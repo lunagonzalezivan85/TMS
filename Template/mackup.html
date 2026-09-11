@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Bombas en Vivo</title>
+    <style>
+        /* Estilos Generales - Paleta de colores Industrial Oscura */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 1000px;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        /* Encabezado */
+        .header {
+            border-bottom: 2px solid #334155;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #38bdf8;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            background-color: #0f172a;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            border: 1px solid #334155;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        /* Distribución en Columnas */
+        .main-content {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .panel-controls {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-graphic {
+            flex: 1.2;
+            min-width: 350px;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Tarjetas de Datos */
+        .card {
+            background-color: #111827;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .card-label {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: bold;
+            font-family: monospace;
+            color: #ffffff;
+        }
+
+        .card-value span {
+            font-size: 16px;
+            color: #64748b;
+            margin-left: 5px;
+        }
+
+        /* Botón e Indicador En Vivo */
+        .btn-live {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .btn-live:hover {
+            background-color: #0369a1;
+        }
+
+        .live-indicator-box {
+            background-color: #111827;
+            border: 1px dashed #334155;
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0.4; /* Apagado por defecto */
+            transition: all 0.3s ease;
+        }
+
+        .live-indicator-box.active {
+            opacity: 1;
+            border-color: #ef4444;
+            background-color: #1e1b4b;
+        }
+
+        .live-text {
+            color: #94a3b8;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .live-indicator-box.active .live-text {
+            color: #ef4444;
+        }
+
+        .pulse-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Animación de parpadeo para el modo En Vivo */
+        .live-indicator-box.active .pulse-dot {
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 10px #ef4444; }
+        }
+
+        /* El Tanque Gráfico y Fluido */
+        .tank-title {
+            align-self: flex-start;
+            font-size: 16px;
+            color: #94a3b8;
+            margin-bottom: 20px;
+            width: 100%;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 8px;
+        }
+
+        .tank-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            width: 100%;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .tank-outer {
+            width: 150px;
+            height: 260px;
+            border: 4px solid #475569;
+            border-radius: 20px;
+            position: relative;
+            background-color: #1e293b;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+        }
+
+        .tank-fluid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100%; /* Inicia lleno al 100% (10,000L) */
+            background: linear-gradient(180deg, #38bdf8 0%, #0369a1 100%);
+            border-top: 3px solid #7dd3fc;
+            /* Esta propiedad hace que el descenso sea totalmente fluido y suave */
+            transition: height 0.5s ease-out; 
+        }
+
+        .tank-percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+
+        .tank-info-text {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <div class="header">
+            <div>
+                <h1>Monitor de Bombas</h1>
+                <p style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Control e Inventario de Tanques</p>
+            </div>
+            <div class="system-status">
+                <span class="status-dot"></span>
+                <span>Sistema Operativo</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+            <div class="panel-controls">
+                <div class="card">
+                    <div class="card-label">Litros de Apertura</div>
+                    <div class="card-value" id="litros-apertura">10,000<span>Lts</span></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-label">Consumo Actual (Salida)</div>
+                    <div class="card-value" id="litros-consumo" style="color: #f43f5e;">0<span>Lts</span></div>
+                </div>
+
+                <button class="btn-live" id="btn-toggle-live">Ver en Vivo</button>
+
+                <div class="live-indicator-box" id="live-box">
+                    <div class="live-text" id="live-status-text">MONITOREO DETENIDO</div>
+                    <div class="pulse-dot"></div>
+                </div>
+            </div>
+
+            <div class="panel-graphic">
+                <div class="tank-title">Tanque Principal de Almacenamiento</div>
+                
+                <div class="tank-wrapper">
+                    <div class="tank-outer">
+                        <div class="tank-percentage" id="txt-porcentaje">100%</div>
+                        <div class="tank-fluid" id="fluid-nivel"></div>
+                    </div>
+
+                    <div class="tank-info-text">
+                        <div>
+                            <div class="card-label">Volumen Neto</div>
+                            <div class="card-value" id="litros-actuales" style="color: #38bdf8; font-size: 36px;">10,000<span>L</span></div>
+                        </div>
+                        <div>
+                            <div class="card-label">Capacidad Máx</div>
+                            <div class="card-value" style="font-size: 18px; color: #e2e8f0;">10,000 L</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const btnLive = document.getElementById('btn-toggle-live');
+        const liveBox = document.getElementById('live-box');
+        const liveStatusText = document.getElementById('live-status-text');
+        const fluidNivel = document.getElementById('fluid-nivel');
+        const txtPorcentaje = document.getElementById('txt-porcentaje');
+        const litrosActualesTxt = document.getElementById('litros-actuales');
+        const litrosConsumoTxt = document.getElementById('litros-consumo');
+
+        let enVivoActivo = false;
+        let intervaloSimulacion = null;
+        
+        // Datos iniciales
+        const capacidadMaxima = 10000;
+        let litrosActuales = 10000;
+        let litrosConsumidos = 0;
+
+        btnLive.addEventListener('click', () => {
+            enVivoActivo = !enVivoActivo;
+
+            if (enVivoActivo) {
+                // Activar modo En Vivo (Visual)
+                btnLive.textContent = "Detener Transmisión";
+                btnLive.style.backgroundColor = "#ef4444";
+                liveBox.classList.add('active');
+                liveStatusText.textContent = "TRANSMITIENDO EN VIVO (REC)";
+
+                // Iniciar simulación de disminución de litros
+                intervaloSimulacion = setInterval(() => {
+                    if (litrosActuales > 500) { // Límite para no vaciarlo a 0 en la simulación
+                        // Disminuye entre 50 y 150 litros por segundo de forma aleatoria
+                        let descarga = Math.floor(Math.random() * 100) + 50; 
+                        
+                        litrosActuales -= descarga;
+                        litrosConsumidos += descarga;
+
+                        // Calcular nuevo porcentaje
+                        let porcentaje = ((litrosActuales / capacidadMaxima) * 100).toFixed(0);
+
+                        // Actualizar la interfaz de inmediato y con suavidad
+                        fluidNivel.style.height = `${porcentaje}%`;
+                        txtPorcentaje.textContent = `${porcentaje}%`;
+                        litrosActualesTxt.innerHTML = `${litrosActuales.toLocaleString()}<span>L</span>`;
+                        litrosConsumoTxt.innerHTML = `${litrosConsumidos.toLocaleString()}<span>Lts</span>`;
+                    } else {
+                        clearInterval(intervaloSimulacion);
+                        liveStatusText.textContent = "TANQUE EN NIVEL CRÍTICO MÍNIMO";
+                    }
+                }, 1000); // Se ejecuta cada 1 segundo
+
+            } else {
+                // Apagar modo En Vivo
+                btnLive.textContent = "Ver en Vivo";
+                btnLive.style.backgroundColor = "#0284c7";
+                liveBox.classList.remove('active');
+                liveStatusText.textContent = "MONITOREO DETENIDO";
+                
+                // Frenar la simulación
+                clearInterval(intervaloSimulacion);
+            }
+        });
+    </script>
+</body>
+</html>

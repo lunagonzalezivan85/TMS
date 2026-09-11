@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Modelo de Costo de Transporte</title>
+  <style>
+    :root {
+      color: #16202a;
+      background: #eef2f5;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    header,
+    section,
+    aside {
+      background: #fff;
+      border: 1px solid #dfe6eb;
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(35, 45, 55, .06);
+      padding: 20px;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 28px;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-bottom: 14px;
+    }
+
+    .eyebrow {
+      color: #db7b2b;
+      font-size: 12px;
+      font-weight: 800;
+      margin: 0 0 8px;
+      text-transform: uppercase;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    label {
+      color: #33424f;
+      display: grid;
+      font-size: 13px;
+      font-weight: 800;
+      gap: 7px;
+    }
+
+    input,
+    select {
+      border: 1px solid #cfd9e1;
+      border-radius: 6px;
+      font: inherit;
+      min-height: 42px;
+      padding: 0 12px;
+      width: 100%;
+    }
+
+    .fixed-note {
+      background: #f7fafb;
+      border: 1px solid #dbe4ea;
+      border-radius: 6px;
+      color: #667684;
+      font-size: 13px;
+      grid-column: 1 / -1;
+      line-height: 1.5;
+      padding: 12px;
+    }
+
+    .summary {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .summary div {
+      display: grid;
+      gap: 6px;
+    }
+
+    .summary span {
+      color: #667684;
+      font-size: 13px;
+    }
+
+    .summary strong {
+      color: #0e5f73;
+      font-size: 25px;
+    }
+
+    .cost-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .cost-grid span,
+    .cost-grid strong {
+      border-bottom: 1px solid #e5ebef;
+      padding: 10px 8px;
+    }
+
+    .cost-grid strong {
+      text-align: right;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      background: #0e5f73;
+      color: #fff;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      min-height: 42px;
+      padding: 0 16px;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+
+      header,
+      section,
+      aside {
+        box-shadow: none;
+      }
+
+      .actions {
+        display: none;
+      }
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding: 12px;
+      }
+
+      .layout,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">GCM Transportes</p>
+      <h1>Modelo de Costo de Transporte</h1>
+    </header>
+
+    <div class="layout">
+      <section>
+        <h2>Datos que ingresa el usuario</h2>
+        <div class="form-grid">
+          <label>
+            Nombre Cliente
+            <input id="customerName" type="text" />
+          </label>
+          <label>
+            RUC
+            <input id="customerRuc" type="text" />
+          </label>
+          <label>
+            Telefono
+            <input id="customerPhone" type="text" />
+          </label>
+          <label>
+            Volumen a trasladar glns
+            <input id="volumeGallons" type="number" min="1" value="3000" />
+          </label>
+          <label>
+            Distancia recorrida km
+            <input id="distanceKm" type="number" min="1" step="0.01" value="262" />
+          </label>
+          <label>
+            Rendimiento km/galon
+            <select id="fuelEfficiencyKmPerGallon">
+              <option value="8">8 km/galon</option>
+              <option value="9">9 km/galon</option>
+              <option value="10" selected>10 km/galon</option>
+              <option value="11">11 km/galon</option>
+              <option value="12">12 km/galon</option>
+              <option value="13">13 km/galon</option>
+              <option value="14">14 km/galon</option>
+              <option value="15">15 km/galon</option>
+            </select>
+          </label>
+          <label>
+            Margen objetivo %
+            <input id="marginPercent" type="number" min="0" max="70" step="0.01" value="15" />
+          </label>
+          <label>
+            Propuesto C$
+            <input id="proposedPrice" type="number" min="0" step="0.01" placeholder="Automatico" />
+          </label>
+        </div>
+
+        <h2 style="margin-top: 22px;">Costos operativos</h2>
+        <div class="form-grid">
+          <label>
+            Conductor %
+            <input id="driverPercent" type="number" min="0" max="50" step="0.01" value="12" />
+          </label>
+          <label>
+            Viatico C$
+            <input id="travelAllowance" type="number" min="0" step="0.01" value="330" />
+          </label>
+          <label>
+            ADMON %
+            <input id="adminPercent" type="number" min="0" max="50" step="0.01" value="8" />
+          </label>
+          <div class="fixed-note">
+            Fijos: tasa de cambio C$36.6243/US$, depreciacion US$0.081/km, mantenimiento US$0.13/km, llantas US$0.05/km, Alcaldia 1%, DGI 3%. El conductor se calcula como porcentaje del total del viaje multiplicado por el indice laboral.
+          </div>
+        </div>
+      </section>
+
+      <aside class="summary">
+        <p class="eyebrow">Resultado</p>
+        <div>
+          <span>Galones consumidos</span>
+          <strong id="gallonsConsumed">0.00</strong>
+        </div>
+        <div>
+          <span>Costo del viaje</span>
+          <strong id="tripCost">C$0.00</strong>
+        </div>
+        <div>
+          <span>Precio sugerido</span>
+          <strong id="suggestedPrice">C$0.00</strong>
+        </div>
+        <div>
+          <span>Propuesto final</span>
+          <strong id="finalPrice">C$0.00</strong>
+        </div>
+        <div>
+          <span>Margen real</span>
+          <strong id="actualMarginPercent">0.00%</strong>
+        </div>
+        <div>
+          <span>Flete por galon</span>
+          <strong id="freightPerGallon">C$0.00</strong>
+        </div>
+      </aside>
+    </div>
+
+    <section>
+      <h2>Calculo del viaje en cordobas y dolares</h2>
+      <div class="cost-grid">
+        <span>Combustible</span><strong id="fuelCost">C$0.00 / $0.00</strong>
+        <span>Conductor <span id="driverLabel"></span></span><strong id="driverCost">C$0.00 / $0.00</strong>
+        <span>Depreciacion</span><strong id="depreciation">C$0.00 / $0.00</strong>
+        <span>Mantenimiento</span><strong id="maintenance">C$0.00 / $0.00</strong>
+        <span>Gastos de llantas</span><strong id="tires">C$0.00 / $0.00</strong>
+        <span>Viatico</span><strong id="travelAllowanceOut">C$0.00 / $0.00</strong>
+        <span>ADMON</span><strong id="adminCost">C$0.00 / $0.00</strong>
+        <span>Alcaldia de Managua</span><strong id="municipalityCost">C$0.00 / $0.00</strong>
+        <span>DGI</span><strong id="dgiCost">C$0.00 / $0.00</strong>
+        <span>Margen real</span><strong id="marginAmount">C$0.00 / $0.00</strong>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button type="button" onclick="window.print()">Imprimir / PDF</button>
+    </div>
+  </main>
+
+  <script>
+    const FUEL_PRICE_PER_GALLON = 149.3879;
+    const EXCHANGE_RATE = 36.6243;
+    const fixedFactors = {
+      laborIndex: 1.5,
+      depreciationUsdPerKm: 0.081,
+      maintenanceUsdPerKm: 0.13,
+      tiresUsdPerKm: 0.05,
+      municipalityPercent: 1,
+      dgiPercent: 3
+    };
+
+    const fields = [
+      "customerName",
+      "customerRuc",
+      "customerPhone",
+      "volumeGallons",
+      "distanceKm",
+      "fuelEfficiencyKmPerGallon",
+      "marginPercent",
+      "proposedPrice",
+      "driverPercent",
+      "travelAllowance",
+      "adminPercent"
+    ];
+
+    function value(id) {
+      return Number(document.getElementById(id).value || 0);
+    }
+
+    function currency(amount) {
+      return new Intl.NumberFormat("es-NI", {
+        style: "currency",
+        currency: "NIO",
+        maximumFractionDigits: 2
+      }).format(Number(amount || 0));
+    }
+
+    function usd(amount) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 2
+      }).format(Number(amount || 0));
+    }
+
+    function dualCurrency(amount) {
+      const cordobas = Number(amount || 0);
+      return `${currency(cordobas)} / ${usd(cordobas / EXCHANGE_RATE)}`;
+    }
+
+    function percent(amount) {
+      return Number(amount || 0) / 100;
+    }
+
+    function calculate() {
+      const volume = value("volumeGallons");
+      const distance = value("distanceKm");
+      const efficiency = value("fuelEfficiencyKmPerGallon");
+      const gallonsConsumed = efficiency > 0 ? distance / efficiency : 0;
+
+      const fuelCost = gallonsConsumed * FUEL_PRICE_PER_GALLON;
+      const depreciation = distance * fixedFactors.depreciationUsdPerKm * EXCHANGE_RATE;
+      const maintenance = distance * fixedFactors.maintenanceUsdPerKm * EXCHANGE_RATE;
+      const tires = distance * fixedFactors.tiresUsdPerKm * EXCHANGE_RATE;
+      const travelAllowance = value("travelAllowance");
+      const fixedDirectCost = fuelCost + depreciation + maintenance + tires + travelAllowance;
+      const driverEffectivePercent = percent(value("driverPercent")) * fixedFactors.laborIndex;
+
+      const retainedPercent =
+        driverEffectivePercent +
+        percent(value("adminPercent")) +
+        percent(fixedFactors.municipalityPercent) +
+        percent(fixedFactors.dgiPercent) +
+        percent(value("marginPercent"));
+
+      const denominator = Math.max(1 - retainedPercent, 0.01);
+      const suggestedPrice = fixedDirectCost / denominator;
+      const manualProposed = value("proposedPrice");
+      const finalPrice = manualProposed > 0 ? manualProposed : suggestedPrice;
+
+      const driverCost = finalPrice * driverEffectivePercent;
+      const adminCost = finalPrice * percent(value("adminPercent"));
+      const municipalityCost = finalPrice * percent(fixedFactors.municipalityPercent);
+      const dgiCost = finalPrice * percent(fixedFactors.dgiPercent);
+      const tripCost = fixedDirectCost + driverCost + adminCost + municipalityCost + dgiCost;
+      const marginAmount = finalPrice - tripCost;
+      const actualMarginPercent = finalPrice > 0 ? (marginAmount / finalPrice) * 100 : 0;
+      const freightPerGallon = volume > 0 ? finalPrice / volume : 0;
+
+      document.getElementById("gallonsConsumed").textContent = gallonsConsumed.toFixed(2);
+      document.getElementById("tripCost").textContent = currency(tripCost);
+      document.getElementById("suggestedPrice").textContent = currency(suggestedPrice);
+      document.getElementById("finalPrice").textContent = currency(finalPrice);
+      document.getElementById("actualMarginPercent").textContent = `${actualMarginPercent.toFixed(2)}%`;
+      document.getElementById("freightPerGallon").textContent = currency(freightPerGallon);
+
+      document.getElementById("driverLabel").textContent = `(${value("driverPercent").toFixed(2)}% x ${fixedFactors.laborIndex})`;
+      document.getElementById("fuelCost").textContent = dualCurrency(fuelCost);
+      document.getElementById("driverCost").textContent = dualCurrency(driverCost);
+      document.getElementById("depreciation").textContent = dualCurrency(depreciation);
+      document.getElementById("maintenance").textContent = dualCurrency(maintenance);
+      document.getElementById("tires").textContent = dualCurrency(tires);
+      document.getElementById("travelAllowanceOut").textContent = dualCurrency(travelAllowance);
+      document.getElementById("adminCost").textContent = dualCurrency(adminCost);
+      document.getElementById("municipalityCost").textContent = dualCurrency(municipalityCost);
+      document.getElementById("dgiCost").textContent = dualCurrency(dgiCost);
+      document.getElementById("marginAmount").textContent = dualCurrency(marginAmount);
+    }
+
+    fields.forEach((id) => {
+      document.getElementById(id).addEventListener("input", calculate);
+    });
+
+    calculate();
+  </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+CREATE TABLE lectura_bomba (
+    id                      INT AUTO_INCREMENT PRIMARY KEY,
+    codigo_centro_costo     VARCHAR(20) NOT NULL,
+    lectura_inicial_litros   DECIMAL(10,2) NOT NULL,
+    lectura_inicial_galones DECIMAL(10,2) NOT NULL,
+    foto                    VARCHAR(255) NULL,
+    estado                  VARCHAR(20) NOT NULL CHECK (estado IN ('normal', 'anomalia')),
+    observaciones           TEXT NULL,
+    referencia_1            VARCHAR(100) NULL,
+    referencia_2            VARCHAR(100) NULL,
+    referencia_3            VARCHAR(100) NULL,
+    fecha_apertura          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario_apertura        VARCHAR(50) NOT NULL,
+    fecha_cierre            DATETIME NULL,
+    lectura_final_litros    DECIMAL(10,2) NULL,
+    lectura_final_galones   DECIMAL(10,2) NULL,
+    observaciones_cierre    TEXT NULL,
+    usuario_cierre          VARCHAR(50) NULL,
+    consumo_turno_litros    DECIMAL(10,2) NULL,
+    consumo_turno_galones   DECIMAL(10,2) NULL
+);

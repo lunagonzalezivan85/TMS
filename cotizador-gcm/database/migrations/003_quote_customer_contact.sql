@@ -1,0 +1,3 @@
+ALTER TABLE quotes
+  ADD COLUMN IF NOT EXISTS customer_ruc VARCHAR(40),
+  ADD COLUMN IF NOT EXISTS customer_phone VARCHAR(40);
