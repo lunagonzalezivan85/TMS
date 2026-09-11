@@ -24,6 +24,7 @@
 - **CHANGED** - `app/Views/vehiculos/partials/documentos_cards.php` — Rediseño Bento Grid / One UI con accent bars, iconos y badges por estado
 - **CHANGED** - `app/Controllers/Vehiculos::documentos()` — Cálculo de alertas basado en campo `notificacion` (días de antelación)
 - **BD** - Sin cambios en BD esta sesión (todas las tablas planificadas en `cambios_bd.md`)
+- **ADDED** - `app/Views/layouts/login.php` — Video de fondo `public/assets/videos/video01.mp4` en columna izquierda del login con overlay verde semitransparente para legibilidad
 
 ---
 

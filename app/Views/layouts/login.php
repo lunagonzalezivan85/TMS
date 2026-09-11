@@ -32,6 +32,31 @@
             overflow: hidden;
         }
 
+        .login-brand-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        .login-brand-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, rgba(7,184,137,.82) 0%, rgba(5,156,115,.85) 55%, rgba(4,122,90,.88) 100%);
+            z-index: 1;
+        }
+
+        .login-brand > *:not(.login-brand-video):not(.login-brand-overlay) {
+            position: relative;
+            z-index: 2;
+        }
+
         .login-brand::before {
             content: '';
             position: absolute;
@@ -228,6 +253,10 @@
 
     <!-- Columna izquierda — Branding TMS -->
     <div class="login-brand">
+        <video class="login-brand-video" autoplay muted loop playsinline>
+            <source src="<?= base_url('public/assets/videos/video01.mp4') ?>" type="video/mp4">
+        </video>
+        <div class="login-brand-overlay"></div>
         <div class="brand-icon"><i class="fas fa-truck-moving"></i></div>
         <div class="brand-title">TMS</div>
         <p class="brand-subtitle">Transport Management System — Gestión integral de tu flota vehicular</p>
