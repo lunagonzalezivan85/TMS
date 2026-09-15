@@ -11,12 +11,19 @@
         overflow: hidden;
         margin-bottom: 1.5rem;
     }
-    .dash-prompt::after {
-        content: ''; position: absolute; top: -40%; right: -10%; width: 300px; height: 300px;
-        background: rgba(255,255,255,0.1); border-radius: 50%;
-    }
+    .dash-prompt::after { content: ''; position: absolute; top: -40%; right: -10%; width: 300px; height: 300px; background: rgba(255,255,255,0.1); border-radius: 50%; }
     .dash-prompt h2 { position: relative; z-index: 1; }
     .dash-prompt p { position: relative; z-index: 1; opacity: 0.9; }
+    .prompt-input-box {
+        background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+        border-radius: 16px; padding: 0.85rem 1.25rem; color: white;
+        cursor: text; display: flex; align-items: center; gap: 0.75rem;
+        transition: background 0.15s; position: relative; z-index: 1;
+    }
+    .prompt-input-box:hover { background: rgba(255,255,255,0.22); }
+    .prompt-input-box input { background: transparent; border: none; outline: none; color: white; flex: 1; font-size: 1rem; }
+    .prompt-input-box input::placeholder { color: rgba(255,255,255,0.75); }
+    .prompt-input-box i { color: rgba(255,255,255,0.8); }
     .chip {
         display: inline-flex; align-items: center; gap: 0.5rem;
         background: #fff; border: 1px solid #e2e8f0; border-radius: 9999px;
@@ -24,45 +31,35 @@
     }
     .chip:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.05); }
     .chip i { font-size: 1.1rem; }
-    .chip-count {
-        min-width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center;
-        border-radius: 50%; font-size: 0.75rem; font-weight: 700;
-    }
-    .cmd-palette-overlay {
-        position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45);
-        backdrop-filter: blur(4px); z-index: 1055; display: none;
-        align-items: flex-start; justify-content: center; padding-top: 10vh;
-    }
-    .cmd-palette {
-        width: 100%; max-width: 560px; background: #fff;
-        border-radius: 18px; box-shadow: 0 24px 60px rgba(0,0,0,0.25); overflow: hidden;
-    }
+    .chip-count { min-width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.75rem; font-weight: 700; }
+    .cmd-palette-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(4px); z-index: 1055; display: none; align-items: flex-start; justify-content: center; padding-top: 10vh; }
+    .cmd-palette { width: 100%; max-width: 560px; background: #fff; border-radius: 18px; box-shadow: 0 24px 60px rgba(0,0,0,0.25); overflow: hidden; }
     .cmd-palette-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; border-bottom: 1px solid #e2e8f0; }
     .cmd-palette-header input { border: none; outline: none; flex: 1; font-size: 1rem; }
     .cmd-palette-list { max-height: 320px; overflow-y: auto; }
-    .cmd-item {
-        display: flex; align-items: center; gap: 0.75rem;
-        padding: 0.85rem 1.25rem; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.1s;
-    }
+    .cmd-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.25rem; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.1s; }
     .cmd-item:hover, .cmd-item.active { background: #fffbeb; }
     .cmd-item i { width: 24px; text-align: center; color: #d97706; }
     .kbd-hint { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: #94a3b8; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.15rem 0.4rem; }
+    .summary-stat { display: flex; flex-direction: column; align-items: flex-start; padding: 1rem; border-radius: 14px; background: #f8fafc; border: 1px solid #e2e8f0; height: 100%; }
+    .summary-stat .number { font-size: 1.7rem; font-weight: 700; color: #0f172a; line-height: 1; }
+    .summary-stat .label { font-size: 0.8rem; color: #64748b; margin-top: 0.35rem; }
 </style>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <div class="container-fluid py-4">
     <div class="dash-prompt">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
+        <div class="row align-items-end">
+            <div class="col-lg-8 mb-3 mb-lg-0">
                 <h2 class="fw-bold mb-2">Hola, Técnico 👋</h2>
-                <p class="mb-0">Consulta tus trabajos asignados y registra avances. Usa <span class="kbd-hint"><i class="fas fa-command"></i> Ctrl K</span>.</p>
+                <p class="mb-0">¿Qué trabajo vas a atender hoy?</p>
             </div>
-            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                <button class="btn btn-light rounded-pill px-4" onclick="abrirCommandPalette()">
-                    <i class="fas fa-bolt me-2 text-warning"></i>Acciones rápidas
-                </button>
-            </div>
+        </div>
+        <div class="prompt-input-box mt-3" onclick="focusPrompt()">
+            <i class="fas fa-sparkles"></i>
+            <input type="text" id="promptInput" placeholder="Escribe una acción o presiona Ctrl + K..." autocomplete="off">
+            <span class="kbd-hint" style="border-color:rgba(255,255,255,0.4);color:rgba(255,255,255,0.8);">Enter</span>
         </div>
     </div>
 
@@ -79,26 +76,34 @@
         </a>
     </div>
 
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3"><i class="fas fa-list-check me-2 text-warning"></i>Mis trabajos</h6>
-                    <p class="text-muted mb-3">Solicitudes asignadas pendientes: <strong><?= $stats['assigned_to_me'] ?></strong></p>
-                    <a href="<?= base_url('solicitudes') ?>" class="btn btn-warning rounded-pill text-white"><i class="fas fa-eye me-2"></i>Ver asignaciones</a>
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0"><i class="fas fa-list-check me-2 text-warning"></i>Mi resumen</h5>
+                <span class="text-muted small"><?= date('d/m/Y') ?></span>
+            </div>
+            <div class="row g-3">
+                <div class="col-6 col-md-4">
+                    <div class="summary-stat">
+                        <span class="number text-warning"><?= $stats['assigned_to_me'] ?></span>
+                        <span class="label">Trabajos asignados</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="summary-stat">
+                        <span class="number text-primary"><?= $stats['pending_maintenance'] ?></span>
+                        <span class="label">Solicitudes abiertas</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="summary-stat">
+                        <span class="number text-success"><?= $stats['vehicles_maintenance'] ?></span>
+                        <span class="label">Vehículos en taller</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3"><i class="fas fa-clock me-2 text-warning"></i>Próximos pasos</h6>
-                    <ul class="list-unstyled mb-0 small text-muted">
-                        <li class="mb-2"><i class="fas fa-check-circle text-warning me-2"></i>Revisar solicitudes asignadas</li>
-                        <li class="mb-2"><i class="fas fa-check-circle text-warning me-2"></i>Diagnosticar fallas</li>
-                        <li class="mb-2"><i class="fas fa-check-circle text-warning me-2"></i>Actualizar estado del trabajo</li>
-                    </ul>
-                </div>
+            <div class="mt-4 d-flex flex-wrap gap-2">
+                <a href="<?= base_url('solicitudes') ?>" class="btn btn-warning rounded-pill text-white"><i class="fas fa-eye me-2"></i>Ver asignaciones</a>
             </div>
         </div>
     </div>
@@ -120,7 +125,6 @@
 <script>
 const comandos = <?= json_encode($comandos) ?>;
 let selectedIndex = -1;
-
 function abrirCommandPalette() {
     document.getElementById('cmdPaletteOverlay').style.display = 'flex';
     document.getElementById('cmdInput').value = '';
@@ -129,6 +133,7 @@ function abrirCommandPalette() {
     renderItems();
 }
 function cerrarCommandPalette() { document.getElementById('cmdPaletteOverlay').style.display = 'none'; }
+function focusPrompt() { document.getElementById('promptInput').focus(); }
 function renderItems(filter = '') {
     const list = document.getElementById('cmdList');
     list.innerHTML = '';
@@ -143,12 +148,14 @@ function renderItems(filter = '') {
 }
 document.addEventListener('keydown', function(e) {
     if (e.ctrlKey && e.key === 'k') { e.preventDefault(); abrirCommandPalette(); return; }
-    if (document.getElementById('cmdPaletteOverlay').style.display === 'none') return;
-    if (e.key === 'Escape') cerrarCommandPalette();
-    else if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = Math.min(selectedIndex + 1, document.querySelectorAll('.cmd-item').length - 1); updateActive(); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = Math.max(selectedIndex - 1, 0); updateActive(); }
-    else if (e.key === 'Enter' && selectedIndex >= 0) { const items = document.querySelectorAll('.cmd-item'); if (items[selectedIndex]) window.location.href = items[selectedIndex].dataset.url; }
+    if (document.getElementById('cmdPaletteOverlay').style.display !== 'none') {
+        if (e.key === 'Escape') cerrarCommandPalette();
+        else if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = Math.min(selectedIndex + 1, document.querySelectorAll('.cmd-item').length - 1); updateActive(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = Math.max(selectedIndex - 1, 0); updateActive(); }
+        else if (e.key === 'Enter' && selectedIndex >= 0) { const items = document.querySelectorAll('.cmd-item'); if (items[selectedIndex]) window.location.href = items[selectedIndex].dataset.url; }
+    }
 });
+document.getElementById('promptInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); abrirCommandPalette(); } });
 document.getElementById('cmdInput').addEventListener('input', function() { selectedIndex = -1; renderItems(this.value); });
 function updateActive() { document.querySelectorAll('.cmd-item').forEach((el, i) => el.classList.toggle('active', i === selectedIndex)); }
 </script>

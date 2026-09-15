@@ -23,6 +23,31 @@
     }
     .dash-prompt h2 { position: relative; z-index: 1; }
     .dash-prompt p { position: relative; z-index: 1; opacity: 0.9; }
+    .prompt-input-box {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.25);
+        border-radius: 16px;
+        padding: 0.85rem 1.25rem;
+        color: white;
+        cursor: text;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: background 0.15s;
+        position: relative;
+        z-index: 1;
+    }
+    .prompt-input-box:hover { background: rgba(255,255,255,0.22); }
+    .prompt-input-box input {
+        background: transparent;
+        border: none;
+        outline: none;
+        color: white;
+        flex: 1;
+        font-size: 1rem;
+    }
+    .prompt-input-box input::placeholder { color: rgba(255,255,255,0.75); }
+    .prompt-input-box i { color: rgba(255,255,255,0.8); }
     .chip {
         display: inline-flex;
         align-items: center;
@@ -78,10 +103,7 @@
         flex: 1;
         font-size: 1rem;
     }
-    .cmd-palette-list {
-        max-height: 320px;
-        overflow-y: auto;
-    }
+    .cmd-palette-list { max-height: 320px; overflow-y: auto; }
     .cmd-item {
         display: flex;
         align-items: center;
@@ -103,22 +125,34 @@
         border-radius: 6px;
         padding: 0.15rem 0.4rem;
     }
+    .summary-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+        border-radius: 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        height: 100%;
+    }
+    .summary-stat .number { font-size: 1.7rem; font-weight: 700; color: #0f172a; line-height: 1; }
+    .summary-stat .label { font-size: 0.8rem; color: #64748b; margin-top: 0.35rem; }
 </style>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <div class="container-fluid py-4">
     <div class="dash-prompt">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
+        <div class="row align-items-end">
+            <div class="col-lg-8 mb-3 mb-lg-0">
                 <h2 class="fw-bold mb-2">Hola, <?= esc(session('nombre') ?? 'Administrador') ?> 👋</h2>
-                <p class="mb-0">Panel de control general del sistema. Usa <span class="kbd-hint"><i class="fas fa-command"></i> Ctrl K</span> para abrir opciones rápidas.</p>
+                <p class="mb-0">¿Qué necesitas hacer hoy?</p>
             </div>
-            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                <button class="btn btn-light rounded-pill px-4" onclick="abrirCommandPalette()">
-                    <i class="fas fa-bolt me-2 text-success"></i>Acciones rápidas
-                </button>
-            </div>
+        </div>
+        <div class="prompt-input-box mt-3" onclick="focusPrompt()">
+            <i class="fas fa-sparkles"></i>
+            <input type="text" id="promptInput" placeholder="Escribe una acción o presiona Ctrl + K..." autocomplete="off">
+            <span class="kbd-hint" style="border-color:rgba(255,255,255,0.4);color:rgba(255,255,255,0.8);">Enter</span>
         </div>
     </div>
 
@@ -150,43 +184,59 @@
         </a>
     </div>
 
-    <div class="row g-4">
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle me-2 text-success"></i>Crear nuevo</h6>
-                    <div class="d-grid gap-2">
-                        <a href="<?= base_url('solicitudes/create') ?>" class="btn btn-outline-success rounded-pill text-start"><i class="fas fa-wrench me-2"></i>Solicitud de mantenimiento</a>
-                        <a href="<?= base_url('vehiculos/create') ?>" class="btn btn-outline-secondary rounded-pill text-start"><i class="fas fa-car me-2"></i>Vehículo</a>
-                        <a href="<?= base_url('conductores/create') ?>" class="btn btn-outline-secondary rounded-pill text-start"><i class="fas fa-user me-2"></i>Conductor</a>
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0"><i class="fas fa-chart-pie me-2 text-success"></i>Resumen del día</h5>
+                <span class="text-muted small"><?= date('d/m/Y') ?></span>
+            </div>
+            <div class="row g-3">
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="summary-stat">
+                        <span class="number text-success"><?= $stats['total_vehicles'] ?></span>
+                        <span class="label">Vehículos</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="summary-stat">
+                        <span class="number text-warning"><?= $stats['pending_maintenance'] ?></span>
+                        <span class="label">Solic. pendientes</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="summary-stat">
+                        <span class="number text-info"><?= $stats['total_conductores'] ?></span>
+                        <span class="label">Conductores</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="summary-stat">
+                        <span class="number text-primary"><?= $stats['alerts'] ?></span>
+                        <span class="label">Alertas</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="summary-stat">
+                        <span class="number text-secondary"><?= number_format($stats['total_galones'], 1) ?></span>
+                        <span class="label">Galones</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="summary-stat">
+                        <span class="number text-danger"><?= $stats['vehicles_maintenance'] ?></span>
+                        <span class="label">En mantenimiento</span>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3"><i class="fas fa-chart-pie me-2 text-success"></i>Estado de vehículos</h6>
-                    <div class="d-flex justify-content-between mb-2"><span>Activos</span><span class="fw-bold"><?= $stats['vehicles_active'] ?></span></div>
-                    <div class="d-flex justify-content-between mb-2"><span>En mantenimiento</span><span class="fw-bold"><?= $stats['vehicles_maintenance'] ?></span></div>
-                    <div class="d-flex justify-content-between"><span>Total</span><span class="fw-bold"><?= $stats['total_vehicles'] ?></span></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3"><i class="fas fa-bell me-2 text-success"></i>Alertas</h6>
-                    <p class="mb-1"><span class="badge bg-warning text-dark rounded-pill"><?= $stats['alerts'] ?></span> documentos por vencer</p>
-                    <p class="mb-3"><span class="badge bg-danger rounded-pill"><?= $stats['pending_maintenance'] ?></span> solicitudes pendientes</p>
-                    <a href="<?= base_url('solicitudes') ?>" class="btn btn-sm btn-success rounded-pill">Ver solicitudes</a>
-                </div>
+            <div class="mt-4 d-flex flex-wrap gap-2">
+                <a href="<?= base_url('solicitudes/create') ?>" class="btn btn-success rounded-pill"><i class="fas fa-plus-circle me-2"></i>Solicitud</a>
+                <a href="<?= base_url('vehiculos/create') ?>" class="btn btn-outline-secondary rounded-pill"><i class="fas fa-car me-2"></i>Vehículo</a>
+                <a href="<?= base_url('conductores/create') ?>" class="btn btn-outline-secondary rounded-pill"><i class="fas fa-user me-2"></i>Conductor</a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Command Palette -->
 <div class="cmd-palette-overlay" id="cmdPaletteOverlay" onclick="cerrarCommandPalette(event)">
     <div class="cmd-palette" onclick="event.stopPropagation()">
         <div class="cmd-palette-header">
@@ -194,14 +244,7 @@
             <input type="text" id="cmdInput" placeholder="Buscar acción..." autocomplete="off">
             <span class="kbd-hint">ESC</span>
         </div>
-        <div class="cmd-palette-list" id="cmdList">
-            <?php foreach ($comandos as $i => $cmd): ?>
-                <div class="cmd-item" data-url="<?= esc($cmd['url']) ?>" data-index="<?= $i ?>">
-                    <i class="fas <?= esc($cmd['icon']) ?>"></i>
-                    <span><?= esc($cmd['label']) ?></span>
-                </div>
-            <?php endforeach; ?>
-        </div>
+        <div class="cmd-palette-list" id="cmdList"></div>
     </div>
 </div>
 <?= $this->endSection() ?>
@@ -221,6 +264,10 @@ function abrirCommandPalette() {
 
 function cerrarCommandPalette() {
     document.getElementById('cmdPaletteOverlay').style.display = 'none';
+}
+
+function focusPrompt() {
+    document.getElementById('promptInput').focus();
 }
 
 function renderItems(filter = '') {
@@ -243,21 +290,19 @@ document.addEventListener('keydown', function(e) {
         abrirCommandPalette();
         return;
     }
-    if (document.getElementById('cmdPaletteOverlay').style.display === 'none') return;
+    if (document.getElementById('cmdPaletteOverlay').style.display !== 'none') {
+        if (e.key === 'Escape') cerrarCommandPalette();
+        else if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = Math.min(selectedIndex + 1, document.querySelectorAll('.cmd-item').length - 1); updateActive(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = Math.max(selectedIndex - 1, 0); updateActive(); }
+        else if (e.key === 'Enter' && selectedIndex >= 0) { const items = document.querySelectorAll('.cmd-item'); if (items[selectedIndex]) window.location.href = items[selectedIndex].dataset.url; }
+    }
+});
 
-    if (e.key === 'Escape') {
-        cerrarCommandPalette();
-    } else if (e.key === 'ArrowDown') {
+const promptInput = document.getElementById('promptInput');
+promptInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
         e.preventDefault();
-        selectedIndex = Math.min(selectedIndex + 1, document.querySelectorAll('.cmd-item').length - 1);
-        updateActive();
-    } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        selectedIndex = Math.max(selectedIndex - 1, 0);
-        updateActive();
-    } else if (e.key === 'Enter' && selectedIndex >= 0) {
-        const items = document.querySelectorAll('.cmd-item');
-        if (items[selectedIndex]) window.location.href = items[selectedIndex].dataset.url;
+        abrirCommandPalette();
     }
 });
 
@@ -267,9 +312,7 @@ document.getElementById('cmdInput').addEventListener('input', function() {
 });
 
 function updateActive() {
-    document.querySelectorAll('.cmd-item').forEach((el, i) => {
-        el.classList.toggle('active', i === selectedIndex);
-    });
+    document.querySelectorAll('.cmd-item').forEach((el, i) => el.classList.toggle('active', i === selectedIndex));
 }
 </script>
 <?= $this->endSection() ?>

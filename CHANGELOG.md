@@ -26,8 +26,10 @@
 - **ADDED** - `Solicitudes::asignar()` y `Solicitudes::guardarAsignacion()` — asignación de técnico a solicitud (solo admin/supervisor)
 - **ADDED** - `Solicitudes::reporte()` — hoja de reporte imprimible de la solicitud con datos del vehículo, sugerencia y firmas
 - **ADDED** - Dashboards por rol (`dashboard/admin`, `dashboard/supervisor`, `dashboard/tecnico`, `dashboard/conductor`) con diseño tipo prompt/IA
+- **ADDED** - Input estilo prompt que abre el command palette al presionar Enter o Ctrl + K
 - **ADDED** - Chips con contadores y acciones rápidas en cada dashboard según rol
 - **ADDED** - Command palette con atajo `Ctrl + K` para abrir opciones rápidas filtradas por rol
+- **CHANGED** - Tarjeta de resumen mejorada con métricas tipo KPI y botones contextuales por rol
 - **CHANGED** - `Auth::getRedirectByRole()` redirige al dashboard correspondiente a cada rol
 - **BD** - `vehiculos` e `historial_estado_vehiculo` — Agregado estado `EN MANTENIMIENTO` a los enums
 - **CHANGED** - `app/Models/SolicitudModel.php` — Campos y validaciones para `tipo_mantenimiento`, `ubicacion` y `condicion_movilidad`
