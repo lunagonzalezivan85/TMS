@@ -49,6 +49,16 @@
                             <?php endif; ?>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="fecha_asignacion" class="form-label fw-semibold">Fecha de asignación</label>
+                            <input type="datetime-local" name="fecha_asignacion" id="fecha_asignacion" class="form-control rounded-3" value="<?= date('Y-m-d\TH:i') ?>" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="observaciones_asignacion" class="form-label fw-semibold">Observaciones de la asignación</label>
+                            <textarea name="observaciones_asignacion" id="observaciones_asignacion" class="form-control rounded-3" rows="3" placeholder="Notas u observaciones para el técnico"></textarea>
+                        </div>
+
                         <div class="d-flex justify-content-between pt-2">
                             <a href="<?= base_url('solicitudes/show/' . $solicitud['id']) ?>" class="btn btn-outline-secondary rounded-pill">
                                 <i class="fas fa-arrow-left me-2"></i>Cancelar

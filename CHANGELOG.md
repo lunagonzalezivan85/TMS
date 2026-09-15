@@ -23,7 +23,7 @@
 - **FIXED** - `app/Models/SolicitudModel::buscarSolicitudes()` — Eliminada referencia a columna inexistente `s.titulo`; COALESCE en nombres de solicitante/asignado
 - **ADDED** - `app/Helpers/vehiculo_helper.php` — Estado `EN MANTENIMIENTO` con badge/clase/label
 - **ADDED** - Roles `Supervisor` y `Tecnico` con usuarios de prueba; permisos de menú para gestión de solicitudes y órdenes
-- **ADDED** - `Solicitudes::asignar()` y `Solicitudes::guardarAsignacion()` — asignación de técnico a solicitud (solo admin/supervisor)
+- **CHANGED** - `app/Controllers/Solicitudes::asignar()` y `guardarAsignacion()` — Corregida clave de sesión de rol y ahora guardan fecha de asignación, técnico y observaciones
 - **ADDED** - `Solicitudes::reporte()` — hoja de reporte imprimible de la solicitud con datos del vehículo, sugerencia y firmas
 - **ADDED** - Dashboards por rol (`dashboard/admin`, `dashboard/supervisor`, `dashboard/tecnico`, `dashboard/conductor`) con diseño tipo prompt/IA
 - **ADDED** - Input estilo prompt que abre el command palette al presionar Enter o Ctrl + K

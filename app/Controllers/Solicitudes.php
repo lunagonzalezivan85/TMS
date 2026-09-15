@@ -42,7 +42,7 @@ class Solicitudes extends BaseController
     {
         $empresaId = $this->session->get('empresa_id');
         $usuarioId = $this->session->get('user_id');
-        $rol = $this->session->get('rol_nombre');
+        $rol = $this->session->get('rol_name');
 
         // Obtener filtros
         $filtros = [
@@ -102,7 +102,7 @@ class Solicitudes extends BaseController
     {
         $empresaId = $this->session->get('empresa_id');
         $usuarioId = $this->session->get('user_id');
-        $rol = $this->session->get('rol_nombre');
+        $rol = $this->session->get('rol_name');
 
         if (!$empresaId || !$usuarioId) {
             return $this->response->setJSON(['error' => 'No autenticado'])->setStatusCode(401);
@@ -223,7 +223,7 @@ class Solicitudes extends BaseController
 
         $empresaId = $this->session->get('empresa_id');
         $usuarioId = $this->session->get('user_id');
-        $rol = $this->session->get('rol_nombre');
+        $rol = $this->session->get('rol_name');
 
         $termino = $this->request->getGet('q');
 
@@ -552,7 +552,7 @@ class Solicitudes extends BaseController
     public function asignar($id = null)
     {
         $empresaId = $this->session->get('empresa_id');
-        $rol = strtolower((string)$this->session->get('rol_nombre'));
+        $rol = strtolower((string)$this->session->get('rol_name'));
 
         if (!$empresaId || !$id) {
             return redirect()->to('/auth/login');
@@ -593,11 +593,11 @@ class Solicitudes extends BaseController
     public function guardarAsignacion($id = null)
     {
         $empresaId = $this->session->get('empresa_id');
+        $rol = strtolower((string)$this->session->get('rol_name'));
         $usuarioId = $this->session->get('user_id');
-        $rol = strtolower((string)$this->session->get('rol_nombre'));
 
-        if (!$this->request->is('post') || !$empresaId || !$id) {
-            return redirect()->to('/solicitudes');
+        if (!$empresaId || !$id) {
+            return redirect()->to('/auth/login');
         }
 
         if (!in_array($rol, ['administrador', 'supervisor'])) {
@@ -614,8 +614,15 @@ class Solicitudes extends BaseController
         }
 
         $idTecnico = $this->request->getPost('id_tecnico');
+        $fechaAsignacion = $this->request->getPost('fecha_asignacion');
+        $observacionesAsignacion = trim($this->request->getPost('observaciones_asignacion') ?? '');
+
         if (empty($idTecnico)) {
             return redirect()->back()->withInput()->with('error', 'Debe seleccionar un técnico.');
+        }
+
+        if (empty($fechaAsignacion)) {
+            return redirect()->back()->withInput()->with('error', 'Debe indicar la fecha de asignación.');
         }
 
         $tecnico = $this->usuarioModel->find($idTecnico);
@@ -623,12 +630,25 @@ class Solicitudes extends BaseController
             return redirect()->back()->withInput()->with('error', 'Técnico no válido.');
         }
 
-        $this->solicitudModel->update($id, [
+        $observacionesActuales = trim($solicitud['observaciones'] ?? '');
+        $nuevaObservacion = '';
+        if (!empty($observacionesAsignacion)) {
+            $nuevaObservacion = empty($observacionesActuales)
+                ? "[Asignación: " . date('d/m/Y H:i', strtotime($fechaAsignacion)) . "] " . $observacionesAsignacion
+                : $observacionesActuales . "\n[Asignación: " . date('d/m/Y H:i', strtotime($fechaAsignacion)) . "] " . $observacionesAsignacion;
+        }
+
+        $updateData = [
             'id_asignado' => $idTecnico,
-            'fecha_asignacion' => date('Y-m-d H:i:s'),
+            'fecha_asignacion' => $fechaAsignacion,
             'estado' => 'ASIGNADA',
             'usuario_modifica' => $usuarioId,
-        ]);
+        ];
+        if (!empty($nuevaObservacion)) {
+            $updateData['observaciones'] = $nuevaObservacion;
+        }
+
+        $this->solicitudModel->update($id, $updateData);
 
         return redirect()->to('/solicitudes/show/' . $id)->with('success', 'Técnico asignado correctamente.');
     }
