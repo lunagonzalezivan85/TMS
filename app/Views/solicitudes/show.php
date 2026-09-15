@@ -1,9 +1,9 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div class="container-fluid py-3">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
+<div class="container-fluid py-2">
+    <div class="row g-2">
+        <div class="col-12">
             <?php if (session()->getFlashdata('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show rounded-4" role="alert">
                     <i class="fas fa-check-circle me-2"></i><?= session()->getFlashdata('success') ?>
@@ -30,11 +30,11 @@
 
             <div class="row g-3">
                 <div class="col-lg-8">
-                    <div class="card border-0 shadow-sm rounded-4 mb-3">
-                        <div class="card-header bg-white border-0 pt-3 pb-0 px-3">
-                            <h6 class="fw-bold mb-0"><i class="fas fa-car me-2 text-success"></i>Información del Vehículo</h6>
+                    <div class="card border-0 shadow-sm rounded-4 mb-2">
+                        <div class="card-header bg-white border-0 pt-2 pb-0 px-2">
+                            <h6 class="fw-bold mb-0" style="font-size:0.85rem;"><i class="fas fa-car me-2 text-success"></i>Información del Vehículo</h6>
                         </div>
-                        <div class="card-body p-3">
+                        <div class="card-body p-2">
                             <div class="row g-2">
                                 <div class="col-md-4">
                                     <small class="text-muted">Placa</small>
@@ -61,10 +61,10 @@
                     </div>
 
                     <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-header bg-white border-0 pt-3 pb-0 px-3">
-                            <h6 class="fw-bold mb-0"><i class="fas fa-clipboard-list me-2 text-success"></i>Detalle de la Solicitud</h6>
+                        <div class="card-header bg-white border-0 pt-2 pb-0 px-2">
+                            <h6 class="fw-bold mb-0" style="font-size:0.85rem;"><i class="fas fa-clipboard-list me-2 text-success"></i>Detalle de la Solicitud</h6>
                         </div>
-                        <div class="card-body p-3">
+                        <div class="card-body p-2">
                             <div class="row g-2 mb-2">
                                 <div class="col-md-6">
                                     <small class="text-muted">Tipo de mantenimiento</small>
@@ -113,8 +113,8 @@
 
                 <div class="col-lg-4">
                     <?php if (!empty($sugerencia)): ?>
-                    <div class="card border-0 rounded-4 mb-3" style="background:#eff6ff;border:1px solid #bfdbfe !important;">
-                        <div class="card-body p-3 d-flex align-items-start">
+                    <div class="card border-0 rounded-4 mb-2" style="background:#eff6ff;border:1px solid #bfdbfe !important;">
+                        <div class="card-body p-2 d-flex align-items-start">
                             <div class="flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:#dbeafe;">
                                 <i class="fas fa-lightbulb text-primary"></i>
                             </div>
@@ -126,9 +126,9 @@
                     </div>
                     <?php endif; ?>
 
-                    <div class="card border-0 shadow-sm rounded-4 mb-3">
-                        <div class="card-body p-3">
-                            <h6 class="text-muted mb-2" style="font-size:0.85rem;">Estado actual</h6>
+                    <div class="card border-0 shadow-sm rounded-4 mb-2">
+                        <div class="card-body p-2">
+                            <h6 class="text-muted mb-1" style="font-size:0.85rem;">Estado actual</h6>
                             <span class="badge text-bg-warning rounded-pill"><?= esc($solicitud['estado']) ?></span>
                             <hr class="my-2">
                             <small class="text-muted d-block mb-0">Código</small>
@@ -184,7 +184,7 @@
                     </div>
 
                     <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-body p-3">
+                        <div class="card-body p-2">
                             <h6 class="fw-bold mb-2" style="font-size:0.85rem;">Siguientes pasos</h6>
                             <div class="d-flex mb-2">
                                 <div class="flex-shrink-0"><span class="badge rounded-circle bg-success p-1">1</span></div>
