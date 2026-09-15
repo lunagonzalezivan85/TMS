@@ -11,60 +11,23 @@ use App\Config\Widget;
 
 class Dashboard extends SecureController
 {
-    public function index(): string
+    public function index(): \CodeIgniter\HTTP\RedirectResponse
     {
-        
-        // Cargar modelos y configuración
-        $docConductorModel = new DocumentacionConductorModel();
-        $combustibleModel = new RegistroCombustibleModel();
-        $vehiculoModel = new VehiculoModel();
-        $solicitudModel = new SolicitudModel();
-        $conductorModel = new ConductorModel();
-        $widgetConfig = new Widget();
-        
-        $empresaId = session()->get('empresa_id');
-        
-        // Obtener documentos próximos a vencer
-        $documentosConductorPorVencer = $docConductorModel->getDocumentosPorVencer();
-        $documentosVehiculosPorVencer = []; // Vista vw_documentacion_vehiculo pendiente de crear
-        
-        // Obtener estadísticas de combustible
-        $estadisticasCombustible = $combustibleModel->getEstadisticasConsumo();
-        
-        // Convertir litros a galones (1 galón = 3.78541 litros) - manejar valores nulos
-        $totalGalones = ($estadisticasCombustible['total_litros'] ?? 0) / 3.78541;
-        $promedioGalones = ($estadisticasCombustible['promedio_litros'] ?? 0) / 3.78541;
-        
-        // Obtener estadísticas generales
-        $statsVehiculos = $vehiculoModel->getEstadisticasVehiculos($empresaId);
-        $statsSolicitudes = $solicitudModel->getEstadisticasSolicitudes($empresaId);
-        $totalConductores = $conductorModel->where('id_empresa', $empresaId)->countAllResults();
-
-        $data = [
-            'title' => 'Dashboard - Sistema GMV',
-            'page_title' => 'Dashboard',
-            'stats' => [
-                'total_vehicles' => $statsVehiculos['total'] ?? 0,
-                'total_maintenance' => $statsSolicitudes['totales']['total'] ?? 0,
-                'total_conductores' => $totalConductores,
-                'alerts' => count($documentosConductorPorVencer) + count($documentosVehiculosPorVencer)
-            ],
-            'documentos_por_vencer' => $documentosConductorPorVencer,
-            'documentos_vehiculos_por_vencer' => $documentosVehiculosPorVencer,
-            'combustible_stats' => [
-                'total_litros' => $estadisticasCombustible['total_litros'] ?? 0,
-                'total_galones' => $totalGalones,
-                'promedio_litros' => $estadisticasCombustible['promedio_litros'] ?? 0,
-                'promedio_galones' => $promedioGalones,
-                'total_registros' => $estadisticasCombustible['total_registros'] ?? 0,
-                'total_kilometros' => $estadisticasCombustible['total_kilometros'] ?? 0
-            ],
-            'widget_config' => $widgetConfig->getWidgetConfig(),
-            'widgets_disponibles' => $widgetConfig->widgets,
-            'widgets_categorias' => $widgetConfig->getWidgetsByCategory()
-        ];
-
-        return view('dashboard/index', $data);
+        $rol = strtolower((string) session('rol_name'));
+        switch ($rol) {
+            case 'administrador':
+                return redirect()->to(base_url('dashboard/admin'));
+            case 'supervisor':
+                return redirect()->to(base_url('dashboard/supervisor'));
+            case 'tecnico':
+            case 'mecanico':
+            case 'mecánico':
+                return redirect()->to(base_url('dashboard/tecnico'));
+            case 'conductor':
+                return redirect()->to(base_url('dashboard/conductor'));
+            default:
+                return redirect()->to(base_url('dashboard/admin'));
+        }
     }
 
     public function getStats()

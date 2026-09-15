@@ -35,6 +35,7 @@
 - **CHANGED** - `app/Views/vehiculos/reportes_dashboard.php` — Resumen del reporte arriba de la tabla, stats superiores en estilo bento sin colores de fondo
 - **CHANGED** - `app/Views/vehiculos/show.php` — Reemplazados botones de acción por command palette con atajo Ctrl + K para liberar espacio en el hero
 - **CHANGED** - `Auth::getRedirectByRole()` redirige al dashboard correspondiente a cada rol
+- **CHANGED** - `app/Controllers/Dashboard::index()` redirige al dashboard específico del rol para evitar que se muestre el dashboard antiguo
 - **BD** - `vehiculos` e `historial_estado_vehiculo` — Agregado estado `EN MANTENIMIENTO` a los enums
 - **CHANGED** - `app/Models/SolicitudModel.php` — Campos y validaciones para `tipo_mantenimiento`, `ubicacion` y `condicion_movilidad`
 - **CHANGED** - `app/Config/Routes.php` — Rutas `solicitudes/buscar-vehiculo` y `solicitudes/crear` apuntan al wizard
