@@ -16,7 +16,7 @@
         background: rgba(79, 70, 229, 0.15); border-radius: 50%;
     }
     .reporte-hero h1, .reporte-hero p { position: relative; z-index: 1; }
-    .kpi-card {
+    .bento-stat {
         background: #fff;
         border: 1px solid #e2e8f0;
         border-radius: 18px;
@@ -25,14 +25,16 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         transition: transform 0.15s;
     }
-    .kpi-card:hover { transform: translateY(-3px); }
-    .kpi-icon {
+    .bento-stat:hover { transform: translateY(-3px); }
+    .bento-icon {
         width: 48px; height: 48px; border-radius: 14px;
         display: flex; align-items: center; justify-content: center;
         font-size: 1.2rem;
+        background: #f8fafc; color: #334155;
+        border: 1px solid #e2e8f0;
     }
-    .kpi-value { font-size: 1.5rem; font-weight: 700; color: #0f172a; line-height: 1; }
-    .kpi-label { font-size: 0.8rem; color: #64748b; }
+    .bento-value { font-size: 1.5rem; font-weight: 700; color: #0f172a; line-height: 1; }
+    .bento-label { font-size: 0.8rem; color: #64748b; }
     .reporte-card {
         border: 2px solid #e2e8f0; border-radius: 18px; padding: 1rem;
         cursor: pointer; text-align: center; background: #fff;
@@ -54,6 +56,17 @@
     .resultado-card { border-radius: 18px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .table-reporte thead th { background: #f8fafc; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.3px; }
     .table-reporte tbody td { font-size: 0.9rem; vertical-align: middle; }
+    .resumen-bento {
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 18px;
+        padding: 1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .resumen-item {
+        display: flex; flex-direction: column; align-items: flex-start;
+        padding: 1rem; border-radius: 14px; background: #f8fafc;
+        border: 1px solid #e2e8f0; height: 100%;
+    }
+    .resumen-item .number { font-size: 1.6rem; font-weight: 700; color: #0f172a; line-height: 1; }
+    .resumen-item .label { font-size: 0.8rem; color: #64748b; margin-top: 0.35rem; }
 </style>
 <?= $this->endSection() ?>
 
@@ -71,30 +84,30 @@
         </div>
     </div>
 
-    <!-- KPIs -->
+    <!-- Bento stats -->
     <div class="row g-3 mb-4">
         <div class="col-md-6 col-lg-3">
-            <div class="kpi-card">
-                <div class="kpi-icon bg-success bg-opacity-10 text-success"><i class="fas fa-car"></i></div>
-                <div><div class="kpi-value"><?= $estadisticas['total_vehiculos'] ?? 0 ?></div><div class="kpi-label">Total Vehículos</div></div>
+            <div class="bento-stat">
+                <div class="bento-icon"><i class="fas fa-car"></i></div>
+                <div><div class="bento-value"><?= $estadisticas['total_vehiculos'] ?? 0 ?></div><div class="bento-label">Total Vehículos</div></div>
             </div>
         </div>
         <div class="col-md-6 col-lg-3">
-            <div class="kpi-card">
-                <div class="kpi-icon bg-info bg-opacity-10 text-info"><i class="fas fa-user-check"></i></div>
-                <div><div class="kpi-value"><?= $estadisticas['asignados'] ?? 0 ?></div><div class="kpi-label">Asignados</div></div>
+            <div class="bento-stat">
+                <div class="bento-icon"><i class="fas fa-user-check"></i></div>
+                <div><div class="bento-value"><?= $estadisticas['asignados'] ?? 0 ?></div><div class="bento-label">Asignados</div></div>
             </div>
         </div>
         <div class="col-md-6 col-lg-3">
-            <div class="kpi-card">
-                <div class="kpi-icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-file-alt"></i></div>
-                <div><div class="kpi-value"><?= $estadisticas['documentos_vencer'] ?? 0 ?></div><div class="kpi-label">Documentos por vencer</div></div>
+            <div class="bento-stat">
+                <div class="bento-icon"><i class="fas fa-file-alt"></i></div>
+                <div><div class="bento-value"><?= $estadisticas['documentos_vencer'] ?? 0 ?></div><div class="bento-label">Documentos por vencer</div></div>
             </div>
         </div>
         <div class="col-md-6 col-lg-3">
-            <div class="kpi-card">
-                <div class="kpi-icon bg-danger bg-opacity-10 text-danger"><i class="fas fa-exclamation-circle"></i></div>
-                <div><div class="kpi-value"><?= $estadisticas['sin_documentacion'] ?? 0 ?></div><div class="kpi-label">Sin documentación</div></div>
+            <div class="bento-stat">
+                <div class="bento-icon"><i class="fas fa-exclamation-circle"></i></div>
+                <div><div class="bento-value"><?= $estadisticas['sin_documentacion'] ?? 0 ?></div><div class="bento-label">Sin documentación</div></div>
             </div>
         </div>
     </div>
@@ -179,7 +192,7 @@
         </div>
     </div>
 
-    <!-- Resultados -->
+    <!-- Resultados: resumen arriba de tabla -->
     <div class="row" id="areaResultados" style="display: none;">
         <div class="col-12">
             <div class="card resultado-card">
@@ -189,7 +202,7 @@
                         <small class="text-muted" id="descripcionReporte"></small>
                     </div>
                     <div>
-                        <button type="button" class="btn btn-outline-success btn-sm rounded-pill me-2" onclick="exportarReporte()">
+                        <button type="button" class="btn btn-outline-success btn-sm rounded-pill" onclick="exportarReporte()">
                             <i class="fas fa-file-excel me-1"></i>Exportar Excel
                         </button>
                     </div>
@@ -200,6 +213,12 @@
                             <strong><i class="fas fa-filter me-1"></i>Filtros aplicados:</strong>
                             <span id="filtrosTexto"></span>
                         </div>
+                    </div>
+
+                    <!-- Resumen del reporte arriba de la tabla -->
+                    <div class="resumen-bento mb-4" id="areaEstadisticas" style="display: none;">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-chart-pie me-2"></i>Resumen del reporte</h6>
+                        <div class="row g-3" id="estadisticasRapidas"></div>
                     </div>
 
                     <div id="loadingReporte" class="text-center py-5" style="display: none;">
@@ -214,20 +233,6 @@
                         <h5 class="text-muted">No se encontraron resultados</h5>
                         <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Estadísticas rápidas -->
-    <div class="row mt-4" id="areaEstadisticas" style="display: none;">
-        <div class="col-12">
-            <div class="card resultado-card">
-                <div class="card-header bg-white border-0 py-3">
-                    <h6 class="fw-bold mb-0"><i class="fas fa-chart-pie me-2"></i>Resumen del reporte</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row" id="estadisticasRapidas"></div>
                 </div>
             </div>
         </div>
@@ -296,10 +301,6 @@ function seleccionarReporte(tipo) {
     document.getElementById('descripcionReporte').textContent = config.descripcion;
 }
 
-function cambiarTipoReporte() {
-    document.getElementById('btnGenerar').disabled = !tipoReporteActual;
-}
-
 function generarReporte() {
     if (!tipoReporteActual) return;
 
@@ -311,6 +312,7 @@ function generarReporte() {
     document.getElementById('loadingReporte').style.display = 'block';
     document.getElementById('tablaResultados').innerHTML = '';
     document.getElementById('sinResultados').style.display = 'none';
+    document.getElementById('areaEstadisticas').style.display = 'none';
 
     let url = config.endpoint;
     const params = new URLSearchParams();
@@ -329,8 +331,8 @@ function generarReporte() {
         document.getElementById('loadingReporte').style.display = 'none';
         if (data.success && data.data && data.data.length > 0) {
             datosActuales = data.data;
-            mostrarTablaResultados(data.data, config);
             mostrarEstadisticasRapidas(data.data);
+            mostrarTablaResultados(data.data, config);
         } else {
             document.getElementById('sinResultados').style.display = 'block';
             document.getElementById('areaEstadisticas').style.display = 'none';
@@ -391,18 +393,14 @@ function mostrarEstadisticasRapidas(datos) {
     }
 
     let estadisticasHtml = '';
-    estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="card bg-primary text-white border-0 rounded-4"><div class="card-body text-center"><h4 class="mb-1">' + datos.length + '</h4><small>Total Registros</small></div></div></div>';
+    estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="resumen-item"><span class="number">' + datos.length + '</span><span class="label">Total Registros</span></div></div>';
 
     if (datos[0].hasOwnProperty('estado')) {
         const conteoEstados = {};
         datos.forEach(item => { const estado = item.estado || 'Sin Estado'; conteoEstados[estado] = (conteoEstados[estado] || 0) + 1; });
-        const colores = ['bg-success', 'bg-warning', 'bg-danger', 'bg-info'];
-        let index = 0;
         Object.entries(conteoEstados).forEach(([estado, cantidad]) => {
             const porcentaje = ((cantidad / datos.length) * 100).toFixed(1);
-            const color = colores[index % colores.length];
-            estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="card ' + color + ' text-white border-0 rounded-4"><div class="card-body text-center"><h4 class="mb-1">' + cantidad + '</h4><small>' + estado + '</small><div class="mt-1"><small class="opacity-75">' + porcentaje + '%</small></div></div></div></div>';
-            index++;
+            estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="resumen-item"><span class="number">' + cantidad + '</span><span class="label">' + estado + ' (' + porcentaje + '%)</span></div></div>';
         });
     }
 
@@ -410,15 +408,15 @@ function mostrarEstadisticasRapidas(datos) {
         const kilometrajes = datos.map(item => parseInt(item.kilometraje) || 0);
         const maxKm = Math.max(...kilometrajes);
         const avgKm = Math.round(kilometrajes.reduce((a, b) => a + b, 0) / kilometrajes.length);
-        estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="card bg-info text-white border-0 rounded-4"><div class="card-body text-center"><h4 class="mb-1">' + formatNumber(maxKm) + '</h4><small>Máximo KM</small></div></div></div>';
-        estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="card bg-secondary text-white border-0 rounded-4"><div class="card-body text-center"><h4 class="mb-1">' + formatNumber(avgKm) + '</h4><small>Promedio KM</small></div></div></div>';
+        estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="resumen-item"><span class="number">' + formatNumber(maxKm) + '</span><span class="label">Máximo KM</span></div></div>';
+        estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="resumen-item"><span class="number">' + formatNumber(avgKm) + '</span><span class="label">Promedio KM</span></div></div>';
     }
 
     if (tipoReporteActual === 'documentos') {
         const criticos = datos.filter(item => item.dias_restantes <= 7).length;
         const advertencia = datos.filter(item => item.dias_restantes > 7 && item.dias_restantes <= 15).length;
-        estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="card bg-danger text-white border-0 rounded-4"><div class="card-body text-center"><h4 class="mb-1">' + criticos + '</h4><small>Críticos (≤7 días)</small></div></div></div>';
-        estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="card bg-warning text-white border-0 rounded-4"><div class="card-body text-center"><h4 class="mb-1">' + advertencia + '</h4><small>Advertencia (8-15 días)</small></div></div></div>';
+        estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="resumen-item"><span class="number">' + criticos + '</span><span class="label">Críticos (≤7 días)</span></div></div>';
+        estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="resumen-item"><span class="number">' + advertencia + '</span><span class="label">Advertencia (8-15 días)</span></div></div>';
     }
 
     document.getElementById('estadisticasRapidas').innerHTML = estadisticasHtml;
@@ -440,7 +438,6 @@ function exportarReporte() {
 
 function limpiarResultados() {
     document.getElementById('areaResultados').style.display = 'none';
-    document.getElementById('areaEstadisticas').style.display = 'none';
     document.getElementById('filtroEstado').value = 'TODOS';
     document.getElementById('filtroBusqueda').value = '';
     document.querySelectorAll('.reporte-card').forEach(card => card.classList.remove('selected'));
