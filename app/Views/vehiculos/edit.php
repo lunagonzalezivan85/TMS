@@ -1,433 +1,428 @@
 <?= $this->extend('layouts/main') ?>
 
+<?= $this->section('head') ?>
+<style>
+    .wizard-card { max-width: 900px; margin: 0 auto; border-radius: 24px; border: none; }
+    .progress-stepper { display: flex; justify-content: space-between; position: relative; margin-bottom: 2rem; }
+    .progress-stepper::before {
+        content: ''; position: absolute; top: 18px; left: 0; right: 0; height: 4px;
+        background: #e2e8f0; z-index: 0;
+    }
+    .step-node {
+        display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+        position: relative; z-index: 1; cursor: default;
+    }
+    .step-circle {
+        width: 40px; height: 40px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: #fff; border: 2px solid #e2e8f0; color: #94a3b8;
+        font-weight: 700; transition: all 0.3s;
+    }
+    .step-node.active .step-circle { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+    .step-node.completed .step-circle { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+    .step-label { font-size: 0.75rem; font-weight: 600; color: #64748b; }
+    .step-node.active .step-label { color: #4f46e5; }
+    .wizard-step { display: none; animation: fadeIn 0.25s ease; }
+    .wizard-step.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .summary-card { background: #f8fafc; border-radius: 16px; padding: 1.25rem; }
+    .summary-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-label { color: #64748b; font-size: 0.9rem; }
+    .summary-value { font-weight: 600; color: #0f172a; text-align: right; }
+    .nav-btns { display: flex; justify-content: space-between; margin-top: 1.5rem; }
+</style>
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
-<div class="container-fluid">
-    <!-- Header -->
+<div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-0 text-gray-800"><?= $page_title ?></h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="<?= base_url('vehiculos') ?>">Vehículos</a></li>
-                    <li class="breadcrumb-item"><a href="<?= base_url('vehiculos/show/' . $vehiculo['id']) ?>"><?= $vehiculo['placa'] ?></a></li>
-                    <li class="breadcrumb-item active">Editar</li>
-                </ol>
-            </nav>
-        </div>
-        <div>
-            <a href="<?= base_url('vehiculos/show/' . $vehiculo['id']) ?>" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Volver
-            </a>
-        </div>
+        <h4 class="fw-bold mb-0"><i class="fas fa-edit me-2 text-primary"></i>Editar Vehículo - <?= esc($vehiculo['placa']) ?></h4>
+        <a href="<?= base_url('vehiculos/show/' . $vehiculo['id']) ?>" class="btn btn-sm btn-outline-secondary rounded-pill"><i class="fas fa-arrow-left me-2"></i>Volver</a>
     </div>
 
-    <!-- Formulario -->
-    <div class="row justify-content-center">
-        <div class="col-xl-12 col-lg-12">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-edit me-2"></i>Editar Vehículo - <?= $vehiculo['placa'] ?>
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <form id="formVehiculo" action="<?= base_url('vehiculos/update/' . $vehiculo['id']) ?>" method="POST">
-                        <?= csrf_field() ?>
-                        
-                        <!-- Información básica del vehículo -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="text-primary border-bottom pb-2">
-                                    <i class="fas fa-info-circle me-2"></i>Datos del Vehículo
-                                </h5>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="placa" class="form-label">
-                                    Placa <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" class="form-control <?= isset($validation) && $validation->hasError('placa') ? 'is-invalid' : '' ?>" 
-                                       id="placa" name="placa" value="<?= old('placa', $vehiculo['placa']) ?>" 
-                                       placeholder="Ej: ABC-123" maxlength="20" required>
-                                <div class="invalid-feedback" id="error_placa">
-                                    <?= isset($validation) ? $validation->getError('placa') : '' ?>
-                                </div>
-                                <div class="form-text">Ingrese la placa del vehículo</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="marca" class="form-label">
-                                    Marca <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" class="form-control <?= isset($validation) && $validation->hasError('marca') ? 'is-invalid' : '' ?>" 
-                                       id="marca" name="marca" value="<?= old('marca', $vehiculo['marca']) ?>" 
-                                       placeholder="Ej: Toyota" maxlength="50" required>
-                                <div class="invalid-feedback" id="error_marca">
-                                    <?= isset($validation) ? $validation->getError('marca') : '' ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="modelo" class="form-label">
-                                    Modelo <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" class="form-control <?= isset($validation) && $validation->hasError('modelo') ? 'is-invalid' : '' ?>" 
-                                       id="modelo" name="modelo" value="<?= old('modelo', $vehiculo['modelo']) ?>" 
-                                       placeholder="Ej: Corolla" maxlength="50" required>
-                                <div class="invalid-feedback" id="error_modelo">
-                                    <?= isset($validation) ? $validation->getError('modelo') : '' ?>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="anio" class="form-label">
-                                    Año <span class="text-danger">*</span>
-                                </label>
-                                <input type="number" class="form-control <?= isset($validation) && $validation->hasError('anio') ? 'is-invalid' : '' ?>" 
-                                       id="anio" name="anio" value="<?= old('anio', $vehiculo['anio']) ?>" 
-                                       min="1900" max="<?= date('Y') ?>" placeholder="<?= date('Y') ?>" required>
-                                <div class="invalid-feedback" id="error_anio">
-                                    <?= isset($validation) ? $validation->getError('anio') : '' ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label for="kilometraje" class="form-label">Kilometraje</label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control <?= isset($validation) && $validation->hasError('kilometraje') ? 'is-invalid' : '' ?>" 
-                                           id="kilometraje" name="kilometraje" value="<?= old('kilometraje', $vehiculo['kilometraje']) ?>" 
-                                           min="0" placeholder="0">
-                                    <span class="input-group-text">km</span>
-                                    <div class="invalid-feedback" id="error_kilometraje">
-                                        <?= isset($validation) ? $validation->getError('kilometraje') : '' ?>
-                                    </div>
-                                </div>
-                                <div class="form-text">Kilometraje actual del vehículo</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="id_conductor" class="form-label">Conductor Asignado</label>
-                                <select class="form-select" id="id_conductor" name="id_conductor">
-                                    <option value="">Sin asignar</option>
-                                    <?php foreach ($conductores as $conductor): ?>
-                                        <option value="<?= $conductor['id'] ?>" 
-                                                <?= old('id_conductor', $vehiculo['id_conductor']) == $conductor['id'] ? 'selected' : '' ?>>
-                                            <?= $conductor['nombre_completo'] ?> - <?= $conductor['dni'] ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <div class="form-text">Conductor que manejará este vehículo</div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="codigo_unidad" class="form-label">Código de Unidad</label>
-                                <input type="text" class="form-control <?= isset($validation) && $validation->hasError('codigo_unidad') ? 'is-invalid' : '' ?>"
-                                       id="codigo_unidad" name="codigo_unidad" value="<?= old('codigo_unidad', $vehiculo['codigo_unidad'] ?? '') ?>"
-                                       placeholder="Ej: UNIDAD-001" maxlength="50">
-                                <div class="invalid-feedback" id="error_codigo_unidad">
-                                    <?= isset($validation) ? $validation->getError('codigo_unidad') : '' ?>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="disponible" class="form-label">Disponibilidad</label>
-                                <select class="form-select <?= isset($validation) && $validation->hasError('disponible') ? 'is-invalid' : '' ?>"
-                                        id="disponible" name="disponible">
-                                    <option value="1" <?= old('disponible', (string)($vehiculo['disponible'] ?? 1)) === '1' ? 'selected' : '' ?>>Disponible</option>
-                                    <option value="0" <?= old('disponible', (string)($vehiculo['disponible'] ?? 1)) === '0' ? 'selected' : '' ?>>No disponible</option>
-                                </select>
-                                <div class="invalid-feedback" id="error_disponible">
-                                    <?= isset($validation) ? $validation->getError('disponible') : '' ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="numero_motor" class="form-label">Número de Motor</label>
-                                <input type="text" class="form-control <?= isset($validation) && $validation->hasError('numero_motor') ? 'is-invalid' : '' ?>"
-                                       id="numero_motor" name="numero_motor" value="<?= old('numero_motor', $vehiculo['numero_motor'] ?? '') ?>"
-                                       placeholder="Ingrese el número de motor" maxlength="100">
-                                <div class="invalid-feedback" id="error_numero_motor">
-                                    <?= isset($validation) ? $validation->getError('numero_motor') : '' ?>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="numero_chasis" class="form-label">Número de Chasis</label>
-                                <input type="text" class="form-control <?= isset($validation) && $validation->hasError('numero_chasis') ? 'is-invalid' : '' ?>"
-                                       id="numero_chasis" name="numero_chasis" value="<?= old('numero_chasis', $vehiculo['numero_chasis'] ?? '') ?>"
-                                       placeholder="Ingrese el número de chasis" maxlength="100">
-                                <div class="invalid-feedback" id="error_numero_chasis">
-                                    <?= isset($validation) ? $validation->getError('numero_chasis') : '' ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="id_color" class="form-label">Color</label>
-                                <select class="form-select <?= isset($validation) && $validation->hasError('id_color') ? 'is-invalid' : '' ?>" id="id_color" name="id_color">
-                                    <option value="">Seleccionar color</option>
-                                    <?php if (!empty($colores)): ?>
-                                        <?php foreach ($colores as $colorId => $colorNombre): ?>
-                                            <option value="<?= $colorId ?>" <?= old('id_color', $vehiculo['id_color'] ?? '') == $colorId ? 'selected' : '' ?>>
-                                                <?= esc($colorNombre) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                                <div class="invalid-feedback" id="error_id_color">
-                                    <?= isset($validation) ? $validation->getError('id_color') : '' ?>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="id_tipo_vehiculo" class="form-label">Tipo de Vehículo</label>
-                                <select class="form-select <?= isset($validation) && $validation->hasError('id_tipo_vehiculo') ? 'is-invalid' : '' ?>"
-                                        id="id_tipo_vehiculo" name="id_tipo_vehiculo">
-                                    <option value="">Seleccionar tipo de vehículo</option>
-                                    <?php if (!empty($tiposVehiculo)): ?>
-                                        <?php foreach ($tiposVehiculo as $tipoId => $tipoNombre): ?>
-                                            <option value="<?= $tipoId ?>" <?= old('id_tipo_vehiculo', $vehiculo['id_tipo_vehiculo'] ?? '') == $tipoId ? 'selected' : '' ?>>
-                                                <?= esc($tipoNombre) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                                <div class="invalid-feedback" id="error_id_tipo_vehiculo">
-                                    <?= isset($validation) ? $validation->getError('id_tipo_vehiculo') : '' ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="rendimiento" class="form-label">Rendimiento</label>
-                                <div class="input-group">
-                                    <input type="number" step="0.01" min="0" class="form-control <?= isset($validation) && $validation->hasError('rendimiento') ? 'is-invalid' : '' ?>"
-                                           id="rendimiento" name="rendimiento" value="<?= old('rendimiento', $vehiculo['rendimiento'] ?? '') ?>"
-                                           placeholder="0.00">
-                                    <span class="input-group-text">km/L</span>
-                                    <div class="invalid-feedback" id="error_rendimiento">
-                                        <?= isset($validation) ? $validation->getError('rendimiento') : '' ?>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="max_combustible" class="form-label">Capacidad Máxima de Combustible</label>
-                                <div class="input-group">
-                                    <input type="number" step="0.01" min="0" class="form-control <?= isset($validation) && $validation->hasError('max_combustible') ? 'is-invalid' : '' ?>"
-                                           id="max_combustible" name="max_combustible" value="<?= old('max_combustible', $vehiculo['max_combustible'] ?? '') ?>"
-                                           placeholder="0.00">
-                                    <span class="input-group-text">L</span>
-                                    <div class="invalid-feedback" id="error_max_combustible">
-                                        <?= isset($validation) ? $validation->getError('max_combustible') : '' ?>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="idTipoUnidad" class="form-label">Tipo de Unidad</label>
-                                <select class="form-select <?= isset($validation) && $validation->hasError('idTipoUnidad') ? 'is-invalid' : '' ?>" 
-                                        id="idTipoUnidad" name="idTipoUnidad">
-                                    <option value="">Seleccionar tipo de unidad</option>
-                                    <?php if (!empty($tiposUnidad)): ?>
-                                        <?php foreach ($tiposUnidad as $tipo): ?>
-                                            <option value="<?= $tipo['id'] ?>" <?= old('idTipoUnidad', $vehiculo['idTipoUnidad'] ?? '') == $tipo['id'] ? 'selected' : '' ?>>
-                                                <?= esc($tipo['descripcion']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                                <div class="invalid-feedback" id="error_idTipoUnidad">
-                                    <?= isset($validation) ? $validation->getError('idTipoUnidad') : '' ?>
-                                </div>
-                                <div class="form-text">Tipo de unidad vehicular</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="idTipoOperacion" class="form-label">Tipo de Operación</label>
-                                <select class="form-select <?= isset($validation) && $validation->hasError('idTipoOperacion') ? 'is-invalid' : '' ?>" 
-                                        id="idTipoOperacion" name="idTipoOperacion">
-                                    <option value="">Seleccionar tipo de operación</option>
-                                    <?php if (!empty($tiposOperacion)): ?>
-                                        <?php foreach ($tiposOperacion as $tipo): ?>
-                                            <option value="<?= $tipo['id'] ?>" <?= old('idTipoOperacion', $vehiculo['idTipoOperacion'] ?? '') == $tipo['id'] ? 'selected' : '' ?>>
-                                                <?= esc($tipo['descripcion']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                                <div class="invalid-feedback" id="error_idTipoOperacion">
-                                    <?= isset($validation) ? $validation->getError('idTipoOperacion') : '' ?>
-                                </div>
-                                <div class="form-text">Tipo de operación que realizará</div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="codigo_centro_costo" class="form-label">
-                                    Centro de Costo <span class="text-danger">*</span>
-                                </label>
-                                <select class="form-select <?= isset($validation) && $validation->hasError('codigo_centro_costo') ? 'is-invalid' : '' ?>" 
-                                        id="codigo_centro_costo" name="codigo_centro_costo" required>
-                                    <option value="">Seleccionar centro de costo</option>
-                                    <?php if (isset($centrosCosto)): ?>
-                                        <?php foreach ($centrosCosto as $codigo => $descripcion): ?>
-                                            <option value="<?= $codigo ?>" <?= old('codigo_centro_costo', $vehiculo['codigo_centro_costo'] ?? '') == $codigo ? 'selected' : '' ?>>
-                                                <?= esc($descripcion) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                                <div class="invalid-feedback" id="error_codigo_centro_costo">
-                                    <?= isset($validation) ? $validation->getError('codigo_centro_costo') : '' ?>
-                                </div>
-                                <div class="form-text">Centro de costo al que pertenece el vehículo</div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="compuesto" name="compuesto" value="1" 
-                                           <?= old('compuesto', $vehiculo['compuesto'] ?? 0) == 1 ? 'checked' : '' ?>>
-                                    <label class="form-check-label" for="compuesto">
-                                        <strong>Vehículo Compuesto</strong>
-                                    </label>
-                                </div>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle text-info me-1"></i>
-                                    Marque esta opción si el vehículo es compuesto (permite hasta 2 conductores)
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="tipo_consumo" class="form-label">
-                                    <strong>Tipo de Consumo</strong>
-                                </label>
-                                <select class="form-select" id="tipo_consumo" name="tipo_consumo">
-                                    <option value="">Seleccionar tipo</option>
-                                    <?php foreach ($tiposConsumo as $ref => $nombre): ?>
-                                        <option value="<?= esc($ref) ?>" <?= old('tipo_consumo', $vehiculo['tipo_consumo'] ?? '') == $ref ? 'selected' : '' ?>>
-                                            <?= esc($nombre) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle text-info me-1"></i>
-                                    Seleccione el tipo de consumo del vehículo
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Estado y configuración -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="text-primary border-bottom pb-2">
-                                    <i class="fas fa-cog me-2"></i>Estado y Configuración
-                                </h5>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="estado" class="form-label">
-                                    Estado <span class="text-danger">*</span>
-                                </label>
-                                <select class="form-select <?= isset($validation) && $validation->hasError('estado') ? 'is-invalid' : '' ?>" 
-                                        id="estado" name="estado" required>
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="ACTIVO" <?= old('estado', $vehiculo['estado']) == 'ACTIVO' ? 'selected' : '' ?>>
-                                        Activo
-                                    </option>
-                                    <option value="INACTIVO" <?= old('estado', $vehiculo['estado']) == 'INACTIVO' ? 'selected' : '' ?>>
-                                        Inactivo
-                                    </option>
-                                    <option value="EN REPARACION" <?= old('estado', $vehiculo['estado']) == 'EN REPARACION' ? 'selected' : '' ?>>
-                                        En Reparación
-                                    </option>
-                                </select>
-                                <div class="invalid-feedback" id="error_estado">
-                                    <?= isset($validation) ? $validation->getError('estado') : '' ?>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="motivo_inactividad" class="form-label">Motivo de Inactividad</label>
-                                <textarea class="form-control" id="motivo_inactividad" name="motivo_inactividad" 
-                                          rows="3" placeholder="Describe el motivo si el estado no es ACTIVO"><?= old('motivo_inactividad', $vehiculo['motivo_inactividad']) ?></textarea>
-                                <div class="form-text">Solo requerido si el estado no es ACTIVO</div>
-                            </div>
-                        </div>
-
-                        <!-- Información de auditoría -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="alert alert-light">
-                                    <h6 class="alert-heading">
-                                        <i class="fas fa-info-circle me-2"></i>Información de Auditoría
-                                    </h6>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <small class="text-muted">
-                                                <strong>Código:</strong> <?= $vehiculo['codigo_consecutivo'] ?><br>
-                                                <strong>Creado:</strong> <?= date('d/m/Y H:i', strtotime($vehiculo['fechaRegistro'])) ?>
-                                            </small>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <small class="text-muted">
-                                                <strong>Última modificación:</strong> <?= date('d/m/Y H:i', strtotime($vehiculo['fechaUpdate'])) ?>
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Botones de acción -->
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a href="<?= base_url('vehiculos/show/' . $vehiculo['id']) ?>" class="btn btn-secondary">
-                                        <i class="fas fa-times me-2"></i>Cancelar
-                                    </a>
-                                    <button type="submit" class="btn btn-primary" id="btnGuardar">
-                                        <i class="fas fa-save me-2"></i>Actualizar Vehículo
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+    <div class="card wizard-card shadow-sm">
+        <div class="card-body p-4 p-md-5">
+            <div class="progress-stepper">
+                <div class="step-node active" data-step="1"><div class="step-circle">1</div><span class="step-label">Básicos</span></div>
+                <div class="step-node" data-step="2"><div class="step-circle">2</div><span class="step-label">Identificación</span></div>
+                <div class="step-node" data-step="3"><div class="step-circle">3</div><span class="step-label">Configuración</span></div>
+                <div class="step-node" data-step="4"><div class="step-circle">4</div><span class="step-label">Estado</span></div>
+                <div class="step-node" data-step="5"><div class="step-circle">5</div><span class="step-label">Confirmar</span></div>
             </div>
+
+            <form id="wizardForm" action="<?= base_url('vehiculos/update/' . $vehiculo['id']) ?>" method="POST">
+                <?= csrf_field() ?>
+
+                <!-- PASO 1: Datos básicos -->
+                <div class="wizard-step active" data-step="1">
+                    <h5 class="fw-bold mb-1">Datos básicos del vehículo</h5>
+                    <p class="text-muted mb-4">Información principal de identificación.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="placa" class="form-label fw-semibold">Placa <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control rounded-4 py-3" id="placa" name="placa" value="<?= old('placa', $vehiculo['placa']) ?>" placeholder="Ej: ABC-123" maxlength="20" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="codigo_unidad" class="form-label fw-semibold">Código de unidad</label>
+                            <input type="text" class="form-control rounded-4 py-3" id="codigo_unidad" name="codigo_unidad" value="<?= old('codigo_unidad', $vehiculo['codigo_unidad'] ?? '') ?>" placeholder="Ej: UNIDAD-001" maxlength="50">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="marca" class="form-label fw-semibold">Marca <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control rounded-4 py-3" id="marca" name="marca" value="<?= old('marca', $vehiculo['marca']) ?>" placeholder="Ej: Toyota" maxlength="50" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="modelo" class="form-label fw-semibold">Modelo <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control rounded-4 py-3" id="modelo" name="modelo" value="<?= old('modelo', $vehiculo['modelo']) ?>" placeholder="Ej: Corolla" maxlength="50" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="anio" class="form-label fw-semibold">Año <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control rounded-4 py-3" id="anio" name="anio" value="<?= old('anio', $vehiculo['anio']) ?>" min="1900" max="<?= date('Y') ?>" placeholder="<?= date('Y') ?>" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="kilometraje" class="form-label fw-semibold">Kilometraje</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control rounded-start-4 py-3" id="kilometraje" name="kilometraje" value="<?= old('kilometraje', $vehiculo['kilometraje']) ?>" min="0" placeholder="0">
+                                <span class="input-group-text rounded-end-4">km</span>
+                            </div>
+                            <div class="form-text text-danger d-none" id="error_kilometraje"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_color" class="form-label fw-semibold">Color</label>
+                            <select class="form-select rounded-4 py-3" id="id_color" name="id_color">
+                                <option value="">Seleccionar color</option>
+                                <?php foreach ($colores as $colorId => $colorNombre): ?>
+                                    <option value="<?= $colorId ?>" <?= old('id_color', $vehiculo['id_color'] ?? '') == $colorId ? 'selected' : '' ?>><?= esc($colorNombre) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 2: Identificación -->
+                <div class="wizard-step" data-step="2">
+                    <h5 class="fw-bold mb-1">Identificación técnica</h5>
+                    <p class="text-muted mb-4">Números de motor, chasis y asignación.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="numero_motor" class="form-label fw-semibold">Número de motor</label>
+                            <input type="text" class="form-control rounded-4 py-3" id="numero_motor" name="numero_motor" value="<?= old('numero_motor', $vehiculo['numero_motor'] ?? '') ?>" placeholder="Ingrese el número de motor" maxlength="100">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="numero_chasis" class="form-label fw-semibold">Número de chasis</label>
+                            <input type="text" class="form-control rounded-4 py-3" id="numero_chasis" name="numero_chasis" value="<?= old('numero_chasis', $vehiculo['numero_chasis'] ?? '') ?>" placeholder="Ingrese el número de chasis" maxlength="100">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="codigo_centro_costo" class="form-label fw-semibold">Centro de costo <span class="text-danger">*</span></label>
+                            <select class="form-select rounded-4 py-3" id="codigo_centro_costo" name="codigo_centro_costo" required>
+                                <option value="">Seleccionar centro de costo</option>
+                                <?php foreach ($centrosCosto as $codigo => $descripcion): ?>
+                                    <option value="<?= $codigo ?>" <?= old('codigo_centro_costo', $vehiculo['codigo_centro_costo'] ?? '') == $codigo ? 'selected' : '' ?>><?= esc($descripcion) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 3: Configuración -->
+                <div class="wizard-step" data-step="3">
+                    <h5 class="fw-bold mb-1">Configuración y operación</h5>
+                    <p class="text-muted mb-4">Tipo de unidad, operación, consumo y conductor.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="idTipoUnidad" class="form-label fw-semibold">Tipo de unidad</label>
+                            <select class="form-select rounded-4 py-3" id="idTipoUnidad" name="idTipoUnidad">
+                                <option value="">Seleccionar tipo de unidad</option>
+                                <?php foreach ($tiposUnidad as $tipo): ?>
+                                    <option value="<?= $tipo['id'] ?>" <?= old('idTipoUnidad', $vehiculo['idTipoUnidad'] ?? '') == $tipo['id'] ? 'selected' : '' ?>><?= esc($tipo['descripcion']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="idTipoOperacion" class="form-label fw-semibold">Tipo de operación</label>
+                            <select class="form-select rounded-4 py-3" id="idTipoOperacion" name="idTipoOperacion">
+                                <option value="">Seleccionar tipo de operación</option>
+                                <?php foreach ($tiposOperacion as $tipo): ?>
+                                    <option value="<?= $tipo['id'] ?>" <?= old('idTipoOperacion', $vehiculo['idTipoOperacion'] ?? '') == $tipo['id'] ? 'selected' : '' ?>><?= esc($tipo['descripcion']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_tipo_vehiculo" class="form-label fw-semibold">Tipo de motor</label>
+                            <select class="form-select rounded-4 py-3" id="id_tipo_vehiculo" name="id_tipo_vehiculo">
+                                <option value="">Seleccionar tipo de motor</option>
+                                <?php foreach ($tiposVehiculo as $tipoId => $tipoNombre): ?>
+                                    <option value="<?= $tipoId ?>" <?= old('id_tipo_vehiculo', $vehiculo['id_tipo_vehiculo'] ?? '') == $tipoId ? 'selected' : '' ?>><?= esc($tipoNombre) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="rendimiento" class="form-label fw-semibold">Rendimiento</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" min="0" class="form-control rounded-start-4 py-3" id="rendimiento" name="rendimiento" value="<?= old('rendimiento', $vehiculo['rendimiento'] ?? '') ?>" placeholder="0.00">
+                                <span class="input-group-text rounded-end-4">km/L</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="max_combustible" class="form-label fw-semibold">Capacidad máxima de combustible</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" min="0" class="form-control rounded-start-4 py-3" id="max_combustible" name="max_combustible" value="<?= old('max_combustible', $vehiculo['max_combustible'] ?? '') ?>" placeholder="0.00">
+                                <span class="input-group-text rounded-end-4">L</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="tipo_consumo" class="form-label fw-semibold">Tipo de consumo</label>
+                            <select class="form-select rounded-4 py-3" id="tipo_consumo" name="tipo_consumo">
+                                <option value="">Seleccionar tipo</option>
+                                <?php foreach ($tiposConsumo as $ref => $nombre): ?>
+                                    <option value="<?= esc($ref) ?>" <?= old('tipo_consumo', $vehiculo['tipo_consumo'] ?? '') == $ref ? 'selected' : '' ?>><?= esc($nombre) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_conductor" class="form-label fw-semibold">Conductor asignado</label>
+                            <select class="form-select rounded-4 py-3" id="id_conductor" name="id_conductor">
+                                <option value="">Sin asignar</option>
+                                <?php foreach ($conductores as $conductor): ?>
+                                    <option value="<?= $conductor['id'] ?>" <?= old('id_conductor', $vehiculo['id_conductor'] ?? '') == $conductor['id'] ? 'selected' : '' ?>><?= esc($conductor['nombre_completo']) ?> - <?= esc($conductor['dni']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="disponible" class="form-label fw-semibold">Disponibilidad</label>
+                            <select class="form-select rounded-4 py-3" id="disponible" name="disponible">
+                                <option value="1" <?= old('disponible', (string)($vehiculo['disponible'] ?? 1)) === '1' ? 'selected' : '' ?>>Disponible</option>
+                                <option value="0" <?= old('disponible', (string)($vehiculo['disponible'] ?? 1)) === '0' ? 'selected' : '' ?>>No disponible</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-center">
+                            <div class="form-check mt-md-4">
+                                <input class="form-check-input" type="checkbox" id="compuesto" name="compuesto" value="1" <?= old('compuesto', $vehiculo['compuesto'] ?? 0) == 1 ? 'checked' : '' ?>>
+                                <label class="form-check-label fw-semibold" for="compuesto">Vehículo compuesto (hasta 2 conductores)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 4: Estado -->
+                <div class="wizard-step" data-step="4">
+                    <h5 class="fw-bold mb-1">Estado del vehículo</h5>
+                    <p class="text-muted mb-4">Cambia el estado solo si es necesario; se registrará en el historial.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="estado" class="form-label fw-semibold">Estado <span class="text-danger">*</span></label>
+                            <select class="form-select rounded-4 py-3" id="estado" name="estado" required>
+                                <option value="">Seleccionar estado</option>
+                                <option value="ACTIVO" <?= old('estado', $vehiculo['estado']) == 'ACTIVO' ? 'selected' : '' ?>>Activo</option>
+                                <option value="INACTIVO" <?= old('estado', $vehiculo['estado']) == 'INACTIVO' ? 'selected' : '' ?>>Inactivo</option>
+                                <option value="EN REPARACION" <?= old('estado', $vehiculo['estado']) == 'EN REPARACION' ? 'selected' : '' ?>>En Reparación</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6" id="motivoWrapper">
+                            <label for="motivo_inactividad" class="form-label fw-semibold">Motivo de inactividad</label>
+                            <textarea class="form-control rounded-4 py-3" id="motivo_inactividad" name="motivo_inactividad" rows="3" placeholder="Describe el motivo si el estado no es ACTIVO"><?= old('motivo_inactividad', $vehiculo['motivo_inactividad'] ?? '') ?></textarea>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-light border rounded-4 mt-4">
+                        <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Información de auditoría</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted"><strong>Código:</strong> <?= $vehiculo['codigo_consecutivo'] ?><br><strong>Creado:</strong> <?= date('d/m/Y H:i', strtotime($vehiculo['fechaRegistro'])) ?></small>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted"><strong>Última modificación:</strong> <?= date('d/m/Y H:i', strtotime($vehiculo['fechaUpdate'])) ?></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 5: Confirmación -->
+                <div class="wizard-step" data-step="5">
+                    <h5 class="fw-bold mb-1">Confirmar cambios</h5>
+                    <p class="text-muted mb-4">Revisa la información antes de actualizar el vehículo.</p>
+                    <div class="summary-card">
+                        <div class="summary-row"><span class="summary-label">Placa</span><span class="summary-value" id="res-placa">-</span></div>
+                        <div class="summary-row"><span class="summary-label">Marca / Modelo</span><span class="summary-value" id="res-marca-modelo">-</span></div>
+                        <div class="summary-row"><span class="summary-label">Año</span><span class="summary-value" id="res-anio">-</span></div>
+                        <div class="summary-row"><span class="summary-label">Color</span><span class="summary-value" id="res-color">-</span></div>
+                        <div class="summary-row"><span class="summary-label">Kilometraje</span><span class="summary-value" id="res-kilometraje">-</span></div>
+                        <div class="summary-row"><span class="summary-label">N.º Motor</span><span class="summary-value" id="res-motor">-</span></div>
+                        <div class="summary-row"><span class="summary-label">N.º Chasis</span><span class="summary-value" id="res-chasis">-</span></div>
+                        <div class="summary-row"><span class="summary-label">Centro de costo</span><span class="summary-value" id="res-centro">-</span></div>
+                        <div class="summary-row"><span class="summary-label">Tipo de unidad</span><span class="summary-value" id="res-tipo-unidad">-</span></div>
+                        <div class="summary-row"><span class="summary-label">Tipo de operación</span><span class="summary-value" id="res-tipo-operacion">-</span></div>
+                        <div class="summary-row"><span class="summary-label">Conductor</span><span class="summary-value" id="res-conductor">-</span></div>
+                        <div class="summary-row"><span class="summary-label">Estado</span><span class="summary-value" id="res-estado">-</span></div>
+                    </div>
+                </div>
+
+                <div class="nav-btns">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" id="btn-atras" onclick="prevStep()" style="display:none;"><i class="fas fa-arrow-left me-2"></i>Atrás</button>
+                    <div></div>
+                    <button type="button" class="btn btn-primary rounded-pill px-5" id="btn-siguiente" onclick="nextStep()">Siguiente<i class="fas fa-arrow-right ms-2"></i></button>
+                    <button type="submit" class="btn btn-success rounded-pill px-5" id="btn-guardar" style="display:none;"><i class="fas fa-save me-2"></i>Actualizar Vehículo</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
 <script>
+const estadoOriginal = '<?= $vehiculo['estado'] ?>';
+const kmOriginal = parseInt('<?= $vehiculo['kilometraje'] ?>');
+let currentStep = 1;
+const totalSteps = 5;
+
+function updateStepper() {
+    document.querySelectorAll('.step-node').forEach(node => {
+        const step = parseInt(node.dataset.step);
+        node.classList.remove('active', 'completed');
+        if (step < currentStep) node.classList.add('completed');
+        if (step === currentStep) node.classList.add('active');
+    });
+
+    document.querySelectorAll('.wizard-step').forEach(el => {
+        el.classList.remove('active');
+        if (parseInt(el.dataset.step) === currentStep) el.classList.add('active');
+    });
+
+    document.getElementById('btn-atras').style.display = currentStep === 1 ? 'none' : 'inline-block';
+    document.getElementById('btn-siguiente').style.display = currentStep === totalSteps ? 'none' : 'inline-block';
+    document.getElementById('btn-guardar').style.display = currentStep === totalSteps ? 'inline-block' : 'none';
+
+    if (currentStep === totalSteps) buildSummary();
+}
+
+function nextStep() {
+    if (!validateStep(currentStep)) return;
+    if (currentStep < totalSteps) {
+        currentStep++;
+        updateStepper();
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        updateStepper();
+    }
+}
+
+function validateStep(step) {
+    const container = document.querySelector('.wizard-step[data-step="' + step + '"]');
+    const required = container.querySelectorAll('[required]');
+    let valid = true;
+    required.forEach(field => {
+        if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            valid = false;
+        } else {
+            field.classList.remove('is-invalid');
+        }
+    });
+
+    if (step === 1) {
+        const anio = parseInt(document.getElementById('anio').value);
+        const anioActual = new Date().getFullYear();
+        if (anio && (anio < 1900 || anio > anioActual)) {
+            document.getElementById('anio').classList.add('is-invalid');
+            valid = false;
+        }
+        const km = parseInt(document.getElementById('kilometraje').value) || 0;
+        const kmError = document.getElementById('error_kilometraje');
+        if (km < kmOriginal) {
+            document.getElementById('kilometraje').classList.add('is-invalid');
+            kmError.textContent = 'El kilometraje no puede ser menor al registrado (' + kmOriginal.toLocaleString() + ' km)';
+            kmError.classList.remove('d-none');
+            valid = false;
+        } else {
+            kmError.classList.add('d-none');
+        }
+    }
+
+    if (step === 4) {
+        const estado = document.getElementById('estado').value;
+        const motivo = document.getElementById('motivo_inactividad');
+        if (estado !== 'ACTIVO' && !motivo.value.trim()) {
+            motivo.classList.add('is-invalid');
+            valid = false;
+        } else {
+            motivo.classList.remove('is-invalid');
+        }
+    }
+
+    return valid;
+}
+
+function textOf(selectId) {
+    const el = document.getElementById(selectId);
+    return el.options[el.selectedIndex].text;
+}
+
+function buildSummary() {
+    document.getElementById('res-placa').textContent = document.getElementById('placa').value.toUpperCase();
+    document.getElementById('res-marca-modelo').textContent = document.getElementById('marca').value + ' ' + document.getElementById('modelo').value;
+    document.getElementById('res-anio').textContent = document.getElementById('anio').value;
+    document.getElementById('res-color').textContent = textOf('id_color');
+    document.getElementById('res-kilometraje').textContent = document.getElementById('kilometraje').value + ' km';
+    document.getElementById('res-motor').textContent = document.getElementById('numero_motor').value || 'No ingresado';
+    document.getElementById('res-chasis').textContent = document.getElementById('numero_chasis').value || 'No ingresado';
+    document.getElementById('res-centro').textContent = textOf('codigo_centro_costo');
+    document.getElementById('res-tipo-unidad').textContent = textOf('idTipoUnidad');
+    document.getElementById('res-tipo-operacion').textContent = textOf('idTipoOperacion');
+    document.getElementById('res-conductor').textContent = textOf('id_conductor');
+    document.getElementById('res-estado').textContent = textOf('estado');
+}
+
+document.getElementById('placa').addEventListener('input', function() {
+    this.value = this.value.toUpperCase();
+});
+document.getElementById('marca').addEventListener('input', function() {
+    const v = this.value;
+    this.value = v ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() : '';
+});
+document.getElementById('modelo').addEventListener('input', function() {
+    const v = this.value;
+    this.value = v ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() : '';
+});
+
+// Estado / motivo
+document.getElementById('estado').addEventListener('change', function() {
+    const estado = this.value;
+    const motivo = document.getElementById('motivo_inactividad');
+    if (estado === 'ACTIVO') {
+        motivo.required = false;
+        motivo.value = '';
+        motivo.closest('.col-md-6').classList.add('d-none');
+    } else {
+        motivo.required = true;
+        motivo.closest('.col-md-6').classList.remove('d-none');
+    }
+    if (estado !== estadoOriginal) mostrarAlertaCambioEstado(estado);
+});
+
+function mostrarAlertaCambioEstado(estado) {
+    Swal.fire({
+        icon: 'warning',
+        title: 'Cambio de estado',
+        text: 'El estado cambiará a ' + estado + ' y se registrará en el historial del vehículo.',
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#4f46e5'
+    });
+}
+
+// AJAX submit
 $(document).ready(function() {
-    // Estado original para detectar cambios
-    const estadoOriginal = '<?= $vehiculo['estado'] ?>';
-    
-    // Validación en tiempo real
-    $('#formVehiculo').on('submit', function(e) {
+    $('#wizardForm').on('submit', function(e) {
         e.preventDefault();
-        
-        // Limpiar errores previos
-        $('.is-invalid').removeClass('is-invalid');
-        $('.invalid-feedback').text('');
-        
-        // Deshabilitar botón de envío
-        $('#btnGuardar').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Actualizando...');
-        
-        // Enviar formulario
+        if (!validateStep(currentStep)) return;
+
+        const btn = $('#btn-guardar');
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Actualizando...');
+
         $.ajax({
             url: $(this).attr('action'),
             type: 'POST',
@@ -435,161 +430,23 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    // Mostrar mensaje de éxito
-                    mostrarAlerta('success', response.message);
-                    
-                    // Redireccionar después de 2 segundos
-                    setTimeout(function() {
-                        window.location.href = '<?= base_url('vehiculos/show/' . $vehiculo['id']) ?>';
-                    }, 2000);
+                    Swal.fire({ icon: 'success', title: 'Actualizado', text: response.message, timer: 2000, showConfirmButton: false })
+                        .then(() => window.location.href = '<?= base_url('vehiculos/show/' . $vehiculo['id']) ?>');
                 } else {
-                    // Mostrar errores de validación
-                    if (response.errors) {
-                        mostrarErrores(response.errors);
-                    } else {
-                        mostrarAlerta('error', response.message || 'Error al actualizar el vehículo');
-                    }
-                    $('#btnGuardar').prop('disabled', false).html('<i class="fas fa-save me-2"></i>Actualizar Vehículo');
+                    if (response.errors) mostrarErrores(response.errors);
+                    else Swal.fire({ icon: 'error', title: 'Error', text: response.message || 'Error al actualizar el vehículo' });
+                    btn.prop('disabled', false).html('<i class="fas fa-save me-2"></i>Actualizar Vehículo');
                 }
             },
             error: function(xhr) {
                 let mensaje = 'Error de conexión';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    mensaje = xhr.responseJSON.message;
-                }
-                mostrarAlerta('error', mensaje);
-                $('#btnGuardar').prop('disabled', false).html('<i class="fas fa-save me-2"></i>Actualizar Vehículo');
+                if (xhr.responseJSON && xhr.responseJSON.message) mensaje = xhr.responseJSON.message;
+                Swal.fire({ icon: 'error', title: 'Error', text: mensaje });
+                btn.prop('disabled', false).html('<i class="fas fa-save me-2"></i>Actualizar Vehículo');
             }
         });
     });
 
-    // Mostrar/ocultar campo de motivo según el estado
-    $('#estado').on('change', function() {
-        const estado = $(this).val();
-        const motivoField = $('#motivo_inactividad');
-        
-        if (estado === 'ACTIVO') {
-            motivoField.prop('required', false);
-            motivoField.closest('.col-md-6').hide();
-        } else {
-            motivoField.prop('required', true);
-            motivoField.closest('.col-md-6').show();
-        }
-        
-        // Si cambió el estado, mostrar alerta
-        if (estado !== estadoOriginal) {
-            mostrarAlertaCambioEstado(estado);
-        }
-    });
-
-    // Inicializar visibilidad del campo motivo
-    $('#estado').trigger('change');
-
-    // Validaciones en tiempo real
-    $('#placa').on('blur', function() {
-        const placa = $(this).val().trim();
-        const vehiculoId = '<?= $vehiculo['id'] ?>';
-        if (placa.length >= 6) {
-            verificarPlacaUnica(placa, vehiculoId);
-        }
-    });
-
-    // Formatear placa en mayúsculas
-    $('#placa').on('input', function() {
-        $(this).val($(this).val().toUpperCase());
-    });
-
-    // Formatear marca y modelo
-    $('#marca, #modelo').on('input', function() {
-        const valor = $(this).val();
-        $(this).val(valor.charAt(0).toUpperCase() + valor.slice(1).toLowerCase());
-    });
-
-    // Validar año
-    $('#anio').on('input', function() {
-        const anio = parseInt($(this).val());
-        const anioActual = new Date().getFullYear();
-        
-        if (anio && (anio < 1900 || anio > anioActual)) {
-            $(this).addClass('is-invalid');
-            $('#error_anio').text(`El año debe estar entre 1900 y ${anioActual}`);
-        } else {
-            $(this).removeClass('is-invalid');
-            $('#error_anio').text('');
-        }
-    });
-
-    // Validar kilometraje
-    $('#kilometraje').on('input', function() {
-        const km = parseInt($(this).val());
-        const kmOriginal = parseInt('<?= $vehiculo['kilometraje'] ?>');
-        
-        if (km && km < 0) {
-            $(this).addClass('is-invalid');
-            $('#error_kilometraje').text('El kilometraje no puede ser negativo');
-        } else if (km && km < kmOriginal) {
-            $(this).addClass('is-invalid');
-            $('#error_kilometraje').text('El kilometraje no puede ser menor al registrado anteriormente (' + kmOriginal.toLocaleString() + ' km)');
-        } else {
-            $(this).removeClass('is-invalid');
-            $('#error_kilometraje').text('');
-        }
-    });
-
-    // Función para verificar placa única
-    function verificarPlacaUnica(placa, vehiculoId) {
-        $.ajax({
-            url: '<?= base_url('vehiculos/verificarPlaca') ?>',
-            type: 'POST',
-            data: { placa: placa, id: vehiculoId },
-            dataType: 'json',
-            success: function(response) {
-                if (!response.disponible) {
-                    $('#placa').addClass('is-invalid');
-                    $('#error_placa').text('Esta placa ya está registrada');
-                } else {
-                    $('#placa').removeClass('is-invalid');
-                    $('#error_placa').text('');
-                }
-            }
-        });
-    }
-
-    // Función para mostrar alerta de cambio de estado
-    function mostrarAlertaCambioEstado(nuevoEstado) {
-        let mensaje = '';
-        let tipo = 'info';
-        
-        if (nuevoEstado === 'ACTIVO') {
-            mensaje = 'El vehículo será marcado como ACTIVO y estará disponible para asignaciones.';
-            tipo = 'success';
-        } else if (nuevoEstado === 'INACTIVO') {
-            mensaje = 'El vehículo será marcado como INACTIVO y no estará disponible para asignaciones.';
-            tipo = 'warning';
-        } else if (nuevoEstado === 'EN REPARACION') {
-            mensaje = 'El vehículo será marcado como EN REPARACIÓN y no estará disponible hasta completar el mantenimiento.';
-            tipo = 'warning';
-        }
-        
-        if (mensaje) {
-            const alertClass = tipo === 'success' ? 'alert-success' : tipo === 'warning' ? 'alert-warning' : 'alert-info';
-            const icon = tipo === 'success' ? 'check-circle' : tipo === 'warning' ? 'exclamation-triangle' : 'info-circle';
-            
-            // Remover alertas previas de cambio de estado
-            $('.alert-cambio-estado').remove();
-            
-            const alerta = `
-                <div class="alert ${alertClass} alert-dismissible fade show alert-cambio-estado" role="alert">
-                    <i class="fas fa-${icon} me-2"></i>${mensaje}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-            
-            $('#estado').closest('.row').after(alerta);
-        }
-    }
-
-    // Función para mostrar errores de validación
     function mostrarErrores(errores) {
         $.each(errores, function(campo, mensaje) {
             $('#' + campo).addClass('is-invalid');
@@ -597,145 +454,34 @@ $(document).ready(function() {
         });
     }
 
-    // Función para mostrar alertas
-    function mostrarAlerta(tipo, mensaje) {
-        const alertClass = tipo === 'success' ? 'alert-success' : 'alert-danger';
-        const icon = tipo === 'success' ? 'check-circle' : 'exclamation-triangle';
-        
-        const alerta = `
-            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                <i class="fas fa-${icon} me-2"></i>${mensaje}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-        
-        $('.container-fluid').prepend(alerta);
-        
-        // Scroll hacia arriba para ver la alerta
-        $('html, body').animate({ scrollTop: 0 }, 300);
-        
-        // Auto-hide después de 5 segundos para alertas de error
-        if (tipo === 'error') {
-            setTimeout(function() {
-                $('.alert').fadeOut();
-            }, 5000);
-        }
-    }
-
-    // Inicializar Select2 para centros de costo
-    $('#codigo_centro_costo').select2({
-        theme: 'bootstrap-5',
-        placeholder: 'Buscar centro de costo...',
-        allowClear: true,
-        width: '100%',
-        language: {
-            noResults: function() {
-                return "No se encontraron centros de costo";
-            },
-            searching: function() {
-                return "Buscando...";
-            },
-            inputTooShort: function() {
-                return "Escriba para buscar";
-            }
-        },
-        templateResult: function(option) {
-            if (!option.id) {
-                return option.text;
-            }
-            
-            // Extraer código y descripción
-            var text = option.text;
-            var parts = text.split(' - ');
-            if (parts.length >= 2) {
-                var codigo = parts[0];
-                var descripcion = parts.slice(1).join(' - ');
-                
-                var $result = $(
-                    '<div class="d-flex flex-column">' +
-                        '<div class="fw-bold text-primary">' + codigo + '</div>' +
-                        '<div class="text-muted small">' + descripcion + '</div>' +
-                    '</div>'
-                );
-                return $result;
-            }
-            
-            return $('<div>' + text + '</div>');
-        },
-        templateSelection: function(option) {
-            return option.text || option.id;
+    $('#placa').on('blur', function() {
+        const placa = $(this).val().trim();
+        const vehiculoId = '<?= $vehiculo['id'] ?>';
+        if (placa.length >= 6) {
+            $.ajax({
+                url: '<?= base_url('vehiculos/verificarPlaca') ?>',
+                type: 'POST',
+                data: { placa: placa, id: vehiculoId },
+                dataType: 'json',
+                success: function(response) {
+                    if (!response.disponible) {
+                        $('#placa').addClass('is-invalid');
+                        $('#error_placa').text('Esta placa ya está registrada');
+                    } else {
+                        $('#placa').removeClass('is-invalid');
+                        $('#error_placa').text('');
+                    }
+                }
+            });
         }
     });
 
-    // Manejar eventos de Select2
-    $('#codigo_centro_costo').on('select2:select', function(e) {
-        // Remover clase de error al seleccionar
-        $(this).removeClass('is-invalid');
-        $('#error_codigo_centro_costo').text('');
-    });
-
-    $('#codigo_centro_costo').on('select2:clear', function(e) {
-        // Agregar clase de error si es requerido y se limpia
-        if ($(this).prop('required')) {
-            $(this).addClass('is-invalid');
-            $('#error_codigo_centro_costo').text('Este campo es requerido');
-        }
-    });
-
-    // Limpiar errores al escribir
-    $('input, select, textarea').on('input change', function() {
-        $(this).removeClass('is-invalid');
-        $(this).siblings('.invalid-feedback').text('');
-    });
+    // Inicializar motivo
+    const estadoInicial = document.getElementById('estado').value;
+    const motivoWrapper = document.getElementById('motivoWrapper');
+    if (estadoInicial === 'ACTIVO') motivoWrapper.classList.add('d-none');
 });
+
+updateStepper();
 </script>
-
-<!-- Select2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
-
-<!-- Select2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-<style>
-/* Estilos personalizados para Select2 */
-.select2-container--bootstrap-5 .select2-selection {
-    min-height: calc(2.25rem + 2px);
-    border-radius: 10px;
-}
-
-.select2-container--bootstrap-5 .select2-selection--single {
-    padding: 0.375rem 0.75rem;
-}
-
-.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
-    padding: 0;
-    line-height: 1.5;
-}
-
-.select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
-    height: calc(2.25rem + 2px);
-}
-
-.select2-container--bootstrap-5.select2-container--focus .select2-selection {
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-
-.select2-container--bootstrap-5 .select2-dropdown {
-    border-radius: 10px;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
-
-.select2-container--bootstrap-5 .select2-results__option--highlighted {
-    background-color: #0d6efd;
-    color: white;
-}
-
-/* Estado de error */
-.is-invalid + .select2-container--bootstrap-5 .select2-selection {
-    border-color: #dc3545;
-}
-</style>
-
 <?= $this->endSection() ?>
