@@ -30,7 +30,7 @@
 - **ADDED** - Chips con contadores y acciones rápidas en cada dashboard según rol
 - **ADDED** - Command palette con atajo `Ctrl + K` para abrir opciones rápidas filtradas por rol
 - **CHANGED** - Tarjeta de resumen mejorada con métricas tipo KPI y botones contextuales por rol
-- **CHANGED** - `Auth::getRedirectByRole()` redirige al dashboard correspondiente a cada rol
+- **CHANGED** - `app/Views/vehiculos/create.php` — Formulario de creación de vehículo reformulado como wizard de 4 pasos (datos básicos, identificación, configuración y confirmación)
 - **BD** - `vehiculos` e `historial_estado_vehiculo` — Agregado estado `EN MANTENIMIENTO` a los enums
 - **CHANGED** - `app/Models/SolicitudModel.php` — Campos y validaciones para `tipo_mantenimiento`, `ubicacion` y `condicion_movilidad`
 - **CHANGED** - `app/Config/Routes.php` — Rutas `solicitudes/buscar-vehiculo` y `solicitudes/crear` apuntan al wizard
