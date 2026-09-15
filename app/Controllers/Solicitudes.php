@@ -642,7 +642,7 @@ class Solicitudes extends BaseController
             'id_asignado' => $idTecnico,
             'fecha_asignacion' => $fechaAsignacion,
             'estado' => 'ASIGNADA',
-            'usuario_modifica' => $usuarioId,
+            'usuario_actualiza' => $usuarioId,
         ];
         if (!empty($nuevaObservacion)) {
             $updateData['observaciones'] = $nuevaObservacion;

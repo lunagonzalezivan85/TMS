@@ -27,7 +27,7 @@ class SolicitudModel extends Model
         'fecha_registro',
         'fecha_actualizacion',
         'usuario_crea',
-        'usuario_edita',
+        'usuario_actualiza',
         'fecha_planificacion',
         'id_asignado',
         'fecha_asignacion',
