@@ -12,12 +12,18 @@
 
 - **DOCUMENTATION** - Creado `Documentacion/plan_solicitud_mantenimiento_wizard.md` — Plan de proyecto para wizard de solicitud de mantenimiento de vehículos
 - **DOCUMENTATION** - Creado `Documentacion/cambios_bd_solicitud_mantenimiento.md` — Registro detallado de cambios en BD para el wizard
-- **ADDED** - `app/Controllers/Solicitudes::create()` — Wizard de 4 pasos para crear solicitudes de mantenimiento de vehículos
+- **ADDED** - `router.php` — Router para servidor embebido de PHP en desarrollo
+- **ADDED** - `app/Controllers/Solicitudes::create()` — Wizard de 6 pasos para crear solicitudes de mantenimiento de vehículos
 - **ADDED** - `app/Controllers/Solicitudes::store()` — Guardar solicitud desde wizard con validaciones y carga de evidencia
 - **ADDED** - `app/Controllers/Solicitudes::show()` — Vista de resumen de solicitud creada con pasos del flujo
 - **ADDED** - `app/Controllers/Solicitudes::buscarVehiculo()` — Búsqueda AJAX de vehículos por placa, motor o carnet de conductor
-- **ADDED** - `app/Views/solicitudes/create.php` — Wizard reformulado con diseño One UI / Bento Grid
-- **ADDED** - `app/Views/solicitudes/show.php` — Vista de confirmación/resumen del flujo de solicitud
+- **CHANGED** - `app/Views/solicitudes/create.php` — Wizard reformulado con diseño One UI / Bento Grid; paso 3 dividido en Tipo de problema, Prioridad, Descripción y Confirmación
+- **CHANGED** - `app/Views/solicitudes/index.php` — Listado de tarjetas en lugar de DataTable; panel de filtros colapsable; paginación simple
+- **FIXED** - `app/Controllers/Solicitudes::getData()` — Ajuste de filtros, validación de sesión y manejo de errores para DataTables
+- **FIXED** - `app/Models/SolicitudModel::buscarSolicitudes()` — Eliminada referencia a columna inexistente `s.titulo`; COALESCE en nombres de solicitante/asignado
+- **ADDED** - `app/Helpers/vehiculo_helper.php` — Estado `EN MANTENIMIENTO` con badge/clase/label
+- **ADDED** - `Solicitudes::store()` — Cambio automático del vehículo a estado `EN MANTENIMIENTO` cuando la solicitud es crítica, emergencia o inmovilizada
+- **BD** - `vehiculos` e `historial_estado_vehiculo` — Agregado estado `EN MANTENIMIENTO` a los enums
 - **CHANGED** - `app/Models/SolicitudModel.php` — Campos y validaciones para `tipo_mantenimiento`, `ubicacion` y `condicion_movilidad`
 - **CHANGED** - `app/Config/Routes.php` — Rutas `solicitudes/buscar-vehiculo` y `solicitudes/crear` apuntan al wizard
 - **BD** - `solicitudes` — Agregadas columnas `tipo_mantenimiento`, `ubicacion`, `condicion_movilidad`

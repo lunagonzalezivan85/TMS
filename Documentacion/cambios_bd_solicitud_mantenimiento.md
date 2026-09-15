@@ -74,6 +74,30 @@ ALTER TABLE vehiculos ADD COLUMN IF NOT EXISTS tipo_consumo INT DEFAULT 0;
 
 **Justificación:** el dashboard es la página de destino después del login; sin este campo el sistema era inaccesible para pruebas. Se mantiene como entero nullable con default 0 para no afectar datos existentes.
 
+### 3.4 Estado "En Mantenimiento" para vehículos
+
+Para soportar la inmovilización automática del vehículo cuando se genera una solicitud crítica, se agregó el estado `EN MANTENIMIENTO` a los enums de las tablas `vehiculos` e `historial_estado_vehiculo`:
+
+```sql
+ALTER TABLE vehiculos
+    MODIFY COLUMN estado ENUM('ACTIVO','INACTIVO','EN REPARACION','EN MANTENIMIENTO') DEFAULT 'ACTIVO';
+
+ALTER TABLE historial_estado_vehiculo
+    MODIFY COLUMN estado ENUM('ACTIVO','INACTIVO','EN REPARACION','EN MANTENIMIENTO') NOT NULL;
+```
+
+**Regla de negocio implementada en `Solicitudes::store()`:**
+
+Un vehículo pasa automáticamente a estado `EN MANTENIMIENTO` cuando una nueva solicitud cumple alguna de estas condiciones:
+
+- `prioridad = 4` (Crítica)
+- `tipo_mantenimiento = 'EMERGENCIA'`
+- `condicion_movilidad = 'INMOVILIZADO'`
+
+Además se inserta un registro en `historial_estado_vehiculo` para auditoría.
+
+**Justificación:** evita que un vehículo con falla grave o en emergencia siga siendo asignado a viajes mientras se realiza la revisión.
+
 ## 4. Datos iniciales de prueba (desarrollo local)
 
 Para validar el wizard se insertaron:

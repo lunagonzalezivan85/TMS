@@ -455,8 +455,8 @@ class SolicitudModel extends Model
     {
         $builder = $this->db->table('solicitudes s')
             ->select('s.*, v.placa, v.modelo, v.marca, 
-                    CONCAT(u1.nombre, " ", u1.apellido) as nombre_solicitante,
-                    CONCAT(u2.nombre, " ", u2.apellido) as nombre_asignado,
+                    TRIM(CONCAT(COALESCE(u1.nombre, ""), " ", COALESCE(u1.apellido, ""))) as nombre_solicitante,
+                    TRIM(CONCAT(COALESCE(u2.nombre, ""), " ", COALESCE(u2.apellido, ""))) as nombre_asignado,
                     tp.nombre as tipo_problema 
                   ')
             ->join('vehiculos v', 'v.id = s.id_vehiculo', 'left')
@@ -528,7 +528,6 @@ class SolicitudModel extends Model
             $busqueda = $filtros['busqueda'];
             $builder->groupStart()
                    ->like('s.codigo_consecutivo', $busqueda)
-                   ->orLike('s.titulo', $busqueda)
                    ->orLike('s.descripcion', $busqueda)
                    ->orLike('s.observaciones', $busqueda)
                    ->orLike('v.placa', $busqueda)

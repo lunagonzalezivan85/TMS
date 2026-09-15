@@ -35,8 +35,8 @@
                                     <p class="fw-semibold"><?= esc(($vehiculo['marca'] ?? '') . ' ' . ($vehiculo['modelo'] ?? '')) ?></p>
                                 </div>
                                 <div class="col-md-4">
-                                    <small class="text-muted">Año</small>
-                                    <p class="fw-semibold"><?= esc($vehiculo['anio'] ?? 'N/A') ?></p>
+                                    <small class="text-muted">Estado del vehículo</small>
+                                    <p class="fw-semibold"><?= vehiculo_estado_badge($vehiculo['estado'] ?? 'ACTIVO') ?></p>
                                 </div>
                                 <div class="col-md-4">
                                     <small class="text-muted">Kilometraje</small>

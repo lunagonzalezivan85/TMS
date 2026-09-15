@@ -31,45 +31,54 @@ class Solicitudes extends BaseController
         $this->catalogoModel = new CatalogoModel();
         $this->session = session();
 
-        helper(['form', 'url', 'date']);
+        helper(['form', 'url', 'date', 'text', 'vehiculo']);
     }
 
     // Listar todas las solicitudes
     public function index()
     {
-
         $empresaId = $this->session->get('empresa_id');
-        $usuarioId = $this->session->get('usuario_id');
+        $usuarioId = $this->session->get('user_id');
         $rol = $this->session->get('rol_nombre');
 
         // Obtener filtros
         $filtros = [
+            'id_empresa' => $empresaId,
             'estado' => $this->request->getGet('estado') ?? '',
             'fecha_desde' => $this->request->getGet('fecha_desde') ?? '',
             'fecha_hasta' => $this->request->getGet('fecha_hasta') ?? '',
             'id_vehiculo' => $this->request->getGet('id_vehiculo') ?? '',
-            'search' => $this->request->getGet('search') ?? '',
+            'busqueda' => $this->request->getGet('search') ?? '',
             'asignadas_a_mi' => $this->request->getGet('asignadas_a_mi') ?? false
         ];
+
+        // Si es un técnico o está marcado "asignadas a mí"
+        if ($rol === 'TECNICO' || $filtros['asignadas_a_mi']) {
+            $filtros['id_asignado_a'] = $usuarioId;
+        }
+
+        // Paginación simple
+        $page = max(1, (int)($this->request->getGet('page') ?? 1));
+        $perPage = 12;
+
+        // Total y registros
+        $totalRecords = $this->solicitudModel->buscarSolicitudes($filtros, true);
+        $solicitudes = $this->solicitudModel->buscarSolicitudes($filtros, false, $perPage, ($page - 1) * $perPage)
+            ->get()->getResultArray();
 
         // Obtener datos para los filtros
         $vehiculos = $this->vehiculoModel->where('id_empresa', $empresaId)
                                        ->where('estado', 'ACTIVO')
                                        ->findAll();
 
-        // Obtener técnicos para filtro (solo para administradores/jefes)
-        $tecnicos = [];
-        if (in_array($rol, ['ADMINISTRADOR', 'JEFE_TALLER'])) {
-            $tecnicos = $this->usuarioModel->where('id_empresa', $empresaId)
-                                         ->whereIn('rol_nombre', ['TECNICO', 'JEFE_TALLER'])
-                                         ->findAll();
-        }
-
         $data = [
             'title' => 'Solicitudes de Mantenimiento',
             'filtros' => $filtros,
+            'solicitudes' => $solicitudes,
             'vehiculos' => $vehiculos,
-            'tecnicos' => $tecnicos,
+            'totalRecords' => $totalRecords,
+            'page' => $page,
+            'perPage' => $perPage,
             'estados' => [
                 'PENDIENTE' => 'Pendiente',
                 'EN_REVISION' => 'En Revisión',
@@ -79,12 +88,6 @@ class Solicitudes extends BaseController
                 'COMPLETADA' => 'Completada',
                 'CANCELADA' => 'Cancelada',
                 'RECHAZADA' => 'Rechazada'
-            ],
-            'prioridades' => [
-                'BAJA' => 'Baja',
-                'MEDIA' => 'Media',
-                'ALTA' => 'Alta',
-                'CRITICA' => 'Crítica'
             ]
         ];
 
@@ -94,32 +97,46 @@ class Solicitudes extends BaseController
     // Obtener datos para DataTables
     public function getData()
     {
-        if (!$this->request->isAJAX()) {
-            return $this->response->setJSON(['error' => 'Acceso no autorizado']);
-        }
-
         $empresaId = $this->session->get('empresa_id');
-        $usuarioId = $this->session->get('usuario_id');
+        $usuarioId = $this->session->get('user_id');
         $rol = $this->session->get('rol_nombre');
 
+        if (!$empresaId || !$usuarioId) {
+            return $this->response->setJSON(['error' => 'No autenticado'])->setStatusCode(401);
+        }
+
         // Obtener parámetros de DataTables
-        $draw = $this->request->getPost('draw');
-        $start = $this->request->getPost('start');
-        $length = $this->request->getPost('length');
+        $draw = $this->request->getPost('draw') ?? 1;
+        $start = (int)($this->request->getPost('start') ?? 0);
+        $length = (int)($this->request->getPost('length') ?? 10);
         $search = $this->request->getPost('search')['value'] ?? '';
+
+        $columnasOrden = [
+            's.codigo_consecutivo',
+            's.fecha_solicitud',
+            'v.placa',
+            'u1.nombre',
+            'tp.nombre',
+            's.descripcion',
+            's.estado',
+            's.id'
+        ];
+        $orderColumn = (int)($this->request->getPost('order')[0]['column'] ?? 0);
+        $orderDir = ($this->request->getPost('order')[0]['dir'] ?? 'desc') === 'asc' ? 'ASC' : 'DESC';
+        $orden = $columnasOrden[$orderColumn] ?? 's.fecha_solicitud';
 
         // Configurar filtros
         $filtros = [
             'id_empresa' => $empresaId,
-            'search' => $search,
+            'busqueda' => $search,
             'estado' => $this->request->getPost('estado'),
             'prioridad' => $this->request->getPost('prioridad'),
             'fecha_desde' => $this->request->getPost('fecha_desde'),
             'fecha_hasta' => $this->request->getPost('fecha_hasta'),
             'id_vehiculo' => $this->request->getPost('id_vehiculo'),
             'id_asignado_a' => $this->request->getPost('id_asignado_a'),
-            'orden' => $this->request->getPost('order[0][column]'),
-            'direccion' => $this->request->getPost('order[0][dir]')
+            'orden' => $orden,
+            'direccion' => $orderDir
         ];
 
         // Si es un técnico o está marcado "asignadas a mí", solo mostrar sus solicitudes
@@ -127,29 +144,59 @@ class Solicitudes extends BaseController
             $filtros['id_asignado_a'] = $usuarioId;
         }
 
-        // Usar el método de búsqueda avanzada
-        $totalRecords = $this->solicitudModel->buscarSolicitudes($filtros, true);
+        try {
+            // Usar el método de búsqueda avanzada
+            $totalRecords = $this->solicitudModel->buscarSolicitudes($filtros, true);
 
-        // Obtener datos con paginación
-        $solicitudes = $this->solicitudModel->buscarSolicitudes($filtros, false, $length, $start)->get()->getResultArray();
+            // Obtener datos con paginación
+            $solicitudes = $this->solicitudModel->buscarSolicitudes($filtros, false, $length, $start)->get()->getResultArray();
+        } catch (\Exception $e) {
+            log_message('error', 'Error en getData: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'draw' => (int)$draw,
+                'recordsTotal' => 0,
+                'recordsFiltered' => 0,
+                'data' => [],
+                'error' => 'Error al obtener datos'
+            ]);
+        }
 
         // Formatear datos para DataTables
         $data = [];
         foreach ($solicitudes as $solicitud) {
+            $estado = $solicitud['estado'] ?? 'PENDIENTE';
+            $prioridad = (int)($solicitud['prioridad'] ?? 2);
+            $badgeClass = ['success', 'warning', 'orange', 'danger'][$prioridad - 1] ?? 'secondary';
+            $prioridadLabel = ['Baja', 'Media', 'Alta', 'Crítica'][$prioridad - 1] ?? 'Media';
+
+            $badgeEstado = match (strtoupper($estado)) {
+                'PENDIENTE' => '<span class="badge bg-warning">Pendiente</span>',
+                'EN_PROCESO' => '<span class="badge bg-info">En Proceso</span>',
+                'APROBADA', 'APROBADAS' => '<span class="badge bg-success">Aprobada</span>',
+                'COMPLETADA', 'FINALIZADA' => '<span class="badge bg-primary">Completada</span>',
+                'CANCELADA' => '<span class="badge bg-secondary">Cancelada</span>',
+                'RECHAZADA' => '<span class="badge bg-dark">Rechazada</span>',
+                default => '<span class="badge bg-light text-dark">' . esc($estado) . '</span>'
+            };
+
+            $acciones = '<div class="btn-group btn-group-sm">';
+            $acciones .= '<a href="' . base_url('solicitudes/show/' . $solicitud['id']) . '" class="btn btn-outline-primary" title="Ver"><i class="fas fa-eye"></i></a>';
+            if (!in_array($estado, ['COMPLETADA', 'CANCELADA', 'RECHAZADA', 'FINALIZADA'])) {
+                $acciones .= '<a href="' . base_url('ordenes-trabajo/edit/' . $solicitud['id']) . '" class="btn btn-outline-success" title="Editar"><i class="fas fa-edit"></i></a>';
+            }
+            $acciones .= '</div>';
+
             $data[] = [
                 'id' => $solicitud['id'],
                 'codigo_consecutivo' => $solicitud['codigo_consecutivo'],
-                'fecha_solicitud' => $solicitud['fecha_solicitud'] ?? $solicitud['fechaSolicitud'],
-                'fecha_limite' => $solicitud['fecha_limite'] ?? null,
+                'fecha_solicitud' => $solicitud['fecha_solicitud'] ?? $solicitud['fechaSolicitud'] ?? '',
                 'placa' => $solicitud['placa'] ?? 'N/A',
                 'solicitante' => $solicitud['nombre_solicitante'] ?? 'N/A',
-                'asignado_a' => $solicitud['nombre_asignado'] ?? 'Sin asignar',
                 'tipo_problema' => $solicitud['tipo_problema'] ?? 'N/A',
-                'prioridad' => $this->getBadgePrioridad($solicitud['prioridad'] ?? 'MEDIA'),
-                'descripcion' => character_limiter($solicitud['descripcion'] ?? '', 100),
-                'estado' => $this->getBadgeEstado($solicitud['estado']),
-                'dias_restantes' => $solicitud['dias_restantes'] ?? null,
-                'acciones' => $this->getAcciones($solicitud)
+                'descripcion' => character_limiter($solicitud['descripcion'] ?? '', 80),
+                'estado' => $badgeEstado,
+                'acciones' => $acciones,
+                'DT_RowData' => ['id' => $solicitud['id']]
             ];
         }
 
@@ -358,11 +405,11 @@ class Solicitudes extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        // Verificar vehiculo pertenece a la empresa y esta activo
+        // Verificar vehiculo pertenece a la empresa y esta activo o en mantenimiento
         $vehiculo = $this->vehiculoModel
             ->where('id', $this->request->getPost('id_vehiculo'))
             ->where('id_empresa', $empresaId)
-            ->where('estado', 'ACTIVO')
+            ->whereIn('estado', ['ACTIVO', 'EN MANTENIMIENTO'])
             ->first();
 
         if (!$vehiculo) {
@@ -412,7 +459,40 @@ class Solicitudes extends BaseController
                 return redirect()->back()->withInput()->with('error', 'Error al guardar: ' . implode(', ', $errors ?: ['desconocido']));
             }
 
-            return redirect()->to('/solicitudes/show/' . $id)->with('success', 'Solicitud de mantenimiento creada exitosamente');
+            $idVehiculo = (int)$this->request->getPost('id_vehiculo');
+            $prioridad = (int)$this->request->getPost('prioridad');
+            $tipoMantenimiento = $this->request->getPost('tipo_mantenimiento');
+            $condicionMovilidad = $this->request->getPost('condicion_movilidad');
+
+            // Si la solicitud indica que el vehiculo no debe usarse, marcarlo como EN MANTENIMIENTO
+            $requiereInmovilizar = ($prioridad === 4) || ($tipoMantenimiento === 'EMERGENCIA') || ($condicionMovilidad === 'INMOVILIZADO');
+
+            if ($requiereInmovilizar && $vehiculo['estado'] !== 'EN MANTENIMIENTO') {
+                $this->vehiculoModel->update($idVehiculo, [
+                    'estado' => 'EN MANTENIMIENTO',
+                    'motivo_inactividad' => 'Solicitud de mantenimiento ' . $codigo . ' generada con prioridad ' . $prioridad,
+                    'fechaUpdate' => date('Y-m-d H:i:s'),
+                    'usuarioEdita' => $usuarioId,
+                ]);
+
+                $db = \Config\Database::connect();
+                $db->table('historial_estado_vehiculo')->insert([
+                    'id_empresa' => $empresaId,
+                    'id_vehiculo' => $idVehiculo,
+                    'estado' => 'EN MANTENIMIENTO',
+                    'motivo' => 'Cambio automático por solicitud ' . $codigo,
+                    'fecha_inicio' => date('Y-m-d H:i:s'),
+                    'fechaRegistro' => date('Y-m-d H:i:s'),
+                    'usuarioCrea' => $usuarioId,
+                    'usuarioEdita' => $usuarioId,
+                ]);
+
+                $mensajeAdicional = ' El vehículo fue marcado como "En Mantenimiento" y no podrá usarse hasta nueva orden.';
+            } else {
+                $mensajeAdicional = '';
+            }
+
+            return redirect()->to('/solicitudes/show/' . $id)->with('success', 'Solicitud de mantenimiento creada exitosamente.' . $mensajeAdicional);
         } catch (\Exception $e) {
             log_message('error', 'Error al crear solicitud: ' . $e->getMessage());
             return redirect()->back()->withInput()->with('error', 'Error al crear la solicitud: ' . $e->getMessage());

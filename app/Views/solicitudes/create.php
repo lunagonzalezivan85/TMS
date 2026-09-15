@@ -26,7 +26,7 @@
         display: flex;
         justify-content: space-between;
         position: relative;
-        margin: 0 1rem;
+        margin: 0 0.25rem;
         padding-top: 1.5rem;
     }
     .progress-track::before {
@@ -56,8 +56,8 @@
         flex: 1;
     }
     .step-circle {
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         background: rgba(255,255,255,0.2);
         color: white;
@@ -65,6 +65,7 @@
         align-items: center;
         justify-content: center;
         font-weight: 600;
+        font-size: 0.85rem;
         border: 2px solid rgba(255,255,255,0.4);
         transition: all 0.3s ease;
     }
@@ -76,8 +77,8 @@
     }
     .step-label {
         display: block;
-        margin-top: 0.5rem;
-        font-size: 0.8rem;
+        margin-top: 0.4rem;
+        font-size: 0.7rem;
         color: rgba(255,255,255,0.85);
         font-weight: 500;
     }
@@ -100,7 +101,6 @@
         color: #64748b;
         margin-bottom: 1.75rem;
     }
-    /* Bento cards */
     .bento-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -162,12 +162,10 @@
         font-size: 0.8rem;
         color: #64748b;
     }
-    /* Priority colors */
     .priority-baja .bento-icon { background: #dcfce7; color: #16a34a; }
     .priority-media .bento-icon { background: #fef9c3; color: #ca8a04; }
     .priority-alta .bento-icon { background: #ffedd5; color: #ea580c; }
     .priority-critica .bento-icon { background: #fee2e2; color: #dc2626; }
-    /* Vehicle card */
     .vehicle-result {
         border: 2px solid #e2e8f0;
         border-radius: 20px;
@@ -245,6 +243,7 @@
     .summary-label { color: #64748b; font-weight: 500; }
     .summary-value { color: #1e293b; font-weight: 600; text-align: right; }
     .d-none { display: none !important; }
+    textarea.form-control { resize: vertical; }
 </style>
 <?= $this->endSection() ?>
 
@@ -277,19 +276,27 @@
                     <div class="progress-track mt-4">
                         <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
                         <div class="step-node active" data-step="1">
-                            <div class="step-circle">1</div>
+                            <div class="step-circle"><i class="fas fa-car"></i></div>
                             <span class="step-label">Vehículo</span>
                         </div>
                         <div class="step-node" data-step="2">
-                            <div class="step-circle">2</div>
+                            <div class="step-circle"><i class="fas fa-wrench"></i></div>
                             <span class="step-label">Tipo</span>
                         </div>
                         <div class="step-node" data-step="3">
-                            <div class="step-circle">3</div>
-                            <span class="step-label">Detalle</span>
+                            <div class="step-circle"><i class="fas fa-tools"></i></div>
+                            <span class="step-label">Problema</span>
                         </div>
                         <div class="step-node" data-step="4">
-                            <div class="step-circle">4</div>
+                            <div class="step-circle"><i class="fas fa-flag"></i></div>
+                            <span class="step-label">Prioridad</span>
+                        </div>
+                        <div class="step-node" data-step="5">
+                            <div class="step-circle"><i class="fas fa-edit"></i></div>
+                            <span class="step-label">Detalle</span>
+                        </div>
+                        <div class="step-node" data-step="6">
+                            <div class="step-circle"><i class="fas fa-check"></i></div>
                             <span class="step-label">Confirmar</span>
                         </div>
                     </div>
@@ -316,7 +323,6 @@
                             </div>
 
                             <input type="hidden" name="id_vehiculo" id="id_vehiculo" value="">
-                            <div id="vehiculoSeleccionado" class="mt-4 d-none"></div>
                         </div>
 
                         <!-- PASO 2: Tipo de mantenimiento -->
@@ -352,71 +358,79 @@
                             </div>
                         </div>
 
-                        <!-- PASO 3: Detalle del problema -->
+                        <!-- PASO 3: Tipo de problema -->
                         <div class="wizard-step d-none" id="step-3">
-                            <h4 class="step-title">Paso 3: Detalle del problema</h4>
-                            <p class="step-subtitle">Describe la avería y adjunta evidencia fotográfica.</p>
+                            <h4 class="step-title">Paso 3: Tipo de problema</h4>
+                            <p class="step-subtitle">Selecciona la categoría que mejor describa la avería.</p>
+
+                            <div class="bento-grid">
+                                <?php foreach ($tiposProblema as $tp): ?>
+                                    <label class="bento-card" onclick="selectProblema(this)">
+                                        <input type="radio" name="id_tipo_problema" value="<?= $tp['id'] ?>" class="d-none" required>
+                                        <div class="bento-icon" style="background:#f3e8ff;color:#9333ea;">
+                                            <i class="fas fa-tools"></i>
+                                        </div>
+                                        <div class="bento-title"><?= esc($tp['nombre']) ?></div>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+
+                        <!-- PASO 4: Prioridad -->
+                        <div class="wizard-step d-none" id="step-4">
+                            <h4 class="step-title">Paso 4: Prioridad</h4>
+                            <p class="step-subtitle">Indica la urgencia de atención.</p>
+
+                            <div class="bento-grid">
+                                <label class="bento-card priority-baja" onclick="selectPrioridad(this)">
+                                    <input type="radio" name="prioridad" value="1" class="d-none">
+                                    <div class="bento-icon"><i class="fas fa-arrow-down"></i></div>
+                                    <div class="bento-title">Baja</div>
+                                    <div class="bento-desc">Puede esperar</div>
+                                </label>
+                                <label class="bento-card priority-media" onclick="selectPrioridad(this)">
+                                    <input type="radio" name="prioridad" value="2" class="d-none">
+                                    <div class="bento-icon"><i class="fas fa-minus"></i></div>
+                                    <div class="bento-title">Media</div>
+                                    <div class="bento-desc">Atención pronto</div>
+                                </label>
+                                <label class="bento-card priority-alta" onclick="selectPrioridad(this)">
+                                    <input type="radio" name="prioridad" value="3" class="d-none">
+                                    <div class="bento-icon"><i class="fas fa-arrow-up"></i></div>
+                                    <div class="bento-title">Alta</div>
+                                    <div class="bento-desc">Urgente</div>
+                                </label>
+                                <label class="bento-card priority-critica" onclick="selectPrioridad(this)">
+                                    <input type="radio" name="prioridad" value="4" class="d-none">
+                                    <div class="bento-icon"><i class="fas fa-fire"></i></div>
+                                    <div class="bento-title">Crítica</div>
+                                    <div class="bento-desc">Inmoviliza el vehículo</div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- PASO 5: Descripción y detalles -->
+                        <div class="wizard-step d-none" id="step-5">
+                            <h4 class="step-title">Paso 5: Descripción y detalles</h4>
+                            <p class="step-subtitle">Describe la avería, indica la ubicación y adjunta evidencia.</p>
 
                             <div class="row g-4">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Tipo de problema</label>
-                                    <div class="bento-grid">
-                                        <?php foreach ($tiposProblema as $tp): ?>
-                                            <label class="bento-card" onclick="selectProblema(this)">
-                                                <input type="radio" name="id_tipo_problema" value="<?= $tp['id'] ?>" class="d-none" required>
-                                                <div class="bento-icon" style="background:#f3e8ff;color:#9333ea;">
-                                                    <i class="fas fa-tools"></i>
-                                                </div>
-                                                <div class="bento-title"><?= esc($tp['nombre']) ?></div>
-                                            </label>
-                                        <?php endforeach; ?>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Prioridad</label>
-                                    <div class="bento-grid">
-                                        <label class="bento-card priority-baja" onclick="selectPrioridad(this)">
-                                            <input type="radio" name="prioridad" value="1" class="d-none">
-                                            <div class="bento-icon"><i class="fas fa-arrow-down"></i></div>
-                                            <div class="bento-title">Baja</div>
-                                            <div class="bento-desc">Puede esperar</div>
-                                        </label>
-                                        <label class="bento-card priority-media" onclick="selectPrioridad(this)">
-                                            <input type="radio" name="prioridad" value="2" class="d-none">
-                                            <div class="bento-icon"><i class="fas fa-minus"></i></div>
-                                            <div class="bento-title">Media</div>
-                                            <div class="bento-desc">Atención pronto</div>
-                                        </label>
-                                        <label class="bento-card priority-alta" onclick="selectPrioridad(this)">
-                                            <input type="radio" name="prioridad" value="3" class="d-none">
-                                            <div class="bento-icon"><i class="fas fa-arrow-up"></i></div>
-                                            <div class="bento-title">Alta</div>
-                                            <div class="bento-desc">Urgente</div>
-                                        </label>
-                                        <label class="bento-card priority-critica" onclick="selectPrioridad(this)">
-                                            <input type="radio" name="prioridad" value="4" class="d-none">
-                                            <div class="bento-icon"><i class="fas fa-fire"></i></div>
-                                            <div class="bento-title">Crítica</div>
-                                            <div class="bento-desc">Inmoviliza el vehículo</div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-8">
+                                <div class="col-12">
                                     <label for="descripcion" class="form-label fw-semibold">Descripción detallada</label>
                                     <textarea name="descripcion" id="descripcion" class="form-control rounded-4" rows="4" minlength="10" placeholder="Describe la falla, síntomas y cualquier detalle relevante..." required></textarea>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label for="condicion_movilidad" class="form-label fw-semibold">Condición de movilidad</label>
                                     <select name="condicion_movilidad" id="condicion_movilidad" class="form-select rounded-4 py-3">
                                         <option value="OPERATIVO" selected>Operativo</option>
                                         <option value="INMOVILIZADO">Inmovilizado</option>
                                         <option value="ARRASTRE">Solo arrastre</option>
                                     </select>
+                                </div>
 
-                                    <label for="ubicacion" class="form-label fw-semibold mt-3">Ubicación actual</label>
+                                <div class="col-md-6">
+                                    <label for="ubicacion" class="form-label fw-semibold">Ubicación actual</label>
                                     <input type="text" name="ubicacion" id="ubicacion" class="form-control rounded-4 py-3" placeholder="Ej: Taller central, Ruta 32 km 15">
                                 </div>
 
@@ -429,9 +443,9 @@
                             </div>
                         </div>
 
-                        <!-- PASO 4: Confirmación -->
-                        <div class="wizard-step d-none" id="step-4">
-                            <h4 class="step-title">Paso 4: Confirmar y enviar</h4>
+                        <!-- PASO 6: Confirmación -->
+                        <div class="wizard-step d-none" id="step-6">
+                            <h4 class="step-title">Paso 6: Confirmar y enviar</h4>
                             <p class="step-subtitle">Revisa la información antes de crear la solicitud.</p>
 
                             <div class="summary-card mb-4">
@@ -476,6 +490,14 @@
                                     <small class="text-muted">La solicitud pasará por aprobación, diagnóstico, asignación de mecánico y finalización.</small>
                                 </div>
                             </div>
+
+                            <div id="avisoInmovilizacion" class="alert alert-warning border-warning rounded-4 d-flex align-items-center d-none">
+                                <i class="fas fa-ban text-warning me-2 fs-5"></i>
+                                <div>
+                                    <strong>El vehículo será marcado como "En Mantenimiento"</strong><br>
+                                    <small class="text-muted">Por tener prioridad Crítica, tipo Emergencia o condición Inmovilizado, el vehículo quedará no disponible hasta que se finalice el mantenimiento.</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -500,9 +522,9 @@
 
 <?= $this->section('scripts') ?>
 <script>
-const baseUrl = document.querySelector('meta[name="base-url"')?.content || '';
+const baseUrl = document.querySelector('meta[name="base-url"]')?.content || '';
 let currentStep = 1;
-const totalSteps = 4;
+const totalSteps = 6;
 let selectedVehicle = null;
 
 function updateProgress() {
@@ -545,10 +567,12 @@ function validateStep(step) {
             Swal.fire('Problema requerido', 'Selecciona el tipo de problema.', 'warning');
             return false;
         }
+    } else if (step === 4) {
         if (!document.querySelector('input[name="prioridad"]:checked')) {
             Swal.fire('Prioridad requerida', 'Selecciona la prioridad.', 'warning');
             return false;
         }
+    } else if (step === 5) {
         const desc = document.getElementById('descripcion').value.trim();
         if (desc.length < 10) {
             Swal.fire('Descripción requerida', 'La descripción debe tener al menos 10 caracteres.', 'warning');
@@ -560,7 +584,7 @@ function validateStep(step) {
 
 function nextStep() {
     if (!validateStep(currentStep)) return;
-    if (currentStep === 3) buildSummary();
+    if (currentStep === totalSteps - 1) buildSummary();
     showStep(currentStep + 1);
 }
 
@@ -630,11 +654,10 @@ function seleccionarVehiculo(id, el) {
     el.classList.add('selected');
     document.getElementById('id_vehiculo').value = id;
 
-    const datos = el.querySelector('h5').textContent + ' - ' + el.querySelector('p.mb-1').textContent;
     selectedVehicle = {
         placa: el.querySelector('h5').textContent,
         info: el.querySelector('p.mb-1').textContent,
-        conductor: el.querySelector('.border-top p').textContent
+        conductor: el.querySelector('.border-top p').textContent.replace('Carnet: ', '')
     };
 }
 
@@ -693,6 +716,10 @@ function buildSummary() {
     document.getElementById('res-condicion').textContent = document.getElementById('condicion_movilidad').value;
     document.getElementById('res-ubicacion').textContent = document.getElementById('ubicacion').value || '-';
     document.getElementById('res-descripcion').textContent = document.getElementById('descripcion').value;
+
+    const condicion = document.getElementById('condicion_movilidad').value;
+    const inmovilizar = (parseInt(prioridad) === 4) || (tipo === 'EMERGENCIA') || (condicion === 'INMOVILIZADO');
+    document.getElementById('avisoInmovilizacion').classList.toggle('d-none', !inmovilizar);
 }
 
 // Anti doble submit
