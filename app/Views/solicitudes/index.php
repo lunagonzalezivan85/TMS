@@ -109,7 +109,8 @@
                 $estadoLabel = $estados[$estado] ?? $estado;
 
                 $prioridad = (int)($s['prioridad'] ?? 2);
-                $prioridadClass = ['success', 'warning', 'orange', 'danger'][$prioridad - 1] ?? 'secondary';
+                $prioridadClass = ['success', 'warning', 'danger', 'dark'][$prioridad - 1] ?? 'secondary';
+                $prioridadBg = ['success', 'warning', 'danger', 'dark'][$prioridad - 1] ?? 'secondary';
                 $prioridadLabels = [1 => 'Baja', 2 => 'Media', 3 => 'Alta', 4 => 'Crítica'];
                 $prioridadLabel = $prioridadLabels[$prioridad] ?? 'Media';
                 ?>
@@ -122,7 +123,7 @@
                                     <h5 class="fw-bold mb-0"><?= esc($s['codigo_consecutivo']) ?></h5>
                                     <small class="text-muted"><?= date('d/m/Y H:i', strtotime($s['fecha_solicitud'] ?? $s['fechaSolicitud'] ?? 'now')) ?></small>
                                 </div>
-                                <span class="badge rounded-pill bg-<?= $prioridadClass ?> bg-opacity-10 text-<?= $prioridadClass ?> border border-<?= $prioridadClass ?> border-opacity-25"><?= $prioridadLabel ?></span>
+                                <span class="badge rounded-pill bg-<?= $prioridadBg ?> bg-opacity-10 text-dark border border-<?= $prioridadClass ?> border-opacity-25"><?= $prioridadLabel ?></span>
                             </div>
 
                             <div class="d-flex align-items-center mb-3 p-2 rounded-3 bg-light">
@@ -143,23 +144,25 @@
                                 <p class="text-muted small mb-0 line-clamp-2"><?= character_limiter(esc($s['descripcion'] ?? ''), 120) ?></p>
                             </div>
 
-                            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <div class="d-flex align-items-center pt-3 border-top">
                                 <small class="text-muted">
                                     <i class="fas fa-user me-1"></i><?= esc($s['nombre_solicitante'] ?? 'N/A') ?>
                                 </small>
-                                <div class="d-flex gap-2">
-                                    <?php if (in_array(strtolower((string)session('rol_name')), ['administrador', 'supervisor']) && in_array($estado, ['PENDIENTE', 'APROBADA'])): ?>
-                                        <a href="<?= base_url('solicitudes/asignar/' . $s['id']) ?>" class="btn btn-sm btn-success rounded-pill" title="Asignar técnico">
-                                            <i class="fas fa-user-cog"></i>
-                                        </a>
-                                    <?php endif; ?>
-                                    <a href="<?= base_url('solicitudes/reporte/' . $s['id']) ?>" onclick="window.open(this.href, 'reporte', 'width=900,height=700,scrollbars=yes'); return false;" class="btn btn-sm btn-outline-primary rounded-pill" title="Reporte">
-                                        <i class="fas fa-print"></i>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-top-0 pt-0 pb-3 px-4">
+                            <div class="d-flex justify-content-end gap-2">
+                                <?php if (in_array(strtolower((string)session('rol_name')), ['administrador', 'supervisor']) && in_array($estado, ['PENDIENTE', 'APROBADA'])): ?>
+                                    <a href="<?= base_url('solicitudes/asignar/' . $s['id']) ?>" class="btn btn-sm btn-success rounded-pill" title="Asignar técnico">
+                                        <i class="fas fa-user-cog"></i>
                                     </a>
-                                    <a href="<?= base_url('solicitudes/show/' . $s['id']) ?>" class="btn btn-sm btn-outline-success rounded-pill" title="Ver detalle">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </div>
+                                <?php endif; ?>
+                                <a href="<?= base_url('solicitudes/reporte/' . $s['id']) ?>" onclick="window.open(this.href, 'reporte', 'width=900,height=700,scrollbars=yes'); return false;" class="btn btn-sm btn-outline-primary rounded-pill" title="Reporte">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                <a href="<?= base_url('solicitudes/show/' . $s['id']) ?>" class="btn btn-sm btn-outline-success rounded-pill" title="Ver detalle">
+                                    <i class="fas fa-eye"></i>
+                                </a>
                             </div>
                         </div>
                     </div>

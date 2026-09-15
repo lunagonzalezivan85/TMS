@@ -18,7 +18,7 @@
 - **ADDED** - `app/Controllers/Solicitudes::show()` — Vista de resumen de solicitud creada con pasos del flujo
 - **ADDED** - `app/Controllers/Solicitudes::buscarVehiculo()` — Búsqueda AJAX de vehículos por placa, motor o carnet de conductor
 - **CHANGED** - `app/Views/solicitudes/create.php` — Wizard reformulado con diseño One UI / Bento Grid; paso 3 dividido en Tipo de problema, Prioridad, Descripción y Confirmación
-- **CHANGED** - `app/Views/solicitudes/index.php` — Listado de tarjetas en lugar de DataTable; panel de filtros colapsable; paginación simple
+- **CHANGED** - `app/Views/solicitudes/index.php` — Botones de acción de cada tarjeta movidos al footer de la card para liberar espacio
 - **FIXED** - `app/Controllers/Solicitudes::getData()` — Ajuste de filtros, validación de sesión y manejo de errores para DataTables
 - **FIXED** - `app/Models/SolicitudModel::buscarSolicitudes()` — Eliminada referencia a columna inexistente `s.titulo`; COALESCE en nombres de solicitante/asignado
 - **ADDED** - `app/Helpers/vehiculo_helper.php` — Estado `EN MANTENIMIENTO` con badge/clase/label
