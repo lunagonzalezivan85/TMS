@@ -6,6 +6,8 @@ use App\Models\SolicitudModel;
 use App\Models\VehiculoModel;
 use App\Models\UsuarioModel;
 use App\Models\TipoProblemaModel;
+use App\Models\ConductorModel;
+use App\Models\CatalogoModel;
 use App\Models\SolicitudDocumentoModel;
 use App\Models\SolicitudHistorialModel;
 
@@ -15,6 +17,8 @@ class Solicitudes extends BaseController
     protected $vehiculoModel;
     protected $usuarioModel;
     protected $tipoProblemaModel;
+    protected $conductorModel;
+    protected $catalogoModel;
     protected $session;
 
     public function __construct()
@@ -23,6 +27,8 @@ class Solicitudes extends BaseController
         $this->vehiculoModel = new VehiculoModel();
         $this->usuarioModel = new UsuarioModel();
         $this->tipoProblemaModel = new TipoProblemaModel();
+        $this->conductorModel = new ConductorModel();
+        $this->catalogoModel = new CatalogoModel();
         $this->session = session();
 
         helper(['form', 'url', 'date']);
@@ -212,5 +218,244 @@ class Solicitudes extends BaseController
             'success' => true,
             'data' => $resultados
         ]);
+    }
+
+    /**
+     * Wizard para crear nueva solicitud de mantenimiento
+     */
+    public function create()
+    {
+        $empresaId = $this->session->get('empresa_id');
+        if (!$empresaId) {
+            return redirect()->to('/auth/login');
+        }
+
+        // Obtener tipos de problema de la empresa
+        $tiposProblema = $this->tipoProblemaModel
+            ->where('id_empresa', $empresaId)
+            ->where('estado', 'ACTIVO')
+            ->findAll();
+
+        // Fallback: usar catalogo CAT-0010 si no hay tipos_problema
+        if (empty($tiposProblema)) {
+            $tiposProblema = $this->catalogoModel
+                ->where('idempresa', $empresaId)
+                ->where('codigo LIKE', 'CAT-0010%')
+                ->where('estado', 1)
+                ->findAll();
+        }
+
+        $data = [
+            'title' => 'Nueva Solicitud de Mantenimiento',
+            'tiposProblema' => $tiposProblema,
+        ];
+
+        return view('solicitudes/create', $data);
+    }
+
+    /**
+     * Buscar vehiculo por placa, numero de motor o carnet de conductor
+     */
+    public function buscarVehiculo()
+    {
+        $empresaId = $this->session->get('empresa_id');
+        if (!$empresaId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'No autenticado']);
+        }
+
+        $termino = trim($this->request->getGet('q') ?? '');
+
+        if (empty($termino) || strlen($termino) < 2) {
+            return $this->response->setJSON(['success' => true, 'data' => []]);
+        }
+
+        // Buscar por placa o numero de motor
+        $vehiculos = $this->vehiculoModel
+            ->where('id_empresa', $empresaId)
+            ->groupStart()
+                ->like('placa', $termino)
+                ->orLike('numero_motor', $termino)
+            ->groupEnd()
+            ->where('estado', 'ACTIVO')
+            ->findAll(10);
+
+        // Buscar por carnet de conductor asignado
+        $conductores = $this->conductorModel
+            ->where('id_empresa', $empresaId)
+            ->where('estado', 'ACTIVO')
+            ->like('carnet', $termino)
+            ->findAll(10);
+
+        $idsConductores = array_column($conductores, 'id');
+        if (!empty($idsConductores)) {
+            $vehiculosConductor = $this->vehiculoModel
+                ->where('id_empresa', $empresaId)
+                ->whereIn('id_conductor', $idsConductores)
+                ->where('estado', 'ACTIVO')
+                ->findAll(10);
+
+            // Merge sin duplicados por id
+            $map = [];
+            foreach ($vehiculos as $v) {
+                $map[$v['id']] = $v;
+            }
+            foreach ($vehiculosConductor as $v) {
+                $map[$v['id']] = $v;
+            }
+            $vehiculos = array_values($map);
+        }
+
+        // Enriquecer con datos del conductor
+        $resultados = [];
+        foreach ($vehiculos as $vehiculo) {
+            $conductor = null;
+            if (!empty($vehiculo['id_conductor'])) {
+                $conductor = $this->conductorModel->find($vehiculo['id_conductor']);
+            }
+
+            $resultados[] = [
+                'id' => $vehiculo['id'],
+                'placa' => $vehiculo['placa'],
+                'marca' => $vehiculo['marca'] ?? '',
+                'modelo' => $vehiculo['modelo'] ?? '',
+                'anio' => $vehiculo['anio'] ?? '',
+                'kilometraje' => $vehiculo['kilometraje'] ?? 0,
+                'numero_motor' => $vehiculo['numero_motor'] ?? '',
+                'conductor' => $conductor ? trim($conductor['nombre'] . ' ' . $conductor['apellido']) : 'Sin conductor asignado',
+                'carnet' => $conductor['carnet'] ?? '',
+            ];
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $resultados
+        ]);
+    }
+
+    /**
+     * Guardar solicitud desde wizard
+     */
+    public function store()
+    {
+        $empresaId = $this->session->get('empresa_id');
+        $usuarioId = $this->session->get('user_id');
+
+        if (!$empresaId || !$usuarioId) {
+            return redirect()->to('/auth/login');
+        }
+
+        $rules = [
+            'id_vehiculo' => 'required|is_natural_no_zero',
+            'tipo_mantenimiento' => 'required|in_list[PREVENTIVO,CORRECTIVO,EMERGENCIA]',
+            'id_tipo_problema' => 'required|is_natural_no_zero',
+            'prioridad' => 'required|in_list[1,2,3,4]',
+            'descripcion' => 'required|min_length[10]',
+            'ubicacion' => 'permit_empty|string|max_length[255]',
+            'condicion_movilidad' => 'permit_empty|in_list[OPERATIVO,INMOVILIZADO,ARRASTRE]',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        // Verificar vehiculo pertenece a la empresa y esta activo
+        $vehiculo = $this->vehiculoModel
+            ->where('id', $this->request->getPost('id_vehiculo'))
+            ->where('id_empresa', $empresaId)
+            ->where('estado', 'ACTIVO')
+            ->first();
+
+        if (!$vehiculo) {
+            return redirect()->back()->withInput()->with('error', 'Vehiculo no valido o no pertenece a la empresa');
+        }
+
+        // Procesar evidencia
+        $foto = $this->request->getFile('evidencia');
+        $fotoPath = null;
+        if ($foto && $foto->isValid() && !$foto->hasMoved()) {
+            $uploadDir = ROOTPATH . 'public/uploads/solicitudes/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0775, true);
+            }
+            $newName = $foto->getRandomName();
+            $foto->move($uploadDir, $newName);
+            $fotoPath = 'uploads/solicitudes/' . $newName;
+        }
+
+        // Generar codigo consecutivo
+        $ultimo = $this->solicitudModel->selectMax('id')->first();
+        $numero = $ultimo ? ((int)$ultimo['id'] + 1) : 1;
+        $codigo = 'SOL-' . str_pad($numero, 5, '0', STR_PAD_LEFT);
+
+        $data = [
+            'id_empresa' => $empresaId,
+            'codigo_consecutivo' => $codigo,
+            'id_vehiculo' => $this->request->getPost('id_vehiculo'),
+            'id_solicitante' => $usuarioId,
+            'id_tipo_problema' => $this->request->getPost('id_tipo_problema'),
+            'tipo_mantenimiento' => $this->request->getPost('tipo_mantenimiento'),
+            'descripcion' => $this->request->getPost('descripcion'),
+            'prioridad' => $this->request->getPost('prioridad'),
+            'estado' => 'PENDIENTE',
+            'ubicacion' => $this->request->getPost('ubicacion'),
+            'condicion_movilidad' => $this->request->getPost('condicion_movilidad'),
+            'url_foto' => $fotoPath,
+            'solicitante' => $this->session->get('nombre') ?? 'Usuario ' . $usuarioId,
+            'fecha_solicitud' => date('Y-m-d H:i:s'),
+            'usuario_crea' => $usuarioId,
+        ];
+
+        try {
+            $id = $this->solicitudModel->insert($data);
+            if (!$id) {
+                $errors = $this->solicitudModel->errors();
+                return redirect()->back()->withInput()->with('error', 'Error al guardar: ' . implode(', ', $errors ?: ['desconocido']));
+            }
+
+            return redirect()->to('/solicitudes/show/' . $id)->with('success', 'Solicitud de mantenimiento creada exitosamente');
+        } catch (\Exception $e) {
+            log_message('error', 'Error al crear solicitud: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Error al crear la solicitud: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Ver detalle de solicitud
+     */
+    public function show($id = null)
+    {
+        $empresaId = $this->session->get('empresa_id');
+        if (!$empresaId || !$id) {
+            return redirect()->to('/auth/login');
+        }
+
+        $solicitud = $this->solicitudModel
+            ->where('id', $id)
+            ->where('id_empresa', $empresaId)
+            ->first();
+
+        if (!$solicitud) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
+        }
+
+        $vehiculo = $this->vehiculoModel->find($solicitud['id_vehiculo']);
+        $conductor = null;
+        if ($vehiculo && !empty($vehiculo['id_conductor'])) {
+            $conductor = $this->conductorModel->find($vehiculo['id_conductor']);
+        }
+        $tipoProblema = null;
+        if (!empty($solicitud['id_tipo_problema'])) {
+            $tipoProblema = $this->tipoProblemaModel->find($solicitud['id_tipo_problema']);
+        }
+
+        $data = [
+            'title' => 'Solicitud #' . $solicitud['codigo_consecutivo'],
+            'solicitud' => $solicitud,
+            'vehiculo' => $vehiculo,
+            'conductor' => $conductor,
+            'tipoProblema' => $tipoProblema,
+        ];
+
+        return view('solicitudes/show', $data);
     }
 }

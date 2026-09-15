@@ -18,6 +18,7 @@ class SolicitudModel extends Model
         'id_solicitante',
         'id_tipo_problema',
         'id_tipo_mantenimiento',
+        'tipo_mantenimiento',
         'descripcion',
         'prioridad',
         'estado',
@@ -32,7 +33,9 @@ class SolicitudModel extends Model
         'fecha_asignacion',
         'observaciones',
         'url_foto',
-        'solicitante'
+        'solicitante',
+        'ubicacion',
+        'condicion_movilidad'
     ];
 
     protected $useTimestamps = true;
@@ -47,16 +50,19 @@ class SolicitudModel extends Model
         'id_solicitante' => 'required',
         'descripcion' => 'required|min_length[10]',
         'prioridad' => 'permit_empty|in_list[1,2,3,4]',
-        'estado' => 'permit_empty|in_list[PLANIFICADA,PENDIENTES,APROBADAS,EN_PROCESO,FINALIZADA]',
+        'estado' => 'permit_empty|in_list[PENDIENTE,PENDIENTES,PLANIFICADA,APROBADA,APROBADAS,EN_PROCESO,EN_PAUSA,COMPLETADA,CANCELADA,RECHAZADA,FINALIZADA]',
         'fecha_solicitud' => 'permit_empty|valid_date',
         'costo_estimado' => 'permit_empty|decimal',
         'costo_real' => 'permit_empty|decimal',
         'kilometraje' => 'permit_empty|is_natural',
         'id_tipo_problema' => 'permit_empty|integer',
         'id_tipo_mantenimiento' => 'permit_empty|integer',
+        'tipo_mantenimiento' => 'permit_empty|in_list[PREVENTIVO,CORRECTIVO,EMERGENCIA]',
         'observaciones' => 'permit_empty|string',
         'url_foto' => 'permit_empty|string|max_length[255]',
-        'solicitante' => 'permit_empty|string|max_length[150]'
+        'solicitante' => 'permit_empty|string|max_length[150]',
+        'ubicacion' => 'permit_empty|string|max_length[255]',
+        'condicion_movilidad' => 'permit_empty|in_list[OPERATIVO,INMOVILIZADO,ARRASTRE]'
     ];
 
     protected $validationMessages = [

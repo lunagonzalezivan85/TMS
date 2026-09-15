@@ -1,300 +1,497 @@
 <?= $this->extend('layouts/main') ?>
 
-<?= $this->section('title') ?>
-    Nueva Solicitud de Mantenimiento - GMV
+<?= $this->section('head') ?>
+<style>
+    .wizard-card {
+        background: #fff;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
+    .wizard-header {
+        background: linear-gradient(135deg, #07b889 0%, #059669 100%);
+        color: white;
+        padding: 2rem;
+        position: relative;
+    }
+    .wizard-header::after {
+        content: '';
+        position: absolute;
+        top: 0; right: 0; bottom: 0; left: 0;
+        background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 40%);
+        pointer-events: none;
+    }
+    .progress-track {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        margin: 0 1rem;
+        padding-top: 1.5rem;
+    }
+    .progress-track::before {
+        content: '';
+        position: absolute;
+        top: 2.25rem;
+        left: 0; right: 0;
+        height: 4px;
+        background: rgba(255,255,255,0.25);
+        border-radius: 2px;
+        z-index: 0;
+    }
+    .progress-fill {
+        position: absolute;
+        top: 2.25rem;
+        left: 0;
+        height: 4px;
+        background: white;
+        border-radius: 2px;
+        z-index: 0;
+        transition: width 0.4s ease;
+    }
+    .step-node {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        flex: 1;
+    }
+    .step-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        border: 2px solid rgba(255,255,255,0.4);
+        transition: all 0.3s ease;
+    }
+    .step-node.active .step-circle,
+    .step-node.completed .step-circle {
+        background: white;
+        color: #059669;
+        border-color: white;
+    }
+    .step-label {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.85);
+        font-weight: 500;
+    }
+    .step-node.active .step-label,
+    .step-node.completed .step-label {
+        color: white;
+        font-weight: 600;
+    }
+    .wizard-body {
+        padding: 2.5rem;
+        min-height: 420px;
+    }
+    .step-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    .step-subtitle {
+        color: #64748b;
+        margin-bottom: 1.75rem;
+    }
+    /* Bento cards */
+    .bento-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+    }
+    .bento-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 1.5rem 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #fff;
+        position: relative;
+    }
+    .bento-card:hover {
+        border-color: #07b889;
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px rgba(7,184,137,0.12);
+    }
+    .bento-card.selected {
+        border-color: #07b889;
+        background: #f0fdf9;
+        box-shadow: 0 0 0 4px rgba(7,184,137,0.15);
+    }
+    .bento-card.selected::after {
+        content: '\f00c';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        width: 24px;
+        height: 24px;
+        background: #07b889;
+        color: white;
+        border-radius: 50%;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .bento-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        margin-bottom: 0.75rem;
+    }
+    .bento-title {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+    .bento-desc {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+    /* Priority colors */
+    .priority-baja .bento-icon { background: #dcfce7; color: #16a34a; }
+    .priority-media .bento-icon { background: #fef9c3; color: #ca8a04; }
+    .priority-alta .bento-icon { background: #ffedd5; color: #ea580c; }
+    .priority-critica .bento-icon { background: #fee2e2; color: #dc2626; }
+    /* Vehicle card */
+    .vehicle-result {
+        border: 2px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #fff;
+    }
+    .vehicle-result:hover {
+        border-color: #07b889;
+        box-shadow: 0 8px 20px rgba(7,184,137,0.1);
+    }
+    .vehicle-result.selected {
+        border-color: #07b889;
+        background: #f0fdf9;
+        box-shadow: 0 0 0 4px rgba(7,184,137,0.15);
+    }
+    .search-box {
+        position: relative;
+    }
+    .search-box input {
+        border-radius: 16px;
+        padding-left: 3rem;
+        height: 56px;
+        font-size: 1.05rem;
+        border: 2px solid #e2e8f0;
+    }
+    .search-box input:focus {
+        border-color: #07b889;
+        box-shadow: 0 0 0 4px rgba(7,184,137,0.1);
+    }
+    .search-box i {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 1.1rem;
+    }
+    .preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 0.75rem;
+    }
+    .preview-item {
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        position: relative;
+        aspect-ratio: 1;
+    }
+    .preview-item img, .preview-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .nav-btns {
+        display: flex;
+        justify-content: space-between;
+        padding: 1.5rem 2.5rem 2.5rem;
+    }
+    .summary-card {
+        background: #f8fafc;
+        border-radius: 18px;
+        padding: 1.25rem 1.5rem;
+        border: 1px solid #e2e8f0;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-label { color: #64748b; font-weight: 500; }
+    .summary-value { color: #1e293b; font-weight: 600; text-align: right; }
+    .d-none { display: none !important; }
+</style>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<div class="container py-4">
+<div class="container-fluid py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
-                    <h4 class="mb-0">Solicitud de Mantenimiento</h4>
-                    <p class="text-muted mb-0">Complete el formulario paso a paso para registrar una nueva solicitud</p>
+        <div class="col-lg-10 col-xl-9">
+            <?php if (session()->getFlashdata('error')): ?>
+                <div class="alert alert-danger alert-dismissible fade show rounded-4" role="alert">
+                    <?= session()->getFlashdata('error') ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-                <div class="card-body p-4">
-                    <!-- Barra de progreso -->
-                    <div class="mb-5">
-                        <div class="progress" style="height: 8px;">
-                            <div id="progress-bar" class="progress-bar bg-primary" role="progressbar" style="width: 0%;" 
-                                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            <?php endif; ?>
+            <?php if (session()->getFlashdata('errors')): ?>
+                <div class="alert alert-danger alert-dismissible fade show rounded-4" role="alert">
+                    <ul class="mb-0">
+                        <?php foreach (session()->getFlashdata('errors') as $err): ?>
+                            <li><?= esc($err) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+
+            <div class="wizard-card">
+                <div class="wizard-header">
+                    <h3 class="fw-bold mb-1"><i class="fas fa-clipboard-list me-2"></i>Nueva Solicitud de Mantenimiento</h3>
+                    <p class="mb-0 opacity-90">Sigue los pasos para reportar una avería o mantenimiento de vehículo</p>
+
+                    <div class="progress-track mt-4">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                        <div class="step-node active" data-step="1">
+                            <div class="step-circle">1</div>
+                            <span class="step-label">Vehículo</span>
                         </div>
-                        <div class="d-flex justify-content-between mt-2">
-                            <div class="text-center">
-                                <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" 
-                                     style="width: 30px; height: 30px;">1</div>
-                                <div class="small mt-1">Datos del Conductor</div>
+                        <div class="step-node" data-step="2">
+                            <div class="step-circle">2</div>
+                            <span class="step-label">Tipo</span>
+                        </div>
+                        <div class="step-node" data-step="3">
+                            <div class="step-circle">3</div>
+                            <span class="step-label">Detalle</span>
+                        </div>
+                        <div class="step-node" data-step="4">
+                            <div class="step-circle">4</div>
+                            <span class="step-label">Confirmar</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="wizardForm" action="<?= base_url('solicitudes/store') ?>" method="POST" enctype="multipart/form-data">
+                    <?= csrf_field() ?>
+
+                    <div class="wizard-body">
+                        <!-- PASO 1: Vehículo -->
+                        <div class="wizard-step" id="step-1">
+                            <h4 class="step-title">Paso 1: Identificar el vehículo</h4>
+                            <p class="step-subtitle">Busca por placa, número de motor o carnet del conductor asignado.</p>
+
+                            <div class="search-box mb-4">
+                                <i class="fas fa-search"></i>
+                                <input type="text" class="form-control" id="buscarVehiculo" placeholder="Ej: ABC-123, motor-001 o CARNET-001" autocomplete="off">
                             </div>
-                            <div class="text-center">
-                                <div class="step-number bg-light border rounded-circle d-inline-flex align-items-center justify-content-center" 
-                                     style="width: 30px; height: 30px;">2</div>
-                                <div class="small mt-1 text-muted">Tipo de Mantenimiento</div>
+
+                            <div id="vehiculosResultados" class="row g-3"></div>
+                            <div id="sinResultados" class="text-center py-5 text-muted d-none">
+                                <i class="fas fa-car-side fa-3x mb-3 opacity-25"></i>
+                                <p>No se encontraron vehículos activos. Intenta con otra placa, motor o carnet.</p>
                             </div>
-                            <div class="text-center">
-                                <div class="step-number bg-light border rounded-circle d-inline-flex align-items-center justify-content-center" 
-                                     style="width: 30px; height: 30px;">3</div>
-                                <div class="small mt-1 text-muted">Descripción</div>
+
+                            <input type="hidden" name="id_vehiculo" id="id_vehiculo" value="">
+                            <div id="vehiculoSeleccionado" class="mt-4 d-none"></div>
+                        </div>
+
+                        <!-- PASO 2: Tipo de mantenimiento -->
+                        <div class="wizard-step d-none" id="step-2">
+                            <h4 class="step-title">Paso 2: Tipo de mantenimiento</h4>
+                            <p class="step-subtitle">Selecciona la naturaleza de la solicitud.</p>
+
+                            <div class="bento-grid">
+                                <label class="bento-card" onclick="selectTipo('PREVENTIVO')">
+                                    <input type="radio" name="tipo_mantenimiento" value="PREVENTIVO" class="d-none">
+                                    <div class="bento-icon" style="background:#e0f2fe;color:#0284c7;">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </div>
+                                    <div class="bento-title">Preventivo</div>
+                                    <div class="bento-desc">Mantenimiento programado</div>
+                                </label>
+                                <label class="bento-card" onclick="selectTipo('CORRECTIVO')">
+                                    <input type="radio" name="tipo_mantenimiento" value="CORRECTIVO" class="d-none">
+                                    <div class="bento-icon" style="background:#fef3c7;color:#d97706;">
+                                        <i class="fas fa-wrench"></i>
+                                    </div>
+                                    <div class="bento-title">Correctivo</div>
+                                    <div class="bento-desc">Reparación de falla</div>
+                                </label>
+                                <label class="bento-card" onclick="selectTipo('EMERGENCIA')">
+                                    <input type="radio" name="tipo_mantenimiento" value="EMERGENCIA" class="d-none">
+                                    <div class="bento-icon" style="background:#fee2e2;color:#dc2626;">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="bento-title">Emergencia</div>
+                                    <div class="bento-desc">Falla crítica, vehículo fuera de servicio</div>
+                                </label>
                             </div>
-                            <div class="text-center">
-                                <div class="step-number bg-light border rounded-circle d-inline-flex align-items-center justify-content-center" 
-                                     style="width: 30px; height: 30px;">4</div>
-                                <div class="small mt-1 text-muted">Confirmación</div>
+                        </div>
+
+                        <!-- PASO 3: Detalle del problema -->
+                        <div class="wizard-step d-none" id="step-3">
+                            <h4 class="step-title">Paso 3: Detalle del problema</h4>
+                            <p class="step-subtitle">Describe la avería y adjunta evidencia fotográfica.</p>
+
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Tipo de problema</label>
+                                    <div class="bento-grid">
+                                        <?php foreach ($tiposProblema as $tp): ?>
+                                            <label class="bento-card" onclick="selectProblema(this)">
+                                                <input type="radio" name="id_tipo_problema" value="<?= $tp['id'] ?>" class="d-none" required>
+                                                <div class="bento-icon" style="background:#f3e8ff;color:#9333ea;">
+                                                    <i class="fas fa-tools"></i>
+                                                </div>
+                                                <div class="bento-title"><?= esc($tp['nombre']) ?></div>
+                                            </label>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Prioridad</label>
+                                    <div class="bento-grid">
+                                        <label class="bento-card priority-baja" onclick="selectPrioridad(this)">
+                                            <input type="radio" name="prioridad" value="1" class="d-none">
+                                            <div class="bento-icon"><i class="fas fa-arrow-down"></i></div>
+                                            <div class="bento-title">Baja</div>
+                                            <div class="bento-desc">Puede esperar</div>
+                                        </label>
+                                        <label class="bento-card priority-media" onclick="selectPrioridad(this)">
+                                            <input type="radio" name="prioridad" value="2" class="d-none">
+                                            <div class="bento-icon"><i class="fas fa-minus"></i></div>
+                                            <div class="bento-title">Media</div>
+                                            <div class="bento-desc">Atención pronto</div>
+                                        </label>
+                                        <label class="bento-card priority-alta" onclick="selectPrioridad(this)">
+                                            <input type="radio" name="prioridad" value="3" class="d-none">
+                                            <div class="bento-icon"><i class="fas fa-arrow-up"></i></div>
+                                            <div class="bento-title">Alta</div>
+                                            <div class="bento-desc">Urgente</div>
+                                        </label>
+                                        <label class="bento-card priority-critica" onclick="selectPrioridad(this)">
+                                            <input type="radio" name="prioridad" value="4" class="d-none">
+                                            <div class="bento-icon"><i class="fas fa-fire"></i></div>
+                                            <div class="bento-title">Crítica</div>
+                                            <div class="bento-desc">Inmoviliza el vehículo</div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <label for="descripcion" class="form-label fw-semibold">Descripción detallada</label>
+                                    <textarea name="descripcion" id="descripcion" class="form-control rounded-4" rows="4" minlength="10" placeholder="Describe la falla, síntomas y cualquier detalle relevante..." required></textarea>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="condicion_movilidad" class="form-label fw-semibold">Condición de movilidad</label>
+                                    <select name="condicion_movilidad" id="condicion_movilidad" class="form-select rounded-4 py-3">
+                                        <option value="OPERATIVO" selected>Operativo</option>
+                                        <option value="INMOVILIZADO">Inmovilizado</option>
+                                        <option value="ARRASTRE">Solo arrastre</option>
+                                    </select>
+
+                                    <label for="ubicacion" class="form-label fw-semibold mt-3">Ubicación actual</label>
+                                    <input type="text" name="ubicacion" id="ubicacion" class="form-control rounded-4 py-3" placeholder="Ej: Taller central, Ruta 32 km 15">
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="evidencia" class="form-label fw-semibold">Evidencias (foto/video)</label>
+                                    <input type="file" name="evidencia" id="evidencia" class="form-control rounded-4 py-3" accept="image/*,video/*" onchange="previewEvidencia(this)">
+                                    <small class="text-muted">Máximo 5 MB por archivo.</small>
+                                    <div id="evidenciaPreview" class="preview-grid mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PASO 4: Confirmación -->
+                        <div class="wizard-step d-none" id="step-4">
+                            <h4 class="step-title">Paso 4: Confirmar y enviar</h4>
+                            <p class="step-subtitle">Revisa la información antes de crear la solicitud.</p>
+
+                            <div class="summary-card mb-4">
+                                <div class="summary-row">
+                                    <span class="summary-label">Vehículo</span>
+                                    <span class="summary-value" id="res-vehiculo">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Conductor</span>
+                                    <span class="summary-value" id="res-conductor">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Tipo de mantenimiento</span>
+                                    <span class="summary-value" id="res-tipo">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Problema</span>
+                                    <span class="summary-value" id="res-problema">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Prioridad</span>
+                                    <span class="summary-value" id="res-prioridad">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Condición</span>
+                                    <span class="summary-value" id="res-condicion">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Ubicación</span>
+                                    <span class="summary-value" id="res-ubicacion">-</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Descripción</span>
+                                    <span class="summary-value" id="res-descripcion" style="max-width:60%;">-</span>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-light border rounded-4 d-flex align-items-center">
+                                <i class="fas fa-info-circle text-success me-2 fs-5"></i>
+                                <div>
+                                    <strong>Estado inicial:</strong> PENDIENTE<br>
+                                    <small class="text-muted">La solicitud pasará por aprobación, diagnóstico, asignación de mecánico y finalización.</small>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <form id="formSolicitud" method="post" action="<?= base_url('solicitudes/store') ?>" enctype="multipart/form-data">
-                        <?= csrf_field() ?>
-                        <!-- Paso 1: Datos del Conductor -->
-                        <div class="step-content active" id="step-1">
-                            <!-- Contenido del paso 1 -->
-                            <div class="text-center mb-5">
-                                <div class="bg-primary bg-opacity-10 d-inline-flex p-3 rounded-circle mb-4">
-                                    <i class="fas fa-user-tie fa-2x text-primary"></i>
-                                </div>
-                                <h3 class="h4 mb-3">Datos del Conductor</h3>
-                                <p class="text-muted">Ingrese el número de carnet del conductor</p>
-                            </div>
-                            
-                            <div class="row justify-content-center">
-                                <div class="col-md-8">
-                                    <div class="input-group input-group-lg mb-4">
-                                        <span class="input-group-text bg-light">
-                                            <i class="fas fa-id-card text-primary"></i>
-                                        </span>
-                                        <input type="text" class="form-control form-control-lg" id="numero_carnet" 
-                                               name="numero_carnet" placeholder="Ej: 12345678" required>
-                                        <button class="btn btn-primary" type="button" id="buscarConductorBtn">
-                                            <i class="fas fa-search me-2"></i> Buscar
-                                        </button>
-                                    </div>
-                                    
-                                    <!-- Información del conductor -->
-                                    <div id="conductor-info" class="card border-start border-4 border-primary mb-4 d-none">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
-                                                    <i class="fas fa-user-tie fa-2x text-primary"></i>
-                                                </div>
-                                                <div>
-                                                    <h5 class="mb-0" id="nombre-conductor">-</h5>
-                                                    <span class="text-muted" id="carnet-conductor">-</span>
-                                                </div>
-                                            </div>
-                                            <div class="d-flex align-items-center bg-light p-3 rounded">
-                                                <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
-                                                    <i class="fas fa-car text-primary"></i>
-                                                </div>
-                                                <div>
-                                                    <p class="mb-0 fw-bold" id="vehiculo-info">-</p>
-                                                    <p class="mb-0 small text-muted">
-                                                        <span id="vehiculo-placa">-</span> • 
-                                                        <span id="vehiculo-tipo">-</span>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <input type="hidden" id="id_conductor" name="id_conductor">
-                                        <input type="hidden" id="id_vehiculo" name="id_vehiculo">
-                                    </div>
-                                    
-                                    <div class="d-grid gap-2 mt-4">
-                                        <button type="button" class="btn btn-primary btn-lg" onclick="nextStep(1)" id="btn-siguiente-1" disabled>
-                                            Siguiente <i class="fas fa-arrow-right ms-2"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Paso 2: Tipo de Mantenimiento -->
-                        <div class="step-content d-none" id="step-2">
-                            <div class="text-center mb-5">
-                                <div class="bg-primary bg-opacity-10 d-inline-flex p-3 rounded-circle mb-4">
-                                    <i class="fas fa-tools fa-2x text-primary"></i>
-                                </div>
-                                <h3 class="h4 mb-3">Tipo de Mantenimiento</h3>
-                                <p class="text-muted">Seleccione el tipo de mantenimiento que desea solicitar</p>
-                            </div>
-                            
-                            <div class="row justify-content-center">
-                                <div class="col-md-10">
-                                    <div class="d-grid gap-3">
-                                        <!-- Opción 1: Preventivo -->
-                                        <input type="radio" class="btn-check" name="tipo_mantenimiento" id="preventivo" value="PREVENTIVO" autocomplete="off" required>
-                                        <label class="btn btn-outline-primary btn-lg p-4 text-start" for="preventivo">
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-4">
-                                                    <i class="fas fa-calendar-check fa-2x text-primary"></i>
-                                                </div>
-                                                <div>
-                                                    <h5 class="mb-1">Mantenimiento Preventivo</h5>
-                                                    <p class="mb-0 text-muted small">Mantenimiento programado para prevenir fallos futuros</p>
-                                                </div>
-                                            </div>
-                                        </label>
-                                        
-                                        <!-- Opción 2: Correctivo -->
-                                        <input type="radio" class="btn-check" name="tipo_mantenimiento" id="correctivo" value="CORRECTIVO" autocomplete="off">
-                                        <label class="btn btn-outline-primary btn-lg p-4 text-start" for="correctivo">
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-4">
-                                                    <i class="fas fa-wrench fa-2x text-primary"></i>
-                                                </div>
-                                                <div>
-                                                    <h5 class="mb-1">Mantenimiento Correctivo</h5>
-                                                    <p class="mb-0 text-muted small">Reparación de fallas existentes en el vehículo</p>
-                                                </div>
-                                            </div>
-                                        </label>
-                                        
-                                        <!-- Opción 3: Emergencia -->
-                                        <input type="radio" class="btn-check" name="tipo_mantenimiento" id="emergencia" value="EMERGENCIA" autocomplete="off">
-                                        <label class="btn btn-outline-danger btn-lg p-4 text-start" for="emergencia">
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-danger bg-opacity-10 p-3 rounded-circle me-4">
-                                                    <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
-                                                </div>
-                                                <div>
-                                                    <h5 class="mb-1">Emergencia</h5>
-                                                    <p class="mb-0 text-muted small">Falla crítica que impide el uso del vehículo</p>
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                    
-                                    <!-- Navegación -->
-                                    <div class="d-flex justify-content-between mt-5">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="prevStep(2)">
-                                            <i class="fas fa-arrow-left me-2"></i> Regresar
-                                        </button>
-                                        <button type="button" class="btn btn-primary" onclick="nextStep(2)" id="btn-siguiente-2" disabled>
-                                            Siguiente <i class="fas fa-arrow-right ms-2"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="step-content d-none" id="step-3">
-                            <div class="text-center mb-5">
-                                <div class="bg-primary bg-opacity-10 d-inline-flex p-3 rounded-circle mb-4">
-                                    <i class="fas fa-exclamation-triangle fa-2x text-primary"></i>
-                                </div>
-                                <h3 class="h4 mb-3">Tipo de problema</h3>
-                                <p class="text-muted">Seleccione el tipo de problema que está presentando el vehículo</p>
-                            </div>
-                            
-                            <div class="row justify-content-center">
-                                <div class="col-md-10">
-                                    <div class="d-grid gap-3">
-                                        <?php 
-                                        $iconos = [
-                                            'MECANICO' => 'cog',
-                                            'ELECTRICO' => 'bolt',
-                                            'NEUMATICOS' => 'tire',
-                                            'CARROCERIA' => 'car-side',
-                                            'SISTEMA_ELECTRICO' => 'plug',
-                                            'FRENOS' => 'stop-circle',
-                                            'SUSPENSION' => 'car-burst',
-                                            'MOTOR' => 'engine',
-                                            'TRANSMISION' => 'cogs',
-                                            'CLIMATIZACION' => 'snowflake',
-                                            'COMBUSTIBLE' => 'gas-pump',
-                                            'ESCAPE' => 'smog',
-                                            'DIRECCION' => 'steering-wheel',
-                                            'EMBRAGUE' => 'exchange-alt',
-                                            'SISTEMA_REFRIAMIENTO' => 'temperature-low',
-                                            'SISTEMA_ENCENDIDO' => 'fire',
-                                            'SISTEMA_ALIMENTACION' => 'gas-pump',
-                                            'SISTEMA_ESCAPE' => 'smog',
-                                            'SISTEMA_LUZ' => 'lightbulb',
-                                            'SISTEMA_FRENO' => 'stop-circle',
-                                            'SISTEMA_SUSPENSION' => 'car-burst',
-                                            'SISTEMA_DIRECCION' => 'steering-wheel',
-                                            'SISTEMA_TRANSMISION' => 'cogs',
-                                            'SISTEMA_EMBRAGUE' => 'exchange-alt',
-                                            'SISTEMA_MOTOR' => 'engine',
-                                            'OTRO' => 'question-circle'
-                                        ];
-                                        
-                                        foreach ($tiposProblema as $tipo): 
-                                            $icono = $iconos[$tipo['nombre']] ?? 'question-circle';
-                                            $id = strtolower(str_replace(' ', '_', $tipo['nombre']));
-                                        ?>
-                                        <input type="radio" class="btn-check" name="tipo_problema" id="<?= $id ?>" value="<?= $tipo['id'] ?>" autocomplete="off" required>
-                                        <label class="btn btn-outline-primary btn-lg p-4 text-start" for="<?= $id ?>">
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-4">
-                                                    <i class="fas fa-<?= $icono ?> fa-2x text-primary"></i>
-                                                </div>
-                                                <div>
-                                                    <h5 class="mb-1"><?= ucfirst(strtolower($tipo['nombre'])) ?></h5>
-                                                    <p class="mb-0 text-muted small"><?= $tipo['descripcion'] ?? 'Sin descripción disponible' ?></p>
-                                                </div>
-                                            </div>
-                                        </label>
-                                        <?php endforeach; ?>
-                                        
-                                        <!-- Opción para problemas no listados -->
-                                        <input type="radio" class="btn-check" name="tipo_problema" id="otro" value="OTRO" autocomplete="off">
-                                        <label class="btn btn-outline-secondary btn-lg p-4 text-start" for="otro">
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-secondary bg-opacity-10 p-3 rounded-circle me-4">
-                                                    <i class="fas fa-question-circle fa-2x text-secondary"></i>
-                                                </div>
-                                                <div>
-                                                    <h5 class="mb-1">Otro tipo de problema</h5>
-                                                    <p class="mb-0 text-muted small">Especifique en la descripción</p>
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                    
-                                    <!-- Navegación -->
-                                    <div class="d-flex justify-content-between mt-5">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="prevStep(3)">
-                                            <i class="fas fa-arrow-left me-2"></i> Regresar
-                                        </button>
-                                        <button type="button" class="btn btn-primary" onclick="nextStep(3)" id="btn-siguiente-3" disabled>
-                                            Siguiente <i class="fas fa-arrow-right ms-2"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="step-content d-none" id="step-4">
-                            <div class="text-center mb-5">
-                                <div class="bg-primary bg-opacity-10 d-inline-flex p-3 rounded-circle mb-4">
-                                    <i class="fas fa-align-left fa-2x text-primary"></i>
-                                </div>
-                                <h3 class="h4 mb-3">Descripción de la problemática</h3>
-                                <p class="text-muted">Por favor describa con detalle el problema que está presentando el vehículo</p>
-                            </div>
-                            
-                            <div class="row justify-content-center">
-                                <div class="col-md-10">
-                                    <div class="mb-4">
-                                        <label for="descripcion" class="form-label">Descripción detallada <span class="text-danger">*</span></label>
-                                        <textarea class="form-control" id="descripcion" name="descripcion" rows="5" placeholder="Describa el problema con el mayor detalle posible..." required></textarea>
-                                        <div class="form-text">Incluya síntomas, ruidos, luces de advertencia, etc.</div>
-                                    </div>
-                                    
-                                    <div class="d-flex justify-content-between mt-5">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="prevStep(4)">
-                                            <i class="fas fa-arrow-left me-2"></i> Regresar
-                                        </button>
-                                        <button type="button" class="btn btn-primary" onclick="nextStep(4)" id="btn-siguiente-4">
-                                            Enviar solicitud <i class="fas fa-paper-plane ms-2"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+                    <div class="nav-btns">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2 d-none" id="btn-atras" onclick="prevStep()">
+                            <i class="fas fa-arrow-left me-2"></i>Atrás
+                        </button>
+                        <div></div>
+                        <button type="button" class="btn btn-success rounded-pill px-5 py-2" id="btn-siguiente" onclick="nextStep()">
+                            Siguiente<i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                        <button type="submit" class="btn btn-success rounded-pill px-5 py-2 d-none" id="btn-enviar">
+                            <i class="fas fa-paper-plane me-2"></i>Enviar solicitud
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -303,145 +500,208 @@
 
 <?= $this->section('scripts') ?>
 <script>
-// Variables globales
+const baseUrl = document.querySelector('meta[name="base-url"')?.content || '';
 let currentStep = 1;
 const totalSteps = 4;
+let selectedVehicle = null;
 
-// Inicializar el wizard
-document.addEventListener('DOMContentLoaded', function() {
-    updateProgressBar();
-    setupEventListeners();
-});
-
-// Configurar event listeners
-function setupEventListeners() {
-    // Buscar conductor
-    document.getElementById('buscarConductorBtn').addEventListener('click', buscarConductor);
-    document.getElementById('numero_carnet').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            buscarConductor();
-        }
-    });
-
-    // Habilitar botón siguiente cuando se seleccione un tipo de mantenimiento
-    const tiposMantenimiento = document.querySelectorAll('input[name="tipo_mantenimiento"]');
-    tiposMantenimiento.forEach(tipo => {
-        tipo.addEventListener('change', function() {
-            document.getElementById('btn-siguiente-2').disabled = false;
-        });
-    });
-    
-    // Habilitar botón siguiente cuando se seleccione un tipo de problema
-    const tiposProblema = document.querySelectorAll('input[name="tipo_problema"]');
-    tiposProblema.forEach(tipo => {
-        tipo.addEventListener('change', function() {
-            document.getElementById('btn-siguiente-3').disabled = false;
-        });
-    });
-}
-
-// Navegación entre pasos
-function nextStep(step) {
-    if (validateStep(step)) {
-        document.getElementById(`step-${step}`).classList.remove('active');
-        document.getElementById(`step-${step}`).classList.add('d-none');
-        currentStep = step + 1;
-        document.getElementById(`step-${currentStep}`).classList.remove('d-none');
-        document.getElementById(`step-${currentStep}`).classList.add('active');
-        updateProgressBar();
-    }
-}
-
-function prevStep(step) {
-    document.getElementById(`step-${step}`).classList.remove('active');
-    document.getElementById(`step-${step}`).classList.add('d-none');
-    currentStep = step - 1;
-    document.getElementById(`step-${currentStep}`).classList.remove('d-none');
-    document.getElementById(`step-${currentStep}`).classList.add('active');
-    updateProgressBar();
-}
-
-// Actualizar barra de progreso
-function updateProgressBar() {
+function updateProgress() {
     const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
-    document.getElementById('progress-bar').style.width = `${progress}%`;
-    
-    // Actualizar pasos
-    document.querySelectorAll('.step-number').forEach((el, index) => {
-        if (index + 1 < currentStep) {
-            el.classList.remove('bg-light', 'border');
-            el.classList.add('bg-primary', 'text-white');
-        } else if (index + 1 === currentStep) {
-            el.classList.remove('bg-light', 'border');
-            el.classList.add('bg-primary', 'text-white');
-        } else {
-            el.classList.remove('bg-primary', 'text-white');
-            el.classList.add('bg-light', 'border');
-        }
+    document.getElementById('progress-fill').style.width = progress + '%';
+
+    document.querySelectorAll('.step-node').forEach(node => {
+        const step = parseInt(node.dataset.step);
+        node.classList.remove('active', 'completed');
+        if (step < currentStep) node.classList.add('completed');
+        if (step === currentStep) node.classList.add('active');
     });
 }
 
-// Validar paso actual
+function showStep(step) {
+    document.querySelectorAll('.wizard-step').forEach(el => el.classList.add('d-none'));
+    document.getElementById('step-' + step).classList.remove('d-none');
+
+    document.getElementById('btn-atras').classList.toggle('d-none', step === 1);
+    document.getElementById('btn-siguiente').classList.toggle('d-none', step === totalSteps);
+    document.getElementById('btn-enviar').classList.toggle('d-none', step !== totalSteps);
+
+    currentStep = step;
+    updateProgress();
+}
+
 function validateStep(step) {
-    let isValid = true;
-    
-    // Validaciones específicas por paso
     if (step === 1) {
-        const conductorInfo = document.getElementById('conductor-info');
-        if (conductorInfo.classList.contains('d-none')) {
-            alert('Debe buscar y seleccionar un conductor');
-            isValid = false;
+        if (!document.getElementById('id_vehiculo').value) {
+            Swal.fire('Vehículo requerido', 'Busca y selecciona un vehículo activo.', 'warning');
+            return false;
         }
     } else if (step === 2) {
-        const tipoSeleccionado = document.querySelector('input[name="tipo_mantenimiento"]:checked');
-        if (!tipoSeleccionado) {
-            alert('Por favor seleccione un tipo de mantenimiento');
-            isValid = false;
-        } else {
-            // Habilitar el botón de siguiente
-            document.getElementById('btn-siguiente-2').disabled = false;
+        if (!document.querySelector('input[name="tipo_mantenimiento"]:checked')) {
+            Swal.fire('Tipo requerido', 'Selecciona el tipo de mantenimiento.', 'warning');
+            return false;
         }
     } else if (step === 3) {
-        const tipoProblemaSeleccionado = document.querySelector('input[name="tipo_problema"]:checked');
-        if (!tipoProblemaSeleccionado) {
-            alert('Por favor seleccione un tipo de problema');
-            isValid = false;
-        } else {
-            // Habilitar el botón de siguiente
-            document.getElementById('btn-siguiente-3').disabled = false;
+        if (!document.querySelector('input[name="id_tipo_problema"]:checked')) {
+            Swal.fire('Problema requerido', 'Selecciona el tipo de problema.', 'warning');
+            return false;
+        }
+        if (!document.querySelector('input[name="prioridad"]:checked')) {
+            Swal.fire('Prioridad requerida', 'Selecciona la prioridad.', 'warning');
+            return false;
+        }
+        const desc = document.getElementById('descripcion').value.trim();
+        if (desc.length < 10) {
+            Swal.fire('Descripción requerida', 'La descripción debe tener al menos 10 caracteres.', 'warning');
+            return false;
         }
     }
-    
-    return isValid;
+    return true;
 }
 
-// Buscar conductor
-function buscarConductor() {
-    const carnet = document.getElementById('numero_carnet').value.trim();
-    
-    if (!carnet) {
-        alert('Por favor ingrese un número de carnet');
+function nextStep() {
+    if (!validateStep(currentStep)) return;
+    if (currentStep === 3) buildSummary();
+    showStep(currentStep + 1);
+}
+
+function prevStep() {
+    showStep(currentStep - 1);
+}
+
+// Búsqueda de vehículo
+let searchTimeout;
+document.getElementById('buscarVehiculo').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    const q = this.value.trim();
+    if (q.length < 2) {
+        document.getElementById('vehiculosResultados').innerHTML = '';
+        document.getElementById('sinResultados').classList.add('d-none');
         return;
     }
-    
-    // Aquí iría la llamada AJAX para buscar el conductor
-    // Por ahora simulamos una respuesta exitosa
-    setTimeout(() => {
-        const conductorInfo = document.getElementById('conductor-info');
-        document.getElementById('nombre-conductor').textContent = 'Juan Pérez Martínez';
-        document.getElementById('carnet-conductor').textContent = carnet;
-        document.getElementById('vehiculo-info').textContent = 'Toyota Hilux 2022';
-        document.getElementById('vehiculo-placa').textContent = 'ABC-123';
-        document.getElementById('vehiculo-tipo').textContent = 'Camioneta';
-        document.getElementById('id_conductor').value = '123';
-        document.getElementById('id_vehiculo').value = '456';
-        
-        conductorInfo.classList.remove('d-none');
-        document.getElementById('btn-siguiente-1').disabled = false;
-        
-        alert('Conductor encontrado correctamente');
-    }, 1000);
+    searchTimeout = setTimeout(() => buscarVehiculo(q), 400);
+});
+
+async function buscarVehiculo(q) {
+    const container = document.getElementById('vehiculosResultados');
+    container.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-success"></i></div>';
+
+    try {
+        const res = await fetch(`${baseUrl}solicitudes/buscar-vehiculo?q=${encodeURIComponent(q)}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const json = await res.json();
+        container.innerHTML = '';
+
+        if (!json.success || json.data.length === 0) {
+            document.getElementById('sinResultados').classList.remove('d-none');
+            return;
+        }
+        document.getElementById('sinResultados').classList.add('d-none');
+
+        json.data.forEach(v => {
+            const col = document.createElement('div');
+            col.className = 'col-md-6';
+            col.innerHTML = `
+                <div class="vehicle-result" onclick="seleccionarVehiculo(${v.id}, this)">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="fw-bold mb-1 text-success">${v.placa}</h5>
+                            <p class="mb-1">${v.marca} ${v.modelo} ${v.anio ? '(' + v.anio + ')' : ''}</p>
+                            <p class="mb-0 small text-muted"><i class="fas fa-road me-1"></i>${parseInt(v.kilometraje).toLocaleString()} km</p>
+                        </div>
+                        <i class="fas fa-car fa-2x text-muted opacity-25"></i>
+                    </div>
+                    <div class="mt-2 pt-2 border-top">
+                        <p class="mb-0 small"><i class="fas fa-user me-1"></i>${v.conductor}</p>
+                        ${v.carnet ? '<p class="mb-0 small text-muted">Carnet: ' + v.carnet + '</p>' : ''}
+                    </div>
+                </div>
+            `;
+            container.appendChild(col);
+        });
+    } catch (err) {
+        console.error(err);
+        Swal.fire('Error', 'No se pudo buscar el vehículo. Intenta de nuevo.', 'error');
+    }
 }
+
+function seleccionarVehiculo(id, el) {
+    document.querySelectorAll('.vehicle-result').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('id_vehiculo').value = id;
+
+    const datos = el.querySelector('h5').textContent + ' - ' + el.querySelector('p.mb-1').textContent;
+    selectedVehicle = {
+        placa: el.querySelector('h5').textContent,
+        info: el.querySelector('p.mb-1').textContent,
+        conductor: el.querySelector('.border-top p').textContent
+    };
+}
+
+function selectTipo(tipo) {
+    document.querySelectorAll('input[name="tipo_mantenimiento"]').forEach(r => {
+        r.closest('.bento-card').classList.remove('selected');
+    });
+    document.querySelector('input[name="tipo_mantenimiento"][value="' + tipo + '"]').closest('.bento-card').classList.add('selected');
+}
+
+function selectProblema(el) {
+    document.querySelectorAll('input[name="id_tipo_problema"]').forEach(r => {
+        r.closest('.bento-card').classList.remove('selected');
+    });
+    el.classList.add('selected');
+}
+
+function selectPrioridad(el) {
+    document.querySelectorAll('input[name="prioridad"]').forEach(r => {
+        r.closest('.bento-card').classList.remove('selected');
+    });
+    el.classList.add('selected');
+}
+
+function previewEvidencia(input) {
+    const preview = document.getElementById('evidenciaPreview');
+    preview.innerHTML = '';
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const url = URL.createObjectURL(file);
+        const div = document.createElement('div');
+        div.className = 'preview-item';
+        if (file.type.startsWith('video')) {
+            div.innerHTML = `<video src="${url}" controls></video>`;
+        } else {
+            div.innerHTML = `<img src="${url}" alt="Evidencia">`;
+        }
+        preview.appendChild(div);
+    }
+}
+
+function buildSummary() {
+    document.getElementById('res-vehiculo').textContent = selectedVehicle ? selectedVehicle.placa + ' ' + selectedVehicle.info : '-';
+    document.getElementById('res-conductor').textContent = selectedVehicle ? selectedVehicle.conductor.replace('Carnet: ', '') : '-';
+
+    const tipo = document.querySelector('input[name="tipo_mantenimiento"]:checked')?.value || '-';
+    document.getElementById('res-tipo').textContent = tipo;
+
+    const problema = document.querySelector('input[name="id_tipo_problema"]:checked')?.closest('.bento-card')?.querySelector('.bento-title')?.textContent || '-';
+    document.getElementById('res-problema').textContent = problema;
+
+    const prioridadMap = {1:'Baja', 2:'Media', 3:'Alta', 4:'Crítica'};
+    const prioridad = document.querySelector('input[name="prioridad"]:checked')?.value;
+    document.getElementById('res-prioridad').textContent = prioridadMap[prioridad] || '-';
+
+    document.getElementById('res-condicion').textContent = document.getElementById('condicion_movilidad').value;
+    document.getElementById('res-ubicacion').textContent = document.getElementById('ubicacion').value || '-';
+    document.getElementById('res-descripcion').textContent = document.getElementById('descripcion').value;
+}
+
+// Anti doble submit
+document.getElementById('wizardForm').addEventListener('submit', function(e) {
+    const btn = document.getElementById('btn-enviar');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+});
+
+updateProgress();
 </script>
 <?= $this->endSection() ?>
