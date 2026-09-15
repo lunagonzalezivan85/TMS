@@ -79,16 +79,11 @@ $accentColors = $colorMap[$estadoClass] ?? $colorMap['secondary'];
                 </div>
 
                 <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
-                    <div class="d-flex gap-2 justify-content-lg-end flex-wrap">
-                        <a href="<?= base_url('vehiculos') ?>" class="btn btn-sm btn-outline-light rounded-pill px-3">
-                            <i class="fas fa-arrow-left me-1"></i>Volver
-                        </a>
-                        <a href="<?= base_url('vehiculos/edit/' . $vehiculo['id']) ?>" class="btn btn-sm btn-light rounded-pill px-3 fw-medium">
-                            <i class="fas fa-edit me-1"></i>Editar
-                        </a>
-                        <a href="<?= base_url('vehiculos/documentos/' . $vehiculo['id']) ?>" class="btn btn-sm btn-outline-light rounded-pill px-3">
-                            <i class="fas fa-file-alt me-1"></i>Documentos
-                        </a>
+                    <div class="d-flex align-items-center justify-content-lg-end gap-2 flex-wrap">
+                        <small class="opacity-75 d-none d-md-inline">Acciones rápidas</small>
+                        <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="abrirCommandPaletteVehiculo()">
+                            <i class="fas fa-bolt me-1"></i>Ctrl + K
+                        </button>
                     </div>
                 </div>
             </div>
@@ -925,6 +920,18 @@ $totalGalonesMes = (float)($stats_combustible_mes['total_litros'] ?? 0) / 3.7854
     </div>
 </div>
 
+<!-- Command palette de acciones del vehículo -->
+<div class="cmd-palette-overlay" id="cmdPaletteVehiculo" onclick="cerrarCommandPaletteVehiculo(event)" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.45);backdrop-filter:blur(4px);z-index:1055;align-items:flex-start;justify-content:center;padding-top:10vh;">
+    <div class="cmd-palette" onclick="event.stopPropagation()" style="width:100%;max-width:560px;background:#fff;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.25);overflow:hidden;">
+        <div class="cmd-palette-header" style="display:flex;align-items:center;gap:0.75rem;padding:1rem 1.25rem;border-bottom:1px solid #e2e8f0;">
+            <i class="fas fa-search text-muted"></i>
+            <input type="text" id="cmdInputVehiculo" placeholder="Buscar acción..." autocomplete="off" style="border:none;outline:none;flex:1;font-size:1rem;">
+            <span style="display:inline-flex;align-items:center;gap:0.25rem;font-size:0.75rem;color:#94a3b8;border:1px solid #e2e8f0;border-radius:6px;padding:0.15rem 0.4rem;">ESC</span>
+        </div>
+        <div class="cmd-palette-list" id="cmdListVehiculo" style="max-height:320px;overflow-y:auto;"></div>
+    </div>
+</div>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('styles') ?>
@@ -1227,6 +1234,73 @@ document.addEventListener('DOMContentLoaded', function () {
     function setText(id, val) {
         const el = document.getElementById(id);
         if (el) el.textContent = val;
+    }
+
+    // Command palette de acciones del vehículo
+    const comandosVehiculo = [
+        { label: 'Volver al listado', url: '<?= base_url('vehiculos') ?>', icon: 'fa-arrow-left' },
+        { label: 'Editar vehículo', url: '<?= base_url('vehiculos/edit/' . $vehiculo['id']) ?>', icon: 'fa-edit' },
+        { label: 'Documentos del vehículo', url: '<?= base_url('vehiculos/documentos/' . $vehiculo['id']) ?>', icon: 'fa-file-alt' },
+        { label: 'Reportar solicitud de mantenimiento', url: '<?= base_url('solicitudes/create') ?>', icon: 'fa-wrench' },
+        { label: 'Ver reportes de vehículos', url: '<?= base_url('vehiculos/reportes') ?>', icon: 'fa-chart-line' }
+    ];
+    let selectedCmdIndex = -1;
+
+    function abrirCommandPaletteVehiculo() {
+        document.getElementById('cmdPaletteVehiculo').style.display = 'flex';
+        document.getElementById('cmdInputVehiculo').value = '';
+        document.getElementById('cmdInputVehiculo').focus();
+        selectedCmdIndex = -1;
+        renderComandosVehiculo();
+    }
+
+    function cerrarCommandPaletteVehiculo() {
+        document.getElementById('cmdPaletteVehiculo').style.display = 'none';
+    }
+
+    function renderComandosVehiculo(filter = '') {
+        const list = document.getElementById('cmdListVehiculo');
+        list.innerHTML = '';
+        const filtered = comandosVehiculo.filter(c => c.label.toLowerCase().includes(filter.toLowerCase()));
+        filtered.forEach((cmd, i) => {
+            const div = document.createElement('div');
+            div.className = 'cmd-item-vehiculo' + (i === selectedCmdIndex ? ' active' : '');
+            div.dataset.url = cmd.url;
+            div.style.cssText = 'display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1.25rem;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:background 0.1s;';
+            div.innerHTML = '<i class="fas ' + cmd.icon + '" style="width:24px;text-align:center;color:#4f46e5;"></i><span>' + cmd.label + '</span>';
+            div.onclick = function() { window.location.href = cmd.url; };
+            div.onmouseenter = function() { selectedCmdIndex = i; updateActiveCmd(); };
+            list.appendChild(div);
+        });
+    }
+
+    function updateActiveCmd() {
+        document.querySelectorAll('.cmd-item-vehiculo').forEach((el, i) => {
+            el.style.background = i === selectedCmdIndex ? '#eef2ff' : '';
+        });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'k') {
+            e.preventDefault();
+            abrirCommandPaletteVehiculo();
+            return;
+        }
+        if (document.getElementById('cmdPaletteVehiculo').style.display === 'none') return;
+
+        const items = document.querySelectorAll('.cmd-item-vehiculo');
+        if (e.key === 'Escape') cerrarCommandPaletteVehiculo();
+        else if (e.key === 'ArrowDown') { e.preventDefault(); selectedCmdIndex = Math.min(selectedCmdIndex + 1, items.length - 1); updateActiveCmd(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); selectedCmdIndex = Math.max(selectedCmdIndex - 1, 0); updateActiveCmd(); }
+        else if (e.key === 'Enter' && selectedCmdIndex >= 0 && items[selectedCmdIndex]) window.location.href = items[selectedCmdIndex].dataset.url;
+    });
+
+    const cmdInputVehiculo = document.getElementById('cmdInputVehiculo');
+    if (cmdInputVehiculo) {
+        cmdInputVehiculo.addEventListener('input', function() {
+            selectedCmdIndex = -1;
+            renderComandosVehiculo(this.value);
+        });
     }
 });
 </script>

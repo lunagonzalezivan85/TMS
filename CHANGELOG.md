@@ -31,7 +31,8 @@
 - **ADDED** - Command palette con atajo `Ctrl + K` para abrir opciones rápidas filtradas por rol
 - **CHANGED** - Tarjeta de resumen mejorada con métricas tipo KPI y botones contextuales por rol
 - **CHANGED** - `app/Views/vehiculos/create.php` — Formulario de creación de vehículo reformulado como wizard de 4 pasos (datos básicos, identificación, configuración y confirmación)
-- **CHANGED** - `app/Views/vehiculos/reportes_dashboard.php` — Rediseño moderno con hero oscuro, KPIs, selector de reportes tipo cards y tabla con estilo mejorado
+- **CHANGED** - `app/Views/vehiculos/reportes_dashboard.php` — Resumen del reporte arriba de la tabla, stats superiores en estilo bento sin colores de fondo
+- **CHANGED** - `app/Views/vehiculos/show.php` — Reemplazados botones de acción por command palette con atajo Ctrl + K para liberar espacio en el hero
 - **CHANGED** - `Auth::getRedirectByRole()` redirige al dashboard correspondiente a cada rol
 - **BD** - `vehiculos` e `historial_estado_vehiculo` — Agregado estado `EN MANTENIMIENTO` a los enums
 - **CHANGED** - `app/Models/SolicitudModel.php` — Campos y validaciones para `tipo_mantenimiento`, `ubicacion` y `condicion_movilidad`
