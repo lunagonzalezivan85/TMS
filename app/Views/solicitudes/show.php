@@ -137,6 +137,49 @@
                             <p class="fw-semibold mb-1 small"><?= date('d/m/Y H:i', strtotime($solicitud['fecha_solicitud'])) ?></p>
                             <small class="text-muted d-block mb-0">Solicitante</small>
                             <p class="fw-semibold mb-0 small"><?= esc($solicitud['solicitante']) ?></p>
+
+                            <?php if (!empty($tecnico)): ?>
+                                <hr class="my-2">
+                                <small class="text-muted d-block mb-0">Técnico asignado</small>
+                                <p class="fw-semibold mb-0 small">
+                                    <i class="fas fa-user-cog text-success me-1"></i>
+                                    <?= esc(($tecnico['nombre'] ?? '') . ' ' . ($tecnico['apellido'] ?? '')) ?>
+                                </p>
+                                <?php if (!empty($solicitud['fecha_asignacion'])): ?>
+                                    <small class="text-muted d-block mb-0">Fecha de asignación</small>
+                                    <p class="fw-semibold mb-0 small"><?= date('d/m/Y H:i', strtotime($solicitud['fecha_asignacion'])) ?></p>
+                                <?php endif; ?>
+                            <?php endif; ?>
+
+                            <?php
+                            $estadosFinales = ['COMPLETADA', 'FINALIZADA', 'CANCELADA', 'RECHAZADA'];
+                            $esFinalizada = in_array(strtoupper($solicitud['estado']), $estadosFinales);
+                            ?>
+                            <?php if (!$esFinalizada && !empty($solicitud['fecha_asignacion'])): ?>
+                                <?php
+                                $fechaAsignacion = new DateTime($solicitud['fecha_asignacion']);
+                                $hoy = new DateTime();
+                                $dias = $fechaAsignacion->diff($hoy)->days;
+                                $claseDias = $dias <= 3 ? 'text-bg-success' : ($dias <= 7 ? 'text-bg-warning' : 'text-bg-danger');
+                                ?>
+                                <div class="mt-2 p-2 rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <small class="text-muted d-block" style="font-size:0.75rem;">Días transcurridos</small>
+                                        <span class="badge <?= $claseDias ?> rounded-pill fs-6"><?= $dias ?> día<?= $dias != 1 ? 's' : '' ?></span>
+                                    </div>
+                                    <i class="fas fa-clock text-muted" style="font-size:1.5rem;"></i>
+                                </div>
+                            <?php elseif ($esFinalizada && !empty($solicitud['fecha_asignacion'])): ?>
+                                <?php
+                                $fechaAsignacion = new DateTime($solicitud['fecha_asignacion']);
+                                $fechaCierre = new DateTime($solicitud['fecha_cierre'] ?? 'now');
+                                $dias = $fechaAsignacion->diff($fechaCierre)->days;
+                                ?>
+                                <div class="mt-2 p-2 rounded-3 bg-light">
+                                    <small class="text-muted d-block" style="font-size:0.75rem;">Días totales (asignación → cierre)</small>
+                                    <span class="badge text-bg-secondary rounded-pill"><?= $dias ?> día<?= $dias != 1 ? 's' : '' ?></span>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
 

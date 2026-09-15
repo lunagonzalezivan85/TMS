@@ -531,12 +531,18 @@ class Solicitudes extends BaseController
             $tipoProblema = $this->tipoProblemaModel->find($solicitud['id_tipo_problema']);
         }
 
+        $tecnico = null;
+        if (!empty($solicitud['id_asignado'])) {
+            $tecnico = $this->usuarioModel->find($solicitud['id_asignado']);
+        }
+
         $data = [
             'title' => 'Solicitud #' . $solicitud['codigo_consecutivo'],
             'solicitud' => $solicitud,
             'vehiculo' => $vehiculo,
             'conductor' => $conductor,
             'tipoProblema' => $tipoProblema,
+            'tecnico' => $tecnico,
             'sugerencia' => $this->generarSugerenciaMantenimiento(
                 $solicitud,
                 $tipoProblema['nombre'] ?? null
