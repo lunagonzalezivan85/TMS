@@ -1,189 +1,214 @@
 <?= $this->extend('layouts/main') ?>
 
-<?= $this->section('title') ?>
-<?= $title ?>
+<?= $this->section('head') ?>
+<style>
+    .reporte-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: white;
+        border-radius: 24px;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    .reporte-hero::after {
+        content: ''; position: absolute; top: -20%; right: -5%; width: 260px; height: 260px;
+        background: rgba(79, 70, 229, 0.15); border-radius: 50%;
+    }
+    .reporte-hero h1, .reporte-hero p { position: relative; z-index: 1; }
+    .kpi-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 1.25rem;
+        display: flex; align-items: center; gap: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        transition: transform 0.15s;
+    }
+    .kpi-card:hover { transform: translateY(-3px); }
+    .kpi-icon {
+        width: 48px; height: 48px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem;
+    }
+    .kpi-value { font-size: 1.5rem; font-weight: 700; color: #0f172a; line-height: 1; }
+    .kpi-label { font-size: 0.8rem; color: #64748b; }
+    .reporte-card {
+        border: 2px solid #e2e8f0; border-radius: 18px; padding: 1rem;
+        cursor: pointer; text-align: center; background: #fff;
+        transition: all 0.15s; height: 100%;
+    }
+    .reporte-card:hover, .reporte-card.selected {
+        border-color: #4f46e5; background: #eef2ff;
+        transform: translateY(-2px); box-shadow: 0 10px 20px rgba(79,70,229,0.08);
+    }
+    .reporte-card i { font-size: 1.5rem; color: #4f46e5; margin-bottom: 0.5rem; }
+    .reporte-card h6 { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .reporte-card small { font-size: 0.75rem; color: #64748b; }
+    .filter-bar {
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+        padding: 1rem 1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .btn-generar { background: #4f46e5; color: #fff; border-radius: 12px; }
+    .btn-generar:disabled { background: #cbd5e1; }
+    .resultado-card { border-radius: 18px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .table-reporte thead th { background: #f8fafc; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.3px; }
+    .table-reporte tbody td { font-size: 0.9rem; vertical-align: middle; }
+</style>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<div class="container-fluid py-4">
+    <div class="reporte-hero">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="h3 fw-bold mb-1"><i class="fas fa-chart-line me-2"></i>Reportes de Vehículos</h1>
+                <p class="mb-0 opacity-75">Análisis y reportes unificados de la flota vehicular.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <span class="opacity-75"><?= date('d M Y, l') ?></span>
+            </div>
+        </div>
+    </div>
 
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-0 text-gray-800">
-                        <i class="fas fa-chart-line text-primary me-2"></i>
-                        Reportes de Vehículos
-                    </h1>
-                    <p class="text-muted mb-0">Panel unificado de análisis y reportes de la flota vehicular</p>
+    <!-- KPIs -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="kpi-card">
+                <div class="kpi-icon bg-success bg-opacity-10 text-success"><i class="fas fa-car"></i></div>
+                <div><div class="kpi-value"><?= $estadisticas['total_vehiculos'] ?? 0 ?></div><div class="kpi-label">Total Vehículos</div></div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="kpi-card">
+                <div class="kpi-icon bg-info bg-opacity-10 text-info"><i class="fas fa-user-check"></i></div>
+                <div><div class="kpi-value"><?= $estadisticas['asignados'] ?? 0 ?></div><div class="kpi-label">Asignados</div></div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="kpi-card">
+                <div class="kpi-icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-file-alt"></i></div>
+                <div><div class="kpi-value"><?= $estadisticas['documentos_vencer'] ?? 0 ?></div><div class="kpi-label">Documentos por vencer</div></div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="kpi-card">
+                <div class="kpi-icon bg-danger bg-opacity-10 text-danger"><i class="fas fa-exclamation-circle"></i></div>
+                <div><div class="kpi-value"><?= $estadisticas['sin_documentacion'] ?? 0 ?></div><div class="kpi-label">Sin documentación</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selector de reportes -->
+    <h6 class="fw-bold text-muted mb-3 text-uppercase small">Selecciona un reporte</h6>
+    <div class="row g-3 mb-4" id="reportesGrid">
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="reporte-card" data-value="estado" onclick="seleccionarReporte('estado')">
+                <i class="fas fa-tasks"></i>
+                <h6>Por Estado</h6>
+                <small>Flota agrupada</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="reporte-card" data-value="mantenimiento" onclick="seleccionarReporte('mantenimiento')">
+                <i class="fas fa-wrench"></i>
+                <h6>Mantenimiento vencido</h6>
+                <small>Más de 90 días</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="reporte-card" data-value="kilometraje" onclick="seleccionarReporte('kilometraje')">
+                <i class="fas fa-tachometer-alt"></i>
+                <h6>Kilometraje</h6>
+                <small>Análisis de KM</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="reporte-card" data-value="documentos" onclick="seleccionarReporte('documentos')">
+                <i class="fas fa-calendar-alt"></i>
+                <h6>Documentos por vencer</h6>
+                <small>Próximos 30 días</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="reporte-card" data-value="asignaciones" onclick="seleccionarReporte('asignaciones')">
+                <i class="fas fa-users"></i>
+                <h6>Asignaciones</h6>
+                <small>Conductores</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="reporte-card" data-value="sin_documentacion" onclick="seleccionarReporte('sin_documentacion')">
+                <i class="fas fa-folder-open"></i>
+                <h6>Sin documentación</h6>
+                <small>Sin archivos</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-bar mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-muted">Estado</label>
+                <select class="form-select" id="filtroEstado">
+                    <option value="TODOS">Todos</option>
+                    <option value="ACTIVO">Activo</option>
+                    <option value="INACTIVO">Inactivo</option>
+                    <option value="EN REPARACION">En Reparación</option>
+                    <option value="FUERA DE SERVICIO">Fuera de Servicio</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label small fw-semibold text-muted">Búsqueda general</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" class="form-control border-start-0" id="filtroBusqueda" placeholder="Placa, marca, modelo, año...">
                 </div>
-                <div>
-                    <span class="text-muted small"><?= date('d M Y, l') ?></span>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-generar flex-fill" onclick="generarReporte()" id="btnGenerar" disabled>
+                        <i class="fas fa-search me-2"></i>Generar
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="limpiarResultados()" title="Limpiar">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Analytics Overview -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-gray-800 mb-0">Resumen Analítico</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <!-- Total Vehículos -->
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="card bg-success text-white shadow-sm border-0 h-100">
-                                <div class="card-body text-center">
-                                    <div class="display-4 font-weight-bold mb-1" id="stat-total">
-                                        <?= $estadisticas['total_vehiculos'] ?? 0 ?>
-                                    </div>
-                                    <div class="small">Total Vehículos</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Vehículos Asignados -->
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="card bg-info text-white shadow-sm border-0 h-100">
-                                <div class="card-body text-center">
-                                    <div class="display-4 font-weight-bold mb-1" id="stat-asignados">
-                                        <?= $estadisticas['asignados'] ?? 0 ?>
-                                    </div>
-                                    <div class="small">Vehículos Asignados</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Documentos por Vencer -->
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="card bg-warning text-white shadow-sm border-0 h-100">
-                                <div class="card-body text-center">
-                                    <div class="display-4 font-weight-bold mb-1" id="stat-documentos">
-                                        <?= $estadisticas['documentos_vencer'] ?? 0 ?>
-                                    </div>
-                                    <div class="small">Documentos por Vencer</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Sin Documentación -->
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <div class="card bg-danger text-white shadow-sm border-0 h-100">
-                                <div class="card-body text-center">
-                                    <div class="display-4 font-weight-bold mb-1" id="stat-sin-docs">
-                                        <?= $estadisticas['sin_documentacion'] ?? 0 ?>
-                                    </div>
-                                    <div class="small">Sin Documentación</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filtros y Controles -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="row g-3 align-items-end">
-                        <!-- Selector de Reporte -->
-                        <div class="col-lg-4 col-md-6">
-                            <label for="tipoReporte" class="form-label font-weight-bold">Tipo de Reporte</label>
-                            <select class="form-select form-select-lg" id="tipoReporte" onchange="cambiarTipoReporte()">
-                                <option value="">Seleccionar tipo de reporte...</option>
-                                <option value="estado">Vehículos por Estado</option>
-                                <option value="mantenimiento">Mantenimiento Vencido</option>
-                                <option value="kilometraje">Reporte de Kilometraje</option>
-                                <option value="documentos">Documentos por Vencer</option>
-                                <option value="asignaciones">Asignaciones de Conductores</option>
-                                <option value="sin_documentacion">Vehículos sin Documentación</option>
-                            </select>
-                        </div>
-
-                        <!-- Filtro de Estado -->
-                        <div class="col-lg-2 col-md-6">
-                            <label for="filtroEstado" class="form-label font-weight-bold">Estado</label>
-                            <select class="form-select" id="filtroEstado">
-                                <option value="TODOS">Todos</option>
-                                <option value="ACTIVO">Activo</option>
-                                <option value="INACTIVO">Inactivo</option>
-                                <option value="EN REPARACION">En Reparación</option>
-                                <option value="FUERA DE SERVICIO">Fuera de Servicio</option>
-                            </select>
-                        </div>
-
-                        <!-- Búsqueda General -->
-                        <div class="col-lg-4 col-md-8">
-                            <label for="filtroBusqueda" class="form-label font-weight-bold">Búsqueda General</label>
-                            <input type="text" class="form-control" id="filtroBusqueda" 
-                                   placeholder="Buscar por placa, marca, modelo, año...">
-                        </div>
-
-                        <!-- Botones de Acción -->
-                        <div class="col-lg-2 col-md-4">
-                            <div class="d-grid gap-2">
-                                <button type="button" class="btn btn-primary btn-lg" onclick="generarReporte()" id="btnGenerar" disabled>
-                                    <i class="fas fa-search me-1"></i>
-                                    Generar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Área de Resultados -->
+    <!-- Resultados -->
     <div class="row" id="areaResultados" style="display: none;">
         <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+            <div class="card resultado-card">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
                     <div>
-                        <h5 class="card-title text-gray-800 mb-0" id="tituloReporte">Resultados del Reporte</h5>
+                        <h5 class="fw-bold mb-0" id="tituloReporte">Resultados del Reporte</h5>
                         <small class="text-muted" id="descripcionReporte"></small>
                     </div>
                     <div>
-                        <button type="button" class="btn btn-outline-success btn-sm me-2" onclick="exportarReporte()">
-                            <i class="fas fa-file-excel me-1"></i>
-                            Exportar Excel
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="limpiarResultados()">
-                            <i class="fas fa-times me-1"></i>
-                            Limpiar
+                        <button type="button" class="btn btn-outline-success btn-sm rounded-pill me-2" onclick="exportarReporte()">
+                            <i class="fas fa-file-excel me-1"></i>Exportar Excel
                         </button>
                     </div>
                 </div>
                 <div class="card-body">
-                    <!-- Información de Filtros Aplicados -->
                     <div id="filtrosAplicados" class="mb-3" style="display: none;">
-                        <div class="alert alert-info border-0 bg-light">
+                        <div class="alert alert-light border rounded-4 mb-0">
                             <strong><i class="fas fa-filter me-1"></i>Filtros aplicados:</strong>
                             <span id="filtrosTexto"></span>
                         </div>
                     </div>
 
-                    <!-- Loading -->
                     <div id="loadingReporte" class="text-center py-5" style="display: none;">
-                        <div class="spinner-border text-primary mb-3" role="status">
-                            <span class="visually-hidden">Cargando...</span>
-                        </div>
+                        <div class="spinner-border text-primary mb-3" role="status"></div>
                         <p class="text-muted">Generando reporte...</p>
                     </div>
 
-                    <!-- Tabla de Resultados -->
-                    <div id="tablaResultados" class="table-responsive">
-                        <!-- Se carga dinámicamente -->
-                    </div>
+                    <div id="tablaResultados" class="table-responsive"></div>
 
-                    <!-- Sin Resultados -->
                     <div id="sinResultados" class="text-center py-5" style="display: none;">
                         <i class="fas fa-search fa-3x text-muted mb-3"></i>
                         <h5 class="text-muted">No se encontraron resultados</h5>
@@ -194,31 +219,27 @@
         </div>
     </div>
 
-    <!-- Estadísticas Rápidas del Reporte -->
+    <!-- Estadísticas rápidas -->
     <div class="row mt-4" id="areaEstadisticas" style="display: none;">
         <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0">
-                    <h6 class="card-title text-gray-800 mb-0">
-                        <i class="fas fa-chart-pie me-2"></i>
-                        Resumen del Reporte
-                    </h6>
+            <div class="card resultado-card">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-chart-pie me-2"></i>Resumen del reporte</h6>
                 </div>
                 <div class="card-body">
-                    <div class="row" id="estadisticasRapidas">
-                        <!-- Se carga dinámicamente -->
-                    </div>
+                    <div class="row" id="estadisticasRapidas"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<?= $this->endSection() ?>
 
+<?= $this->section('scripts') ?>
 <script>
 let tipoReporteActual = '';
 let datosActuales = [];
 
-// Configuraciones de reportes
 const configReportes = {
     'estado': {
         titulo: 'Vehículos por Estado',
@@ -264,106 +285,73 @@ const configReportes = {
     }
 };
 
+function seleccionarReporte(tipo) {
+    tipoReporteActual = tipo;
+    document.querySelectorAll('.reporte-card').forEach(card => card.classList.remove('selected'));
+    document.querySelector('.reporte-card[data-value="' + tipo + '"]').classList.add('selected');
+    document.getElementById('btnGenerar').disabled = false;
+
+    const config = configReportes[tipo];
+    document.getElementById('tituloReporte').textContent = config.titulo;
+    document.getElementById('descripcionReporte').textContent = config.descripcion;
+}
+
 function cambiarTipoReporte() {
-    const select = document.getElementById('tipoReporte');
-    const btnGenerar = document.getElementById('btnGenerar');
-    
-    if (select.value) {
-        btnGenerar.disabled = false;
-        tipoReporteActual = select.value;
-        
-        // Actualizar título y descripción
-        const config = configReportes[tipoReporteActual];
-        document.getElementById('tituloReporte').textContent = config.titulo;
-        document.getElementById('descripcionReporte').textContent = config.descripcion;
-    } else {
-        btnGenerar.disabled = true;
-        tipoReporteActual = '';
-        limpiarResultados();
-    }
+    document.getElementById('btnGenerar').disabled = !tipoReporteActual;
 }
 
 function generarReporte() {
     if (!tipoReporteActual) return;
-    
+
     const config = configReportes[tipoReporteActual];
     const estado = document.getElementById('filtroEstado').value;
     const busqueda = document.getElementById('filtroBusqueda').value.trim();
-    
-    // Mostrar área de resultados y loading
+
     document.getElementById('areaResultados').style.display = 'block';
     document.getElementById('loadingReporte').style.display = 'block';
     document.getElementById('tablaResultados').innerHTML = '';
     document.getElementById('sinResultados').style.display = 'none';
-    
-    // Construir URL con parámetros
+
     let url = config.endpoint;
     const params = new URLSearchParams();
-    
-    if (estado && estado !== 'TODOS') {
-        params.append('estado', estado);
-    }
-    if (busqueda) {
-        params.append('busqueda', busqueda);
-    }
-    
-    if (params.toString()) {
-        url += '?' + params.toString();
-    }
-    
-    // Mostrar filtros aplicados
+    if (estado && estado !== 'TODOS') params.append('estado', estado);
+    if (busqueda) params.append('busqueda', busqueda);
+    if (params.toString()) url += '?' + params.toString();
+
     mostrarFiltrosAplicados(estado, busqueda);
-    
-    // Realizar petición con headers correctos
+
     fetch(url, {
         method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => { if (!response.ok) throw new Error('HTTP error! status: ' + response.status); return response.json(); })
+    .then(data => {
+        document.getElementById('loadingReporte').style.display = 'none';
+        if (data.success && data.data && data.data.length > 0) {
+            datosActuales = data.data;
+            mostrarTablaResultados(data.data, config);
+            mostrarEstadisticasRapidas(data.data);
+        } else {
+            document.getElementById('sinResultados').style.display = 'block';
+            document.getElementById('areaEstadisticas').style.display = 'none';
+            datosActuales = [];
         }
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            document.getElementById('loadingReporte').style.display = 'none';
-            
-            if (data.success && data.data && data.data.length > 0) {
-                datosActuales = data.data;
-                mostrarTablaResultados(data.data, config);
-                mostrarEstadisticasRapidas(data.data);
-            } else {
-                document.getElementById('sinResultados').style.display = 'block';
-                document.getElementById('areaEstadisticas').style.display = 'none';
-                datosActuales = [];
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('loadingReporte').style.display = 'none';
-            mostrarError('Error cargando el reporte');
-        });
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('loadingReporte').style.display = 'none';
+        mostrarError('Error cargando el reporte');
+    });
 }
 
 function mostrarFiltrosAplicados(estado, busqueda) {
     let filtros = [];
-    
-    if (estado && estado !== 'TODOS') {
-        filtros.push(`<span class="badge bg-primary me-1">Estado: ${estado}</span>`);
-    }
-    if (busqueda) {
-        filtros.push(`<span class="badge bg-info me-1">Búsqueda: "${busqueda}"</span>`);
-    }
-    
+    if (estado && estado !== 'TODOS') filtros.push('<span class="badge bg-primary me-1">Estado: ' + estado + '</span>');
+    if (busqueda) filtros.push('<span class="badge bg-info me-1">Búsqueda: "' + busqueda + '"</span>');
+
     const filtrosDiv = document.getElementById('filtrosAplicados');
-    const filtrosTexto = document.getElementById('filtrosTexto');
-    
     if (filtros.length > 0) {
-        filtrosTexto.innerHTML = filtros.join(' ');
+        document.getElementById('filtrosTexto').innerHTML = filtros.join(' ');
         filtrosDiv.style.display = 'block';
     } else {
         filtrosDiv.style.display = 'none';
@@ -371,59 +359,28 @@ function mostrarFiltrosAplicados(estado, busqueda) {
 }
 
 function mostrarTablaResultados(datos, config) {
-    let html = `
-        <table class="table table-hover table-striped">
-            <thead class="table-dark">
-                <tr>
-                    ${config.headers.map(header => `<th>${header}</th>`).join('')}
-                </tr>
-            </thead>
-            <tbody>
-    `;
-    
+    let html = '<table class="table table-hover align-middle table-reporte"><thead class="table-light"><tr>';
+    config.headers.forEach(header => html += '<th>' + header + '</th>');
+    html += '</tr></thead><tbody>';
+
     datos.forEach(item => {
         html += '<tr>';
         config.campos.forEach(campo => {
             let valor = item[campo] || 'N/A';
-            
-            // Formateo especial según el campo
-            if (campo === 'estado') {
-                valor = getEstadoBadge(valor);
-            } else if (campo === 'kilometraje') {
-                valor = formatNumber(valor) + ' km';
-            } else if (campo.includes('fecha')) {
-                valor = formatDate(valor);
-            } else if (campo === 'dias_sin_mantenimiento') {
-                const badge = valor > 180 ? 'bg-danger' : 'bg-warning';
-                valor = `<span class="badge ${badge}">${valor} días</span>`;
-            } else if (campo === 'dias_restantes') {
-                const badge = valor <= 7 ? 'bg-danger' : 'bg-warning';
-                valor = `<span class="badge ${badge}">${valor} días</span>`;
-            } else if (campo === 'estado_desc') {
-                const badge = valor === 'Asignado' ? 'bg-success' : 'bg-secondary';
-                valor = `<span class="badge ${badge}">${valor}</span>`;
-            } else if (campo === 'vehiculo_info') {
-                valor = `${item.marca} ${item.modelo} (${item.anio})`;
-            } else if (campo === 'placa') {
-                valor = `<strong>${valor}</strong>`;
-            }
-            
-            html += `<td>${valor}</td>`;
+            if (campo === 'estado') valor = getEstadoBadge(valor);
+            else if (campo === 'kilometraje') valor = formatNumber(valor) + ' km';
+            else if (campo.includes('fecha')) valor = formatDate(valor);
+            else if (campo === 'dias_sin_mantenimiento') valor = '<span class="badge ' + (valor > 180 ? 'bg-danger' : 'bg-warning') + '">' + valor + ' días</span>';
+            else if (campo === 'dias_restantes') valor = '<span class="badge ' + (valor <= 7 ? 'bg-danger' : 'bg-warning') + '">' + valor + ' días</span>';
+            else if (campo === 'estado_desc') valor = '<span class="badge ' + (valor === 'Asignado' ? 'bg-success' : 'bg-secondary') + '">' + valor + '</span>';
+            else if (campo === 'vehiculo_info') valor = item.marca + ' ' + item.modelo + ' (' + item.anio + ')';
+            else if (campo === 'placa') valor = '<strong>' + valor + '</strong>';
+            html += '<td>' + valor + '</td>';
         });
         html += '</tr>';
     });
-    
-    html += `
-            </tbody>
-        </table>
-        <div class="mt-3">
-            <small class="text-muted">
-                <i class="fas fa-info-circle me-1"></i>
-                Total de registros encontrados: <strong>${datos.length}</strong>
-            </small>
-        </div>
-    `;
-    
+
+    html += '</tbody></table><div class="mt-3"><small class="text-muted"><i class="fas fa-info-circle me-1"></i>Total de registros encontrados: <strong>' + datos.length + '</strong></small></div>';
     document.getElementById('tablaResultados').innerHTML = html;
 }
 
@@ -432,133 +389,53 @@ function mostrarEstadisticasRapidas(datos) {
         document.getElementById('areaEstadisticas').style.display = 'none';
         return;
     }
-    
+
     let estadisticasHtml = '';
-    
-    // Estadísticas generales
-    estadisticasHtml += `
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-primary text-white border-0">
-                <div class="card-body text-center">
-                    <h4 class="mb-1">${datos.length}</h4>
-                    <small>Total Registros</small>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Si tiene campo estado, mostrar distribución
+    estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="card bg-primary text-white border-0 rounded-4"><div class="card-body text-center"><h4 class="mb-1">' + datos.length + '</h4><small>Total Registros</small></div></div></div>';
+
     if (datos[0].hasOwnProperty('estado')) {
         const conteoEstados = {};
-        datos.forEach(item => {
-            const estado = item.estado || 'Sin Estado';
-            conteoEstados[estado] = (conteoEstados[estado] || 0) + 1;
-        });
-        
-        let index = 0;
+        datos.forEach(item => { const estado = item.estado || 'Sin Estado'; conteoEstados[estado] = (conteoEstados[estado] || 0) + 1; });
         const colores = ['bg-success', 'bg-warning', 'bg-danger', 'bg-info'];
-        
+        let index = 0;
         Object.entries(conteoEstados).forEach(([estado, cantidad]) => {
             const porcentaje = ((cantidad / datos.length) * 100).toFixed(1);
             const color = colores[index % colores.length];
-            
-            estadisticasHtml += `
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card ${color} text-white border-0">
-                        <div class="card-body text-center">
-                            <h4 class="mb-1">${cantidad}</h4>
-                            <small>${estado}</small>
-                            <div class="mt-1">
-                                <small class="opacity-75">${porcentaje}%</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="card ' + color + ' text-white border-0 rounded-4"><div class="card-body text-center"><h4 class="mb-1">' + cantidad + '</h4><small>' + estado + '</small><div class="mt-1"><small class="opacity-75">' + porcentaje + '%</small></div></div></div></div>';
             index++;
         });
     }
-    
-    // Estadísticas específicas según el tipo de reporte
+
     if (tipoReporteActual === 'kilometraje') {
         const kilometrajes = datos.map(item => parseInt(item.kilometraje) || 0);
         const maxKm = Math.max(...kilometrajes);
-        const minKm = Math.min(...kilometrajes);
         const avgKm = Math.round(kilometrajes.reduce((a, b) => a + b, 0) / kilometrajes.length);
-        
-        estadisticasHtml += `
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="card bg-info text-white border-0">
-                    <div class="card-body text-center">
-                        <h4 class="mb-1">${formatNumber(maxKm)}</h4>
-                        <small>Máximo KM</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="card bg-secondary text-white border-0">
-                    <div class="card-body text-center">
-                        <h4 class="mb-1">${formatNumber(avgKm)}</h4>
-                        <small>Promedio KM</small>
-                    </div>
-                </div>
-            </div>
-        `;
+        estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="card bg-info text-white border-0 rounded-4"><div class="card-body text-center"><h4 class="mb-1">' + formatNumber(maxKm) + '</h4><small>Máximo KM</small></div></div></div>';
+        estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="card bg-secondary text-white border-0 rounded-4"><div class="card-body text-center"><h4 class="mb-1">' + formatNumber(avgKm) + '</h4><small>Promedio KM</small></div></div></div>';
     }
-    
+
     if (tipoReporteActual === 'documentos') {
         const criticos = datos.filter(item => item.dias_restantes <= 7).length;
         const advertencia = datos.filter(item => item.dias_restantes > 7 && item.dias_restantes <= 15).length;
-        
-        estadisticasHtml += `
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="card bg-danger text-white border-0">
-                    <div class="card-body text-center">
-                        <h4 class="mb-1">${criticos}</h4>
-                        <small>Críticos (≤7 días)</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="card bg-warning text-white border-0">
-                    <div class="card-body text-center">
-                        <h4 class="mb-1">${advertencia}</h4>
-                        <small>Advertencia (8-15 días)</small>
-                    </div>
-                </div>
-            </div>
-        `;
+        estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="card bg-danger text-white border-0 rounded-4"><div class="card-body text-center"><h4 class="mb-1">' + criticos + '</h4><small>Críticos (≤7 días)</small></div></div></div>';
+        estadisticasHtml += '<div class="col-md-6 col-lg-3"><div class="card bg-warning text-white border-0 rounded-4"><div class="card-body text-center"><h4 class="mb-1">' + advertencia + '</h4><small>Advertencia (8-15 días)</small></div></div></div>';
     }
-    
+
     document.getElementById('estadisticasRapidas').innerHTML = estadisticasHtml;
     document.getElementById('areaEstadisticas').style.display = 'block';
 }
 
 function exportarReporte() {
-    if (!tipoReporteActual || !datosActuales.length) {
-        alert('No hay datos para exportar');
-        return;
-    }
-    
+    if (!tipoReporteActual || !datosActuales.length) { alert('No hay datos para exportar'); return; }
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = '<?= base_url('vehiculos/exportarReporte') ?>';
-    
     const tipoInput = document.createElement('input');
-    tipoInput.type = 'hidden';
-    tipoInput.name = 'tipo_reporte';
-    tipoInput.value = tipoReporteActual;
-    
+    tipoInput.type = 'hidden'; tipoInput.name = 'tipo_reporte'; tipoInput.value = tipoReporteActual;
     const formatoInput = document.createElement('input');
-    formatoInput.type = 'hidden';
-    formatoInput.name = 'formato';
-    formatoInput.value = 'excel';
-    
-    form.appendChild(tipoInput);
-    form.appendChild(formatoInput);
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
+    formatoInput.type = 'hidden'; formatoInput.name = 'formato'; formatoInput.value = 'excel';
+    form.appendChild(tipoInput); form.appendChild(formatoInput);
+    document.body.appendChild(form); form.submit(); document.body.removeChild(form);
 }
 
 function limpiarResultados() {
@@ -566,85 +443,33 @@ function limpiarResultados() {
     document.getElementById('areaEstadisticas').style.display = 'none';
     document.getElementById('filtroEstado').value = 'TODOS';
     document.getElementById('filtroBusqueda').value = '';
+    document.querySelectorAll('.reporte-card').forEach(card => card.classList.remove('selected'));
+    tipoReporteActual = '';
+    document.getElementById('btnGenerar').disabled = true;
     datosActuales = [];
 }
 
 function mostrarError(mensaje) {
-    document.getElementById('tablaResultados').innerHTML = `
-        <div class="alert alert-danger text-center">
-            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-            <h5>Error</h5>
-            <p class="mb-0">${mensaje}</p>
-        </div>
-    `;
+    document.getElementById('tablaResultados').innerHTML = '<div class="alert alert-danger text-center"><i class="fas fa-exclamation-triangle fa-2x mb-2"></i><h5>Error</h5><p class="mb-0">' + mensaje + '</p></div>';
 }
 
-// Funciones auxiliares
 function getEstadoBadge(estado) {
     const badges = {
-        'ACTIVO': '<span class="badge bg-success">Activo</span>',
-        'INACTIVO': '<span class="badge bg-secondary">Inactivo</span>',
-        'EN REPARACION': '<span class="badge bg-warning">En Reparación</span>',
-        'FUERA DE SERVICIO': '<span class="badge bg-danger">Fuera de Servicio</span>'
+        'ACTIVO': '<span class="badge bg-success rounded-pill">Activo</span>',
+        'INACTIVO': '<span class="badge bg-secondary rounded-pill">Inactivo</span>',
+        'EN REPARACION': '<span class="badge bg-warning rounded-pill">En Reparación</span>',
+        'FUERA DE SERVICIO': '<span class="badge bg-danger rounded-pill">Fuera de Servicio</span>'
     };
-    return badges[estado] || `<span class="badge bg-secondary">${estado}</span>`;
+    return badges[estado] || '<span class="badge bg-secondary rounded-pill">' + estado + '</span>';
 }
 
-function formatNumber(number) {
-    return new Intl.NumberFormat('es-ES').format(number);
-}
+function formatNumber(number) { return new Intl.NumberFormat('es-ES').format(number); }
+function formatDate(dateString) { if (!dateString) return 'N/A'; return new Date(dateString).toLocaleDateString('es-ES'); }
 
-function formatDate(dateString) {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES');
-}
-
-// Función de debug para probar rutas
-function testRutas() {
-    console.log('Probando ruta de test...');
-    fetch('<?= base_url('vehiculos/test-reporte') ?>', {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => {
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        return response.json();
-    })
-    .then(data => {
-        console.log('Test response:', data);
-        alert('Ruta de prueba funcionando: ' + data.message);
-    })
-    .catch(error => {
-        console.error('Error en test:', error);
-        alert('Error en ruta de prueba: ' + error.message);
-    });
-}
-
-// Inicialización
 document.addEventListener('DOMContentLoaded', function() {
-    // Configurar eventos de filtros
-    document.getElementById('filtroEstado').addEventListener('change', function() {
-        if (tipoReporteActual) {
-            // Auto-generar si hay un reporte seleccionado
-            // generarReporte();
-        }
-    });
-    
     document.getElementById('filtroBusqueda').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && tipoReporteActual) {
-            generarReporte();
-        }
+        if (e.key === 'Enter' && tipoReporteActual) generarReporte();
     });
-    
-    // Agregar botón de debug (temporal)
-    console.log('Dashboard de reportes cargado. Usa testRutas() para probar.');
 });
 </script>
-
 <?= $this->endSection() ?>
