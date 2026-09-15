@@ -109,47 +109,38 @@
                             <?php endif; ?>
                         </div>
                     </div>
-                </div>
-
-                <div class="col-lg-4">
-                    <?php if (!empty($sugerencia)): ?>
-                    <div class="card border-0 rounded-4 mb-2" style="background:#eff6ff;border:1px solid #bfdbfe !important;">
-                        <div class="card-body p-2 d-flex align-items-start">
-                            <div class="flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:#dbeafe;">
-                                <i class="fas fa-lightbulb text-primary"></i>
-                            </div>
-                            <div class="ms-2">
-                                <h6 class="fw-bold text-primary mb-1" style="font-size:0.85rem;">Sugerencia de acción</h6>
-                                <p class="mb-0 small text-dark"><?= esc($sugerencia) ?></p>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
 
                     <div class="card border-0 shadow-sm rounded-4 mb-2">
                         <div class="card-body p-2">
                             <h6 class="text-muted mb-1" style="font-size:0.85rem;">Estado actual</h6>
                             <span class="badge text-bg-warning rounded-pill"><?= esc($solicitud['estado']) ?></span>
                             <hr class="my-2">
-                            <small class="text-muted d-block mb-0">Código</small>
-                            <p class="fw-bold mb-1"><?= esc($solicitud['codigo_consecutivo']) ?></p>
-                            <small class="text-muted d-block mb-0">Fecha de solicitud</small>
-                            <p class="fw-semibold mb-1 small"><?= date('d/m/Y H:i', strtotime($solicitud['fecha_solicitud'])) ?></p>
-                            <small class="text-muted d-block mb-0">Solicitante</small>
-                            <p class="fw-semibold mb-0 small"><?= esc($solicitud['solicitante']) ?></p>
-
-                            <?php if (!empty($tecnico)): ?>
-                                <hr class="my-2">
-                                <small class="text-muted d-block mb-0">Técnico asignado</small>
-                                <p class="fw-semibold mb-0 small">
-                                    <i class="fas fa-user-cog text-success me-1"></i>
-                                    <?= esc(($tecnico['nombre'] ?? '') . ' ' . ($tecnico['apellido'] ?? '')) ?>
-                                </p>
-                                <?php if (!empty($solicitud['fecha_asignacion'])): ?>
-                                    <small class="text-muted d-block mb-0">Fecha de asignación</small>
-                                    <p class="fw-semibold mb-0 small"><?= date('d/m/Y H:i', strtotime($solicitud['fecha_asignacion'])) ?></p>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block mb-0">Código</small>
+                                    <p class="fw-bold mb-0"><?= esc($solicitud['codigo_consecutivo']) ?></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block mb-0">Fecha de solicitud</small>
+                                    <p class="fw-semibold mb-0 small"><?= date('d/m/Y H:i', strtotime($solicitud['fecha_solicitud'])) ?></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block mb-0">Solicitante</small>
+                                    <p class="fw-semibold mb-0 small"><?= esc($solicitud['solicitante']) ?></p>
+                                </div>
+                                <?php if (!empty($tecnico)): ?>
+                                    <div class="col-md-3">
+                                        <small class="text-muted d-block mb-0">Técnico asignado</small>
+                                        <p class="fw-semibold mb-0 small">
+                                            <i class="fas fa-user-cog text-success me-1"></i>
+                                            <?= esc(($tecnico['nombre'] ?? '') . ' ' . ($tecnico['apellido'] ?? '')) ?>
+                                        </p>
+                                        <?php if (!empty($solicitud['fecha_asignacion'])): ?>
+                                            <small class="text-muted d-block" style="font-size:0.7rem;"><?= date('d/m/Y H:i', strtotime($solicitud['fecha_asignacion'])) ?></small>
+                                        <?php endif; ?>
+                                    </div>
                                 <?php endif; ?>
-                            <?php endif; ?>
+                            </div>
 
                             <?php
                             $estadosFinales = ['COMPLETADA', 'FINALIZADA', 'CANCELADA', 'RECHAZADA'];
@@ -182,6 +173,22 @@
                             <?php endif; ?>
                         </div>
                     </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <?php if (!empty($sugerencia)): ?>
+                    <div class="card border-0 rounded-4 mb-2" style="background:#eff6ff;border:1px solid #bfdbfe !important;">
+                        <div class="card-body p-2 d-flex align-items-start">
+                            <div class="flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:#dbeafe;">
+                                <i class="fas fa-lightbulb text-primary"></i>
+                            </div>
+                            <div class="ms-2">
+                                <h6 class="fw-bold text-primary mb-1" style="font-size:0.85rem;">Sugerencia de acción</h6>
+                                <p class="mb-0 small text-dark"><?= esc($sugerencia) ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
 
                     <div class="card border-0 shadow-sm rounded-4">
                         <div class="card-body p-2">
