@@ -14,12 +14,12 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="fw-bold mb-0"><i class="fas fa-file-alt me-2 text-success"></i><?= $title ?></h4>
                 <div class="d-flex gap-2">
-                    <?php if (in_array(strtolower((string)session('rol_nombre')), ['administrador', 'supervisor']) && in_array($solicitud['estado'], ['PENDIENTE', 'APROBADA'])): ?>
+                    <?php if (in_array(strtolower((string)session('rol_name')), ['administrador', 'supervisor']) && in_array($solicitud['estado'], ['PENDIENTE', 'APROBADA'])): ?>
                         <a href="<?= base_url('solicitudes/asignar/' . $solicitud['id']) ?>" class="btn btn-sm btn-success rounded-pill">
                             <i class="fas fa-user-cog me-2"></i>Asignar técnico
                         </a>
                     <?php endif; ?>
-                    <a href="<?= base_url('solicitudes/reporte/' . $solicitud['id']) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
+                    <a href="<?= base_url('solicitudes/reporte/' . $solicitud['id']) ?>" onclick="window.open(this.href, 'reporte', 'width=900,height=700,scrollbars=yes'); return false;" class="btn btn-sm btn-outline-primary rounded-pill">
                         <i class="fas fa-print me-2"></i>Reporte
                     </a>
                     <a href="<?= base_url('solicitudes') ?>" class="btn btn-sm btn-outline-secondary rounded-pill">

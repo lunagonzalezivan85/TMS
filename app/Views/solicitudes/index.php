@@ -148,12 +148,12 @@
                                     <i class="fas fa-user me-1"></i><?= esc($s['nombre_solicitante'] ?? 'N/A') ?>
                                 </small>
                                 <div class="d-flex gap-2">
-                                    <?php if (in_array(strtolower((string)session('rol_nombre')), ['administrador', 'supervisor']) && in_array($estado, ['PENDIENTE', 'APROBADA'])): ?>
+                                    <?php if (in_array(strtolower((string)session('rol_name')), ['administrador', 'supervisor']) && in_array($estado, ['PENDIENTE', 'APROBADA'])): ?>
                                         <a href="<?= base_url('solicitudes/asignar/' . $s['id']) ?>" class="btn btn-sm btn-success rounded-pill" title="Asignar técnico">
                                             <i class="fas fa-user-cog"></i>
                                         </a>
                                     <?php endif; ?>
-                                    <a href="<?= base_url('solicitudes/reporte/' . $s['id']) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill" title="Reporte">
+                                    <a href="<?= base_url('solicitudes/reporte/' . $s['id']) ?>" onclick="window.open(this.href, 'reporte', 'width=900,height=700,scrollbars=yes'); return false;" class="btn btn-sm btn-outline-primary rounded-pill" title="Reporte">
                                         <i class="fas fa-print"></i>
                                     </a>
                                     <a href="<?= base_url('solicitudes/show/' . $s['id']) ?>" class="btn btn-sm btn-outline-success rounded-pill" title="Ver detalle">
