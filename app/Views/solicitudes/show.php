@@ -102,6 +102,20 @@
                 </div>
 
                 <div class="col-lg-4">
+                    <?php if (!empty($sugerencia)): ?>
+                    <div class="card border-0 rounded-4 mb-4" style="background:#eff6ff;border:1px solid #bfdbfe !important;">
+                        <div class="card-body p-4 d-flex align-items-start">
+                            <div class="flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:#dbeafe;">
+                                <i class="fas fa-lightbulb text-primary"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="fw-bold text-primary mb-1">Sugerencia de acción</h6>
+                                <p class="mb-0 text-dark"><?= esc($sugerencia) ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                     <div class="card border-0 shadow-sm rounded-4 mb-4">
                         <div class="card-body p-4">
                             <h6 class="text-muted mb-2">Estado actual</h6>

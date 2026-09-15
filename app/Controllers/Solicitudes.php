@@ -534,8 +534,51 @@ class Solicitudes extends BaseController
             'vehiculo' => $vehiculo,
             'conductor' => $conductor,
             'tipoProblema' => $tipoProblema,
+            'sugerencia' => $this->generarSugerenciaMantenimiento(
+                $solicitud,
+                $tipoProblema['nombre'] ?? null
+            ),
         ];
 
         return view('solicitudes/show', $data);
+    }
+
+    /**
+     * Genera una sugerencia de acción según tipo de problema, prioridad,
+     * condición de movilidad y tipo de mantenimiento.
+     */
+    private function generarSugerenciaMantenimiento(array $solicitud, ?string $nombreProblema): string
+    {
+        $prioridad = (int)($solicitud['prioridad'] ?? 2);
+        $tipoMantenimiento = $solicitud['tipo_mantenimiento'] ?? '';
+        $condicion = $solicitud['condicion_movilidad'] ?? 'OPERATIVO';
+        $problema = $nombreProblema ?? 'General';
+
+        if ($tipoMantenimiento === 'EMERGENCIA' || $prioridad === 4 || $condicion === 'INMOVILIZADO') {
+            $texto = 'Se recomienda inmovilizar el vehículo de inmediato y derivarlo a taller para diagnóstico urgente.';
+        } elseif ($prioridad === 3) {
+            $texto = 'Se recomienda agendar la revisión en las próximas 24 horas para evitar mayores daños.';
+        } elseif ($prioridad === 2) {
+            $texto = 'Se recomienda programar la revisión durante la próxima semana.';
+        } else {
+            $texto = 'Puede incluirse en la próxima programación de mantenimiento preventivo.';
+        }
+
+        $recomendaciones = [
+            'Mecanico'    => ' Verificar nivel de aceite, correas, mangueras y estado general del motor.',
+            'Electrico'   => ' Revisar batería, alternador, fusibles y sistema de carga.',
+            'Neumaticos'  => ' Inspeccionar presión, desgaste y posibles daños en llantas.',
+            'Carroceria'  => ' Evaluar daños estructurales y realizar ajustes si afecta la seguridad.',
+            'Frenos'      => ' Revisar zapatas, discos, líquido de frenos y sistema ABS.',
+            'Suspension'  => ' Verificar amortiguadores, ballestas y terminaciones de dirección.',
+            'Motor'       => ' Realizar diagnóstico computarizado y pruebas de compresión.',
+            'Transmision' => ' Revisar nivel y estado del aceite de transmisión, y posibles tirones.',
+        ];
+
+        if (isset($recomendaciones[$problema])) {
+            $texto .= $recomendaciones[$problema];
+        }
+
+        return $texto;
     }
 }
