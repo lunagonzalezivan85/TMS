@@ -483,6 +483,18 @@
                                 </div>
                             </div>
 
+                            <div id="cardSugerencia" class="card border-0 rounded-4 mb-4 d-none" style="background:#eff6ff;border:1px solid #bfdbfe !important;">
+                                <div class="card-body d-flex align-items-start">
+                                    <div class="flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:#dbeafe;">
+                                        <i class="fas fa-lightbulb text-primary"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="fw-bold text-primary mb-1">Sugerencia de acción</h6>
+                                        <p class="mb-0 text-dark" id="res-sugerencia">-</p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="alert alert-light border rounded-4 d-flex align-items-center">
                                 <i class="fas fa-info-circle text-success me-2 fs-5"></i>
                                 <div>
@@ -720,6 +732,46 @@ function buildSummary() {
     const condicion = document.getElementById('condicion_movilidad').value;
     const inmovilizar = (parseInt(prioridad) === 4) || (tipo === 'EMERGENCIA') || (condicion === 'INMOVILIZADO');
     document.getElementById('avisoInmovilizacion').classList.toggle('d-none', !inmovilizar);
+
+    // Generar sugerencia basada en tipo de problema + prioridad + condición
+    const sugerencia = generarSugerencia(problema, parseInt(prioridad), condicion, tipo);
+    if (sugerencia) {
+        document.getElementById('cardSugerencia').classList.remove('d-none');
+        document.getElementById('res-sugerencia').textContent = sugerencia;
+    } else {
+        document.getElementById('cardSugerencia').classList.add('d-none');
+    }
+}
+
+function generarSugerencia(problema, prioridad, condicion, tipoMantenimiento) {
+    let texto = '';
+
+    if (tipoMantenimiento === 'EMERGENCIA' || prioridad === 4 || condicion === 'INMOVILIZADO') {
+        texto = 'Se recomienda inmovilizar el vehículo de inmediato y derivarlo a taller para diagnóstico urgente.';
+    } else if (prioridad === 3) {
+        texto = 'Se recomienda agendar la revisión en las próximas 24 horas para evitar mayores daños.';
+    } else if (prioridad === 2) {
+        texto = 'Se recomienda programar la revisión durante la próxima semana.';
+    } else {
+        texto = 'Puede incluirse en la próxima programación de mantenimiento preventivo.';
+    }
+
+    const recomendacionesProblema = {
+        'Mecanico': ' Verificar nivel de aceite, correas, mangueras y estado general del motor.',
+        'Electrico': ' Revisar batería, alternador, fusibles y sistema de carga.',
+        'Neumaticos': ' Inspeccionar presión, desgaste y posibles daños en llantas.',
+        'Carroceria': ' Evaluar daños estructurales y realizar ajustes si afecta la seguridad.',
+        'Frenos': ' Revisar zapatas, discos, líquido de frenos y sistema ABS.',
+        'Suspension': ' Verificar amortiguadores, ballestas y terminaciones de dirección.',
+        'Motor': ' Realizar diagnóstico computarizado y pruebas de compresión.',
+        'Transmision': ' Revisar nivel y estado del aceite de transmisión, y posibles tirones.',
+    };
+
+    if (recomendacionesProblema[problema]) {
+        texto += recomendacionesProblema[problema];
+    }
+
+    return texto;
 }
 
 // Anti doble submit
