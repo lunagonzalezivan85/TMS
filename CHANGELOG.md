@@ -25,8 +25,10 @@
 - **ADDED** - Roles `Supervisor` y `Tecnico` con usuarios de prueba; permisos de menú para gestión de solicitudes y órdenes
 - **ADDED** - `Solicitudes::asignar()` y `Solicitudes::guardarAsignacion()` — asignación de técnico a solicitud (solo admin/supervisor)
 - **ADDED** - `Solicitudes::reporte()` — hoja de reporte imprimible de la solicitud con datos del vehículo, sugerencia y firmas
-- **ADDED** - Vistas `solicitudes/asignar.php` y `solicitudes/reporte.php`
-- **CHANGED** - `solicitudes/show.php` e `index.php` — botones para asignar técnico e imprimir reporte
+- **ADDED** - Dashboards por rol (`dashboard/admin`, `dashboard/supervisor`, `dashboard/tecnico`, `dashboard/conductor`) con diseño tipo prompt/IA
+- **ADDED** - Chips con contadores y acciones rápidas en cada dashboard según rol
+- **ADDED** - Command palette con atajo `Ctrl + K` para abrir opciones rápidas filtradas por rol
+- **CHANGED** - `Auth::getRedirectByRole()` redirige al dashboard correspondiente a cada rol
 - **BD** - `vehiculos` e `historial_estado_vehiculo` — Agregado estado `EN MANTENIMIENTO` a los enums
 - **CHANGED** - `app/Models/SolicitudModel.php` — Campos y validaciones para `tipo_mantenimiento`, `ubicacion` y `condicion_movilidad`
 - **CHANGED** - `app/Config/Routes.php` — Rutas `solicitudes/buscar-vehiculo` y `solicitudes/crear` apuntan al wizard

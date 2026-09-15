@@ -342,14 +342,18 @@ class Auth extends BaseController
      */
     private function getRedirectByRole(?string $rolName)
     {
-        switch (strtolower((string) $rolName)) {
+        $rol = strtolower((string) $rolName);
+        switch ($rol) {
             case 'administrador':
-                return base_url('dashboard');
-            case 'mecánico':
+                return base_url('dashboard/admin');
+            case 'supervisor':
+                return base_url('dashboard/supervisor');
+            case 'tecnico':
             case 'mecanico':
-                return base_url('maintenance');
+            case 'mecánico':
+                return base_url('dashboard/tecnico');
             case 'conductor':
-                return base_url('vehicles');
+                return base_url('dashboard/conductor');
             default:
                 return base_url('dashboard');
         }

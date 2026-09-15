@@ -20,6 +20,10 @@ $routes->get('logout', 'Auth::logout');
 
 // Dashboard: solo requiere estar logueado
 $routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
+$routes->get('dashboard/admin', 'Dashboard::admin', ['filter' => 'auth']);
+$routes->get('dashboard/supervisor', 'Dashboard::supervisor', ['filter' => 'auth']);
+$routes->get('dashboard/tecnico', 'Dashboard::tecnico', ['filter' => 'auth']);
+$routes->get('dashboard/conductor', 'Dashboard::conductor', ['filter' => 'auth']);
 
 // Rutas protegidas con autenticación y control de acceso
 $routes->group('', ['filter' => 'access'], function($routes) {
