@@ -22,7 +22,11 @@
 - **FIXED** - `app/Controllers/Solicitudes::getData()` — Ajuste de filtros, validación de sesión y manejo de errores para DataTables
 - **FIXED** - `app/Models/SolicitudModel::buscarSolicitudes()` — Eliminada referencia a columna inexistente `s.titulo`; COALESCE en nombres de solicitante/asignado
 - **ADDED** - `app/Helpers/vehiculo_helper.php` — Estado `EN MANTENIMIENTO` con badge/clase/label
-- **ADDED** - `Solicitudes::store()` — Cambio automático del vehículo a estado `EN MANTENIMIENTO` cuando la solicitud es crítica, emergencia o inmovilizada
+- **ADDED** - Roles `Supervisor` y `Tecnico` con usuarios de prueba; permisos de menú para gestión de solicitudes y órdenes
+- **ADDED** - `Solicitudes::asignar()` y `Solicitudes::guardarAsignacion()` — asignación de técnico a solicitud (solo admin/supervisor)
+- **ADDED** - `Solicitudes::reporte()` — hoja de reporte imprimible de la solicitud con datos del vehículo, sugerencia y firmas
+- **ADDED** - Vistas `solicitudes/asignar.php` y `solicitudes/reporte.php`
+- **CHANGED** - `solicitudes/show.php` e `index.php` — botones para asignar técnico e imprimir reporte
 - **BD** - `vehiculos` e `historial_estado_vehiculo` — Agregado estado `EN MANTENIMIENTO` a los enums
 - **CHANGED** - `app/Models/SolicitudModel.php` — Campos y validaciones para `tipo_mantenimiento`, `ubicacion` y `condicion_movilidad`
 - **CHANGED** - `app/Config/Routes.php` — Rutas `solicitudes/buscar-vehiculo` y `solicitudes/crear` apuntan al wizard

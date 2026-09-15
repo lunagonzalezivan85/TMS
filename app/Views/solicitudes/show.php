@@ -1,9 +1,9 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div class="container-fluid py-4">
+<div class="container-fluid py-3">
     <div class="row justify-content-center">
-        <div class="col-lg-9">
+        <div class="col-lg-10">
             <?php if (session()->getFlashdata('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show rounded-4" role="alert">
                     <i class="fas fa-check-circle me-2"></i><?= session()->getFlashdata('success') ?>
@@ -11,58 +11,68 @@
                 </div>
             <?php endif; ?>
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3 class="fw-bold mb-0"><i class="fas fa-file-alt me-2 text-success"></i><?= $title ?></h3>
-                <a href="<?= base_url('solicitudes') ?>" class="btn btn-outline-secondary rounded-pill">
-                    <i class="fas fa-arrow-left me-2"></i>Volver al listado
-                </a>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0"><i class="fas fa-file-alt me-2 text-success"></i><?= $title ?></h4>
+                <div class="d-flex gap-2">
+                    <?php if (in_array(strtolower((string)session('rol_nombre')), ['administrador', 'supervisor']) && in_array($solicitud['estado'], ['PENDIENTE', 'APROBADA'])): ?>
+                        <a href="<?= base_url('solicitudes/asignar/' . $solicitud['id']) ?>" class="btn btn-sm btn-success rounded-pill">
+                            <i class="fas fa-user-cog me-2"></i>Asignar técnico
+                        </a>
+                    <?php endif; ?>
+                    <a href="<?= base_url('solicitudes/reporte/' . $solicitud['id']) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
+                        <i class="fas fa-print me-2"></i>Reporte
+                    </a>
+                    <a href="<?= base_url('solicitudes') ?>" class="btn btn-sm btn-outline-secondary rounded-pill">
+                        <i class="fas fa-arrow-left me-2"></i>Volver
+                    </a>
+                </div>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-3">
                 <div class="col-lg-8">
-                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                        <div class="card-header bg-white border-0 pt-4 ps-4">
-                            <h5 class="fw-bold"><i class="fas fa-car me-2 text-success"></i>Información del Vehículo</h5>
+                    <div class="card border-0 shadow-sm rounded-4 mb-3">
+                        <div class="card-header bg-white border-0 pt-3 pb-0 px-3">
+                            <h6 class="fw-bold mb-0"><i class="fas fa-car me-2 text-success"></i>Información del Vehículo</h6>
                         </div>
-                        <div class="card-body ps-4">
-                            <div class="row g-3">
+                        <div class="card-body p-3">
+                            <div class="row g-2">
                                 <div class="col-md-4">
                                     <small class="text-muted">Placa</small>
-                                    <p class="fw-semibold fs-5"><?= esc($vehiculo['placa'] ?? 'N/A') ?></p>
+                                    <p class="fw-semibold fs-5 mb-0"><?= esc($vehiculo['placa'] ?? 'N/A') ?></p>
                                 </div>
                                 <div class="col-md-4">
                                     <small class="text-muted">Marca / Modelo</small>
-                                    <p class="fw-semibold"><?= esc(($vehiculo['marca'] ?? '') . ' ' . ($vehiculo['modelo'] ?? '')) ?></p>
+                                    <p class="fw-semibold mb-0"><?= esc(($vehiculo['marca'] ?? '') . ' ' . ($vehiculo['modelo'] ?? '')) ?></p>
                                 </div>
                                 <div class="col-md-4">
                                     <small class="text-muted">Estado del vehículo</small>
-                                    <p class="fw-semibold"><?= vehiculo_estado_badge($vehiculo['estado'] ?? 'ACTIVO') ?></p>
+                                    <p class="mb-0"><?= vehiculo_estado_badge($vehiculo['estado'] ?? 'ACTIVO') ?></p>
                                 </div>
                                 <div class="col-md-4">
                                     <small class="text-muted">Kilometraje</small>
-                                    <p class="fw-semibold"><?= number_format((int)($vehiculo['kilometraje'] ?? 0)) ?> km</p>
+                                    <p class="fw-semibold mb-0"><?= number_format((int)($vehiculo['kilometraje'] ?? 0)) ?> km</p>
                                 </div>
                                 <div class="col-md-8">
                                     <small class="text-muted">Conductor asignado</small>
-                                    <p class="fw-semibold"><?= esc(($conductor['nombre'] ?? '') . ' ' . ($conductor['apellido'] ?? 'N/A')) ?></p>
+                                    <p class="fw-semibold mb-0"><?= esc(($conductor['nombre'] ?? '') . ' ' . ($conductor['apellido'] ?? 'N/A')) ?></p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-header bg-white border-0 pt-4 ps-4">
-                            <h5 class="fw-bold"><i class="fas fa-clipboard-list me-2 text-success"></i>Detalle de la Solicitud</h5>
+                        <div class="card-header bg-white border-0 pt-3 pb-0 px-3">
+                            <h6 class="fw-bold mb-0"><i class="fas fa-clipboard-list me-2 text-success"></i>Detalle de la Solicitud</h6>
                         </div>
-                        <div class="card-body ps-4">
-                            <div class="row g-3 mb-3">
+                        <div class="card-body p-3">
+                            <div class="row g-2 mb-2">
                                 <div class="col-md-6">
                                     <small class="text-muted">Tipo de mantenimiento</small>
-                                    <p class="fw-semibold"><?= esc($solicitud['tipo_mantenimiento'] ?? 'N/A') ?></p>
+                                    <p class="fw-semibold mb-0"><?= esc($solicitud['tipo_mantenimiento'] ?? 'N/A') ?></p>
                                 </div>
                                 <div class="col-md-6">
                                     <small class="text-muted">Tipo de problema</small>
-                                    <p class="fw-semibold"><?= esc($tipoProblema['nombre'] ?? 'N/A') ?></p>
+                                    <p class="fw-semibold mb-0"><?= esc($tipoProblema['nombre'] ?? 'N/A') ?></p>
                                 </div>
                                 <div class="col-md-6">
                                     <small class="text-muted">Prioridad</small>
@@ -70,28 +80,28 @@
                                     $prioridades = [1 => 'Baja', 2 => 'Media', 3 => 'Alta', 4 => 'Crítica'];
                                     $p = (int)($solicitud['prioridad'] ?? 2);
                                     ?>
-                                    <p><span class="badge <?= ['text-bg-success','text-bg-warning','text-bg-orange','text-bg-danger'][$p-1] ?? 'text-bg-secondary' ?> rounded-pill"><?= $prioridades[$p] ?? 'Media' ?></span></p>
+                                    <p class="mb-0"><span class="badge <?= ['text-bg-success','text-bg-warning','text-bg-orange','text-bg-danger'][$p-1] ?? 'text-bg-secondary' ?> rounded-pill"><?= $prioridades[$p] ?? 'Media' ?></span></p>
                                 </div>
                                 <div class="col-md-6">
                                     <small class="text-muted">Condición de movilidad</small>
-                                    <p class="fw-semibold"><?= esc($solicitud['condicion_movilidad'] ?? 'No especificada') ?></p>
+                                    <p class="fw-semibold mb-0"><?= esc($solicitud['condicion_movilidad'] ?? 'No especificada') ?></p>
                                 </div>
                                 <div class="col-12">
                                     <small class="text-muted">Ubicación actual</small>
-                                    <p class="fw-semibold"><?= esc($solicitud['ubicacion'] ?? 'No especificada') ?></p>
+                                    <p class="fw-semibold mb-0"><?= esc($solicitud['ubicacion'] ?? 'No especificada') ?></p>
                                 </div>
                             </div>
 
-                            <div class="bg-light rounded-4 p-3">
+                            <div class="bg-light rounded-3 p-2">
                                 <small class="text-muted">Descripción</small>
-                                <p class="mb-0"><?= nl2br(esc($solicitud['descripcion'])) ?></p>
+                                <p class="mb-0 small"><?= nl2br(esc($solicitud['descripcion'])) ?></p>
                             </div>
 
                             <?php if (!empty($solicitud['url_foto'])): ?>
-                                <div class="mt-4">
+                                <div class="mt-3">
                                     <small class="text-muted">Evidencia</small>
-                                    <div class="mt-2">
-                                        <a href="<?= base_url('public/' . $solicitud['url_foto']) ?>" target="_blank" class="btn btn-outline-success rounded-pill">
+                                    <div class="mt-1">
+                                        <a href="<?= base_url('public/' . $solicitud['url_foto']) ?>" target="_blank" class="btn btn-sm btn-outline-success rounded-pill">
                                             <i class="fas fa-image me-2"></i>Ver evidencia adjunta
                                         </a>
                                     </div>
@@ -103,62 +113,62 @@
 
                 <div class="col-lg-4">
                     <?php if (!empty($sugerencia)): ?>
-                    <div class="card border-0 rounded-4 mb-4" style="background:#eff6ff;border:1px solid #bfdbfe !important;">
-                        <div class="card-body p-4 d-flex align-items-start">
-                            <div class="flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:#dbeafe;">
+                    <div class="card border-0 rounded-4 mb-3" style="background:#eff6ff;border:1px solid #bfdbfe !important;">
+                        <div class="card-body p-3 d-flex align-items-start">
+                            <div class="flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:#dbeafe;">
                                 <i class="fas fa-lightbulb text-primary"></i>
                             </div>
-                            <div class="ms-3">
-                                <h6 class="fw-bold text-primary mb-1">Sugerencia de acción</h6>
-                                <p class="mb-0 text-dark"><?= esc($sugerencia) ?></p>
+                            <div class="ms-2">
+                                <h6 class="fw-bold text-primary mb-1" style="font-size:0.85rem;">Sugerencia de acción</h6>
+                                <p class="mb-0 small text-dark"><?= esc($sugerencia) ?></p>
                             </div>
                         </div>
                     </div>
                     <?php endif; ?>
 
-                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                        <div class="card-body p-4">
-                            <h6 class="text-muted mb-2">Estado actual</h6>
-                            <span class="badge text-bg-warning fs-6 rounded-pill"><?= esc($solicitud['estado']) ?></span>
-                            <hr class="my-3">
-                            <small class="text-muted d-block mb-1">Código</small>
-                            <p class="fw-bold"><?= esc($solicitud['codigo_consecutivo']) ?></p>
-                            <small class="text-muted d-block mb-1">Fecha de solicitud</small>
-                            <p class="fw-semibold"><?= date('d/m/Y H:i', strtotime($solicitud['fecha_solicitud'])) ?></p>
-                            <small class="text-muted d-block mb-1">Solicitante</small>
-                            <p class="fw-semibold"><?= esc($solicitud['solicitante']) ?></p>
+                    <div class="card border-0 shadow-sm rounded-4 mb-3">
+                        <div class="card-body p-3">
+                            <h6 class="text-muted mb-2" style="font-size:0.85rem;">Estado actual</h6>
+                            <span class="badge text-bg-warning rounded-pill"><?= esc($solicitud['estado']) ?></span>
+                            <hr class="my-2">
+                            <small class="text-muted d-block mb-0">Código</small>
+                            <p class="fw-bold mb-1"><?= esc($solicitud['codigo_consecutivo']) ?></p>
+                            <small class="text-muted d-block mb-0">Fecha de solicitud</small>
+                            <p class="fw-semibold mb-1 small"><?= date('d/m/Y H:i', strtotime($solicitud['fecha_solicitud'])) ?></p>
+                            <small class="text-muted d-block mb-0">Solicitante</small>
+                            <p class="fw-semibold mb-0 small"><?= esc($solicitud['solicitante']) ?></p>
                         </div>
                     </div>
 
                     <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-body p-4">
-                            <h6 class="fw-bold mb-3">Siguientes pasos</h6>
-                            <div class="d-flex mb-3">
-                                <div class="flex-shrink-0"><span class="badge rounded-circle bg-success p-2">1</span></div>
-                                <div class="ms-3">
-                                    <p class="fw-semibold mb-0">Aprobación</p>
-                                    <small class="text-muted">Un supervisor aprueba o rechaza la solicitud.</small>
+                        <div class="card-body p-3">
+                            <h6 class="fw-bold mb-2" style="font-size:0.85rem;">Siguientes pasos</h6>
+                            <div class="d-flex mb-2">
+                                <div class="flex-shrink-0"><span class="badge rounded-circle bg-success p-1">1</span></div>
+                                <div class="ms-2">
+                                    <p class="fw-semibold mb-0 small">Aprobación</p>
+                                    <small class="text-muted" style="font-size:0.75rem;">Un supervisor aprueba o rechaza.</small>
                                 </div>
                             </div>
-                            <div class="d-flex mb-3">
-                                <div class="flex-shrink-0"><span class="badge rounded-circle bg-secondary p-2">2</span></div>
-                                <div class="ms-3">
-                                    <p class="fw-semibold mb-0">Diagnóstico</p>
-                                    <small class="text-muted">Se evalúa si el vehículo entra en mantenimiento.</small>
+                            <div class="d-flex mb-2">
+                                <div class="flex-shrink-0"><span class="badge rounded-circle bg-secondary p-1">2</span></div>
+                                <div class="ms-2">
+                                    <p class="fw-semibold mb-0 small">Diagnóstico</p>
+                                    <small class="text-muted" style="font-size:0.75rem;">Se evalúa el vehículo.</small>
                                 </div>
                             </div>
-                            <div class="d-flex mb-3">
-                                <div class="flex-shrink-0"><span class="badge rounded-circle bg-secondary p-2">3</span></div>
-                                <div class="ms-3">
-                                    <p class="fw-semibold mb-0">Asignación</p>
-                                    <small class="text-muted">Se asigna un mecánico responsable.</small>
+                            <div class="d-flex mb-2">
+                                <div class="flex-shrink-0"><span class="badge rounded-circle bg-secondary p-1">3</span></div>
+                                <div class="ms-2">
+                                    <p class="fw-semibold mb-0 small">Asignación</p>
+                                    <small class="text-muted" style="font-size:0.75rem;">Se asigna un mecánico.</small>
                                 </div>
                             </div>
                             <div class="d-flex">
-                                <div class="flex-shrink-0"><span class="badge rounded-circle bg-secondary p-2">4</span></div>
-                                <div class="ms-3">
-                                    <p class="fw-semibold mb-0">Finalización</p>
-                                    <small class="text-muted">Reparado, descartado o pendiente de compra.</small>
+                                <div class="flex-shrink-0"><span class="badge rounded-circle bg-secondary p-1">4</span></div>
+                                <div class="ms-2">
+                                    <p class="fw-semibold mb-0 small">Finalización</p>
+                                    <small class="text-muted" style="font-size:0.75rem;">Reparado, descartado o pendiente.</small>
                                 </div>
                             </div>
                         </div>

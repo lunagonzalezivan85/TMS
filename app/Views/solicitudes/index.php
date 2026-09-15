@@ -147,9 +147,19 @@
                                 <small class="text-muted">
                                     <i class="fas fa-user me-1"></i><?= esc($s['nombre_solicitante'] ?? 'N/A') ?>
                                 </small>
-                                <a href="<?= base_url('solicitudes/show/' . $s['id']) ?>" class="btn btn-sm btn-outline-success rounded-pill">
-                                    Ver detalle<i class="fas fa-arrow-right ms-1"></i>
-                                </a>
+                                <div class="d-flex gap-2">
+                                    <?php if (in_array(strtolower((string)session('rol_nombre')), ['administrador', 'supervisor']) && in_array($estado, ['PENDIENTE', 'APROBADA'])): ?>
+                                        <a href="<?= base_url('solicitudes/asignar/' . $s['id']) ?>" class="btn btn-sm btn-success rounded-pill" title="Asignar técnico">
+                                            <i class="fas fa-user-cog"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                    <a href="<?= base_url('solicitudes/reporte/' . $s['id']) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill" title="Reporte">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <a href="<?= base_url('solicitudes/show/' . $s['id']) ?>" class="btn btn-sm btn-outline-success rounded-pill" title="Ver detalle">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

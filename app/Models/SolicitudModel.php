@@ -50,7 +50,7 @@ class SolicitudModel extends Model
         'id_solicitante' => 'required',
         'descripcion' => 'required|min_length[10]',
         'prioridad' => 'permit_empty|in_list[1,2,3,4]',
-        'estado' => 'permit_empty|in_list[PENDIENTE,PENDIENTES,PLANIFICADA,APROBADA,APROBADAS,EN_PROCESO,EN_PAUSA,COMPLETADA,CANCELADA,RECHAZADA,FINALIZADA]',
+        'estado' => 'permit_empty|in_list[PENDIENTE,PENDIENTES,PLANIFICADA,APROBADA,APROBADAS,ASIGNADA,EN_PROCESO,EN_PAUSA,COMPLETADA,CANCELADA,RECHAZADA,FINALIZADA]',
         'fecha_solicitud' => 'permit_empty|valid_date',
         'costo_estimado' => 'permit_empty|decimal',
         'costo_real' => 'permit_empty|decimal',

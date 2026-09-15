@@ -10,6 +10,7 @@ use App\Models\ConductorModel;
 use App\Models\CatalogoModel;
 use App\Models\SolicitudDocumentoModel;
 use App\Models\SolicitudHistorialModel;
+use App\Models\EmpresaModel;
 
 class Solicitudes extends BaseController
 {
@@ -19,6 +20,7 @@ class Solicitudes extends BaseController
     protected $tipoProblemaModel;
     protected $conductorModel;
     protected $catalogoModel;
+    protected $empresaModel;
     protected $session;
 
     public function __construct()
@@ -29,6 +31,7 @@ class Solicitudes extends BaseController
         $this->tipoProblemaModel = new TipoProblemaModel();
         $this->conductorModel = new ConductorModel();
         $this->catalogoModel = new CatalogoModel();
+        $this->empresaModel = new EmpresaModel();
         $this->session = session();
 
         helper(['form', 'url', 'date', 'text', 'vehiculo']);
@@ -541,6 +544,145 @@ class Solicitudes extends BaseController
         ];
 
         return view('solicitudes/show', $data);
+    }
+
+    /**
+     * Formulario para supervisor asignar técnico a una solicitud
+     */
+    public function asignar($id = null)
+    {
+        $empresaId = $this->session->get('empresa_id');
+        $rol = strtolower((string)$this->session->get('rol_nombre'));
+
+        if (!$empresaId || !$id) {
+            return redirect()->to('/auth/login');
+        }
+
+        if (!in_array($rol, ['administrador', 'supervisor'])) {
+            return redirect()->to('/solicitudes')->with('error', 'No tiene permisos para asignar técnicos.');
+        }
+
+        $solicitud = $this->solicitudModel
+            ->where('id', $id)
+            ->where('id_empresa', $empresaId)
+            ->first();
+
+        if (!$solicitud) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
+        }
+
+        // Obtener técnicos disponibles
+        $tecnicos = $this->usuarioModel
+            ->where('id_empresa', $empresaId)
+            ->where('estado', 'ACTIVO')
+            ->whereIn('id_rol', [2, 5]) // Mecanico o Tecnico
+            ->findAll();
+
+        $data = [
+            'title' => 'Asignar técnico - ' . $solicitud['codigo_consecutivo'],
+            'solicitud' => $solicitud,
+            'tecnicos' => $tecnicos,
+        ];
+
+        return view('solicitudes/asignar', $data);
+    }
+
+    /**
+     * Guardar asignación de técnico
+     */
+    public function guardarAsignacion($id = null)
+    {
+        $empresaId = $this->session->get('empresa_id');
+        $usuarioId = $this->session->get('user_id');
+        $rol = strtolower((string)$this->session->get('rol_nombre'));
+
+        if (!$this->request->is('post') || !$empresaId || !$id) {
+            return redirect()->to('/solicitudes');
+        }
+
+        if (!in_array($rol, ['administrador', 'supervisor'])) {
+            return redirect()->to('/solicitudes')->with('error', 'No tiene permisos para asignar técnicos.');
+        }
+
+        $solicitud = $this->solicitudModel
+            ->where('id', $id)
+            ->where('id_empresa', $empresaId)
+            ->first();
+
+        if (!$solicitud) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
+        }
+
+        $idTecnico = $this->request->getPost('id_tecnico');
+        if (empty($idTecnico)) {
+            return redirect()->back()->withInput()->with('error', 'Debe seleccionar un técnico.');
+        }
+
+        $tecnico = $this->usuarioModel->find($idTecnico);
+        if (!$tecnico || $tecnico['id_empresa'] != $empresaId) {
+            return redirect()->back()->withInput()->with('error', 'Técnico no válido.');
+        }
+
+        $this->solicitudModel->update($id, [
+            'id_asignado' => $idTecnico,
+            'fecha_asignacion' => date('Y-m-d H:i:s'),
+            'estado' => 'ASIGNADA',
+            'usuario_modifica' => $usuarioId,
+        ]);
+
+        return redirect()->to('/solicitudes/show/' . $id)->with('success', 'Técnico asignado correctamente.');
+    }
+
+    /**
+     * Reporte / hoja de detalle de la solicitud (vista para imprimir)
+     */
+    public function reporte($id = null)
+    {
+        $empresaId = $this->session->get('empresa_id');
+        if (!$empresaId || !$id) {
+            return redirect()->to('/auth/login');
+        }
+
+        $solicitud = $this->solicitudModel
+            ->where('id', $id)
+            ->where('id_empresa', $empresaId)
+            ->first();
+
+        if (!$solicitud) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
+        }
+
+        $vehiculo = $this->vehiculoModel->find($solicitud['id_vehiculo']);
+        $conductor = null;
+        if ($vehiculo && !empty($vehiculo['id_conductor'])) {
+            $conductor = $this->conductorModel->find($vehiculo['id_conductor']);
+        }
+        $tipoProblema = null;
+        if (!empty($solicitud['id_tipo_problema'])) {
+            $tipoProblema = $this->tipoProblemaModel->find($solicitud['id_tipo_problema']);
+        }
+        $tecnico = null;
+        if (!empty($solicitud['id_asignado'])) {
+            $tecnico = $this->usuarioModel->find($solicitud['id_asignado']);
+        }
+
+        $empresa = $this->empresaModel->find($empresaId);
+
+        $data = [
+            'title' => 'Reporte de Solicitud ' . $solicitud['codigo_consecutivo'],
+            'solicitud' => $solicitud,
+            'vehiculo' => $vehiculo,
+            'conductor' => $conductor,
+            'tipoProblema' => $tipoProblema,
+            'tecnico' => $tecnico,
+            'empresa' => $empresa,
+            'sugerencia' => $this->generarSugerenciaMantenimiento(
+                $solicitud,
+                $tipoProblema['nombre'] ?? null
+            ),
+        ];
+
+        return view('solicitudes/reporte', $data);
     }
 
     /**
