@@ -239,16 +239,6 @@
         </div>
         <?php endif; ?>
 
-        <!-- EVIDENCIA -->
-        <?php if (!empty($solicitud['url_foto'])): ?>
-        <div class="section">
-            <div class="section-title"><i class="fas fa-camera"></i> Evidencia Adjunta</div>
-            <div class="photo-container">
-                <img src="<?= base_url('public/' . $solicitud['url_foto']) ?>" alt="Evidencia">
-            </div>
-        </div>
-        <?php endif; ?>
-
         <!-- FIRMAS -->
         <div class="signatures">
             <div class="signature">
