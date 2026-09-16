@@ -286,13 +286,20 @@ class PortalConductores extends BaseController
         $qEsc = '%' . $db->escapeLikeString($q) . '%';
 
         $vehiculo = $db->query(
-            "SELECT id, placa, marca, modelo, anio, codigo_consecutivo, numero_motor
+            "SELECT id, placa, marca, modelo, anio, codigo_consecutivo, codigo_unidad, numero_motor, numero_chasis
              FROM vehiculos
              WHERE id_empresa = ?
                AND estado = 'ACTIVO'
-               AND (placa LIKE ? OR codigo_consecutivo LIKE ? OR numero_motor LIKE ?)
+               AND (placa LIKE ?
+                    OR codigo_consecutivo LIKE ?
+                    OR codigo_unidad LIKE ?
+                    OR numero_motor LIKE ?
+                    OR numero_chasis LIKE ?
+                    OR marca LIKE ?
+                    OR modelo LIKE ?
+                    OR CONCAT(marca, ' ', modelo) LIKE ?)
              LIMIT 1",
-            [$this->empresaId, $qEsc, $qEsc, $qEsc]
+            [$this->empresaId, $qEsc, $qEsc, $qEsc, $qEsc, $qEsc, $qEsc, $qEsc, $qEsc]
         )->getRowArray();
 
         if (!$vehiculo) {
