@@ -11,7 +11,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="alert alert-info mb-0 py-2 flex-grow-1 me-2">
             <i class="fas fa-info-circle"></i>
-            <strong>Arrastra y suelta</strong> los elementos para reordenarlos. Usa el ícono <i class="fas fa-grip-vertical text-muted"></i> para mover.
+            <strong>Arrastra y suelta</strong> los elementos para reordenarlos. Usa el ícono <i class="fas fa-grip-vertical text-muted"></i> para mover. Click en <i class="fas fa-chevron-down text-muted"></i> para colapsar.
         </div>
         <button type="button" class="btn btn-success btn-sm" id="btnGuardarOrden">
             <i class="fas fa-save"></i> Guardar Orden
@@ -25,10 +25,14 @@
             $html = '<div class="sortable-list" data-parent-id="">';
             foreach ($menus as $menu):
                 $orden_global++;
-                $html .= '<div class="menu-item level-' . $menu['nivel'] . '" data-id="' . $menu['id'] . '" data-orden="' . $orden_global . '">';
+                $hasChildren = !empty($menu['children']);
+                $html .= '<div class="menu-item level-' . $menu['nivel'] . ($hasChildren ? ' has-children' : '') . '" data-id="' . $menu['id'] . '" data-orden="' . $orden_global . '">';
                 $html .= '<div class="menu-content">';
                 $html .= '<div class="menu-info">';
                 $html .= '<i class="fas fa-grip-vertical drag-handle text-muted me-2"></i>';
+                if ($hasChildren):
+                    $html .= '<i class="fas fa-chevron-down toggle-children text-muted me-2" style="cursor:pointer; font-size:12px;"></i>';
+                endif;
                 $html .= '<span class="menu-icon"><i class="' . esc($menu['icono']) . '"></i></span>';
                 $html .= '<span class="menu-name">' . esc($menu['menu']) . '</span>';
                 $html .= '<span class="badge bg-secondary ms-2">Nivel ' . $menu['nivel'] . '</span>';
@@ -36,14 +40,14 @@
                 $html .= '<div class="menu-actions">';
                 $html .= '<a href="' . base_url('menu/show/' . $menu['id']) . '" class="btn btn-sm btn-outline-info" title="Ver detalles"><i class="fas fa-eye"></i></a>';
                 $html .= '<a href="' . base_url('menu/edit/' . $menu['id']) . '" class="btn btn-sm btn-outline-warning" title="Editar"><i class="fas fa-edit"></i></a>';
-                if (empty($menu['children'])):
+                if (!$hasChildren):
                     $html .= '<button type="button" class="btn btn-sm btn-outline-danger eliminar-menu-tree" data-id="' . $menu['id'] . '" title="Eliminar"><i class="fas fa-trash"></i></button>';
                 else:
                     $html .= '<button type="button" class="btn btn-sm btn-outline-secondary" disabled title="No se puede eliminar: tiene submenús"><i class="fas fa-ban"></i></button>';
                 endif;
                 $html .= '</div>';
                 $html .= '</div>';
-                if (!empty($menu['children'])):
+                if ($hasChildren):
                     $html .= '<div class="submenu-container">';
                     $html .= renderMenuItems($menu['children'], $orden_global);
                     $html .= '</div>';
@@ -136,6 +140,24 @@
     margin-top: 8px;
     padding-left: 15px;
     border-left: 2px dashed #e3e6f0;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+}
+
+.menu-item.collapsed > .submenu-container {
+    max-height: 0 !important;
+    opacity: 0;
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.toggle-children {
+    transition: transform 0.2s ease;
+}
+
+.menu-item.collapsed > .menu-content .toggle-children {
+    transform: rotate(-90deg);
 }
 
 .sortable-list {
@@ -201,6 +223,15 @@ $(document).ready(function() {
             }
         });
     });
+
+    // Colapsar/expandir nivel 1
+    $(document).on('click', '.toggle-children', function(e) {
+        e.stopPropagation();
+        $(this).closest('.menu-item').toggleClass('collapsed');
+    });
+
+    // Colapsar todo por defecto (solo nivel 1 que tiene hijos)
+    $('.menu-item.level-1.has-children').addClass('collapsed');
 
     // Guardar orden
     $('#btnGuardarOrden').on('click', function() {
