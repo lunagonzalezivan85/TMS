@@ -25,361 +25,250 @@
             <i class="fas fa-key text-primary me-2"></i>
             Gestión de Accesos
         </h1>
-        <a href="<?= base_url('acceso/create') ?>" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>
-            Nuevo Acceso
-        </a>
     </div>
 
-    <!-- Estadísticas -->
-    <div class="row mb-4" id="estadisticas-container">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Total Accesos</h5>
-                            <h2 class="mb-0" id="total-accesos">
-                                <div class="spinner-border spinner-border-sm" role="status">
-                                    <span class="visually-hidden">Cargando...</span>
-                                </div>
-                            </h2>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-key fa-2x opacity-75"></i>
-                        </div>
-                    </div>
+    <div class="row">
+        <!-- Panel izquierdo: Roles -->
+        <div class="col-lg-3 col-md-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-users me-2"></i>Roles</h6>
+                </div>
+                <div class="list-group list-group-flush" id="listaRoles">
+                    <?php foreach ($roles as $rol): ?>
+                        <button type="button"
+                                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center rol-item"
+                                data-id-rol="<?= $rol['id'] ?>">
+                            <span>
+                                <i class="fas fa-user-tag text-muted me-2"></i>
+                                <?= esc($rol['nombre']) ?>
+                            </span>
+                            <span class="badge bg-primary rounded-pill" id="badge-rol-<?= $rol['id'] ?>">0</span>
+                        </button>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Activos</h5>
-                            <h2 class="mb-0" id="accesos-activos">
-                                <div class="spinner-border spinner-border-sm" role="status">
-                                    <span class="visually-hidden">Cargando...</span>
-                                </div>
-                            </h2>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-check-circle fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Inactivos</h5>
-                            <h2 class="mb-0" id="accesos-inactivos">
-                                <div class="spinner-border spinner-border-sm" role="status">
-                                    <span class="visually-hidden">Cargando...</span>
-                                </div>
-                            </h2>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-times-circle fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Roles con Acceso</h5>
-                            <h2 class="mb-0" id="roles-con-acceso">
-                                <div class="spinner-border spinner-border-sm" role="status">
-                                    <span class="visually-hidden">Cargando...</span>
-                                </div>
-                            </h2>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-users fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Tabla de Accesos -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="card-title mb-0">
-                <i class="fas fa-list me-2"></i>
-                Lista de Accesos
-            </h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="accesos-table" class="table table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Rol</th>
-                            <th>Menú</th>
-                            <th>Estado</th>
-                            <th>Fecha Registro</th>
-                            <th width="120">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Los datos se cargan via AJAX -->
-                    </tbody>
-                </table>
+        <!-- Panel derecho: Accesos del rol seleccionado -->
+        <div class="col-lg-9 col-md-8">
+            <div class="card shadow-sm" id="panelAccesos">
+                <div class="card-header d-flex justify-content-between align-items-center py-2">
+                    <h6 class="mb-0">
+                        <i class="fas fa-shield-alt me-2 text-primary"></i>
+                        <span id="tituloPanel">Selecciona un rol</span>
+                    </h6>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnSeleccionarTodos" disabled>
+                            <i class="fas fa-check-double"></i> Todos
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnDeseleccionarTodos" disabled>
+                            <i class="fas fa-times"></i> Ninguno
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success" id="btnGuardarAccesos" disabled>
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="contenidoAccesos" class="text-center text-muted py-5">
+                        <i class="fas fa-hand-point-left fa-3x mb-3 d-block opacity-50"></i>
+                        <p class="mb-0">Selecciona un rol del panel izquierdo para ver y editar sus accesos.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+<?= $this->endSection() ?>
 
-<!-- Modal de confirmación para eliminar -->
-<div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalEliminarLabel">Confirmar Eliminación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>¿Está seguro que desea eliminar este acceso?</p>
-                <p class="text-muted">Esta acción no se puede deshacer.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" id="btnConfirmarEliminar">Eliminar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Scripts -->
+<?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let table;
-    let accesoAEliminar = null;
+    var rolSeleccionado = null;
+    var menusData = <?= json_encode($menus) ?>;
+    var csrfToken = '<?= csrf_hash() ?>';
+    var csrfName = '<?= csrf_token() ?>';
 
-    // Inicializar DataTable
-    function inicializarDataTable() {
-        if (typeof $ !== 'undefined' && $.fn.DataTable) {
-            table = $('#accesos-table').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: '<?= base_url('acceso/getData') ?>',
-                    type: 'POST',
-                    error: function(xhr, error, code) {
-                        console.error('Error en DataTable:', error);
-                        mostrarAlerta('Error al cargar los datos', 'error');
-                    }
-                },
-                columns: [
-                    { data: 'id', width: '60px' },
-                    { data: 'rol_nombre' },
-                    { data: 'menu_nombre' },
-                    { data: 'estado', orderable: false },
-                    { data: 'fecha_registro' },
-                    { data: 'acciones', orderable: false, searchable: false }
-                ],
-                order: [[0, 'desc']],
-                pageLength: 25,
-                responsive: true,
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
-                },
-                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-                     '<"row"<"col-sm-12"tr>>' +
-                     '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-                drawCallback: function() {
-                    // Re-inicializar tooltips después de cada draw
-                    if (typeof bootstrap !== 'undefined') {
-                        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-                        tooltipTriggerList.map(function(tooltipTriggerEl) {
-                            return new bootstrap.Tooltip(tooltipTriggerEl);
-                        });
-                    }
-                }
+    // Renderizar árbol de menús con checkboxes
+    function renderMenuTree(menus, accesosIds, level) {
+        level = level || 1;
+        var html = '';
+        menus.forEach(function(menu) {
+            var checked = accesosIds.indexOf(parseInt(menu.id)) !== -1 ? 'checked' : '';
+            var hasChildren = menu.children && menu.children.length > 0;
+            var indent = (level - 1) * 24;
+
+            html += '<div class="menu-access-item" style="margin-left:' + indent + 'px;">';
+            html += '<div class="d-flex align-items-center py-1">';
+            if (hasChildren) {
+                html += '<i class="fas fa-chevron-down toggle-access-children text-muted me-2" style="cursor:pointer;font-size:11px;"></i>';
+            } else {
+                html += '<i class="fas fa-circle text-muted me-2" style="font-size:6px;"></i>';
+            }
+            html += '<div class="form-check">';
+            html += '<input class="form-check-input menu-checkbox" type="checkbox" value="' + menu.id + '" id="menu-' + menu.id + '" ' + checked + '>';
+            html += '<label class="form-check-label" for="menu-' + menu.id + '">';
+            html += '<i class="' + (menu.icono || 'fas fa-folder') + ' me-1 text-muted"></i>';
+            html += esc(menu.menu);
+            html += ' <span class="badge bg-secondary ms-1">N' + menu.nivel + '</span>';
+            html += '</label>';
+            html += '</div>';
+            html += '</div>';
+
+            if (hasChildren) {
+                html += '<div class="submenu-access-container">';
+                html += renderMenuTree(menu.children, accesosIds, level + 1);
+                html += '</div>';
+            }
+            html += '</div>';
+        });
+        return html;
+    }
+
+    function esc(str) {
+        var div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
+    // Cargar accesos del rol
+    function cargarAccesos(idRol, nombreRol) {
+        rolSeleccionado = idRol;
+        document.getElementById('tituloPanel').textContent = 'Accesos de: ' + nombreRol;
+
+        // Mostrar loading
+        document.getElementById('contenidoAccesos').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Cargando...</p></div>';
+
+        // Habilitar botones
+        document.getElementById('btnSeleccionarTodos').disabled = false;
+        document.getElementById('btnDeseleccionarTodos').disabled = false;
+        document.getElementById('btnGuardarAccesos').disabled = false;
+
+        // Obtener accesos actuales del rol
+        fetch('<?= base_url('acceso/api/accesos-rol') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+                [csrfName]: csrfToken
+            },
+            body: 'id_rol=' + idRol
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(response) {
+            if (response.success) {
+                var accesosIds = response.data.map(function(id) { return parseInt(id); });
+                var html = renderMenuTree(menusData, accesosIds, 1);
+                document.getElementById('contenidoAccesos').innerHTML = html;
+
+                // Actualizar badge
+                var badge = document.getElementById('badge-rol-' + idRol);
+                if (badge) badge.textContent = accesosIds.length;
+
+                // Toggle children
+                document.querySelectorAll('.toggle-access-children').forEach(function(el) {
+                    el.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var container = this.closest('.menu-access-item').querySelector('.submenu-access-container');
+                        if (container) {
+                            var isHidden = container.style.display === 'none';
+                            container.style.display = isHidden ? '' : 'none';
+                            this.classList.toggle('fa-chevron-down');
+                            this.classList.toggle('fa-chevron-right');
+                        }
+                    });
+                });
+            } else {
+                document.getElementById('contenidoAccesos').innerHTML = '<div class="alert alert-danger">Error: ' + (response.message || 'No se pudieron cargar los accesos') + '</div>';
+            }
+        })
+        .catch(function() {
+            document.getElementById('contenidoAccesos').innerHTML = '<div class="alert alert-danger">Error al cargar los accesos</div>';
+        });
+    }
+
+    // Click en rol
+    document.querySelectorAll('.rol-item').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.rol-item').forEach(function(el) {
+                el.classList.remove('active', 'bg-primary', 'text-white');
             });
-        } else {
-            console.error('DataTables no está disponible');
-            mostrarAlerta('Error: DataTables no está cargado', 'error');
-        }
-    }
-
-    // Cargar estadísticas
-    function cargarEstadisticas() {
-        fetch('<?= base_url('acceso/getEstadisticas') ?>', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('total-accesos').textContent = data.data.total_accesos || 0;
-                document.getElementById('accesos-activos').textContent = data.data.accesos_activos || 0;
-                document.getElementById('accesos-inactivos').textContent = data.data.accesos_inactivos || 0;
-                document.getElementById('roles-con-acceso').textContent = data.data.roles_con_acceso || 0;
-            } else {
-                console.error('Error al cargar estadísticas:', data.message);
-                // Mostrar 0 en caso de error
-                document.getElementById('total-accesos').textContent = '0';
-                document.getElementById('accesos-activos').textContent = '0';
-                document.getElementById('accesos-inactivos').textContent = '0';
-                document.getElementById('roles-con-acceso').textContent = '0';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // Mostrar 0 en caso de error
-            document.getElementById('total-accesos').textContent = '0';
-            document.getElementById('accesos-activos').textContent = '0';
-            document.getElementById('accesos-inactivos').textContent = '0';
-            document.getElementById('roles-con-acceso').textContent = '0';
-        });
-    }
-
-    // Cambiar estado del acceso
-    window.cambiarEstadoAcceso = function(id) {
-        if (!confirm('¿Está seguro que desea cambiar el estado de este acceso?')) {
-            return;
-        }
-
-        fetch(`<?= base_url('acceso/cambiarEstado') ?>/${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                mostrarAlerta(data.message, 'success');
-                if (table) {
-                    table.ajax.reload(null, false);
-                }
-                cargarEstadisticas();
-            } else {
-                mostrarAlerta(data.message, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarAlerta('Error al cambiar el estado del acceso', 'error');
-        });
-    };
-
-    // Eliminar acceso
-    window.eliminarAcceso = function(id) {
-        accesoAEliminar = id;
-        const modal = new bootstrap.Modal(document.getElementById('modalEliminar'));
-        modal.show();
-    };
-
-    // Confirmar eliminación
-    document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
-        if (!accesoAEliminar) return;
-
-        fetch(`<?= base_url('acceso/delete') ?>/${accesoAEliminar}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                mostrarAlerta(data.message, 'success');
-                if (table) {
-                    table.ajax.reload(null, false);
-                }
-                cargarEstadisticas();
-            } else {
-                mostrarAlerta(data.message, 'error');
-            }
-            
-            // Cerrar modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminar'));
-            modal.hide();
-            accesoAEliminar = null;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarAlerta('Error al eliminar el acceso', 'error');
-            
-            // Cerrar modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEliminar'));
-            modal.hide();
-            accesoAEliminar = null;
+            this.classList.add('active', 'bg-primary', 'text-white');
+            var idRol = this.getAttribute('data-id-rol');
+            var nombreRol = this.textContent.trim().replace(/\d+$/, '').trim();
+            cargarAccesos(idRol, nombreRol);
         });
     });
 
-    // Función para mostrar alertas
-    function mostrarAlerta(mensaje, tipo) {
-        const alertClass = tipo === 'success' ? 'alert-success' : 'alert-danger';
-        const iconClass = tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-        
-        const alertHtml = `
-            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                <i class="fas ${iconClass} me-2"></i>
-                ${mensaje}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        `;
-        
-        // Insertar alerta al inicio del container
-        const container = document.querySelector('.container-fluid');
-        container.insertAdjacentHTML('afterbegin', alertHtml);
-        
-        // Auto-remover después de 5 segundos
-        setTimeout(() => {
-            const alert = container.querySelector('.alert');
-            if (alert) {
-                alert.remove();
+    // Seleccionar todos
+    document.getElementById('btnSeleccionarTodos').addEventListener('click', function() {
+        document.querySelectorAll('.menu-checkbox').forEach(function(cb) { cb.checked = true; });
+    });
+
+    // Deseleccionar todos
+    document.getElementById('btnDeseleccionarTodos').addEventListener('click', function() {
+        document.querySelectorAll('.menu-checkbox').forEach(function(cb) { cb.checked = false; });
+    });
+
+    // Guardar accesos
+    document.getElementById('btnGuardarAccesos').addEventListener('click', function() {
+        if (!rolSeleccionado) return;
+
+        var menuIds = [];
+        document.querySelectorAll('.menu-checkbox:checked').forEach(function(cb) {
+            menuIds.push(parseInt(cb.value));
+        });
+
+        var btn = this;
+        var originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+        fetch('<?= base_url('acceso/storeMultiple') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+                [csrfName]: csrfToken
+            },
+            body: 'id_rol=' + rolSeleccionado + '&menu_ids=' + JSON.stringify(menuIds)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(response) {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            if (response.success) {
+                mostrarAlerta(response.message, 'success');
+                var badge = document.getElementById('badge-rol-' + rolSeleccionado);
+                if (badge) badge.textContent = menuIds.length;
+            } else {
+                mostrarAlerta(response.message || 'Error al guardar', 'error');
             }
+        })
+        .catch(function() {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            mostrarAlerta('Error al guardar los accesos', 'error');
+        });
+    });
+
+    function mostrarAlerta(mensaje, tipo) {
+        var alertClass = tipo === 'success' ? 'alert-success' : 'alert-danger';
+        var iconClass = tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        var alert = document.createElement('div');
+        alert.className = 'alert ' + alertClass + ' alert-dismissible fade show';
+        alert.setAttribute('role', 'alert');
+        alert.innerHTML = '<i class="fas ' + iconClass + ' me-2"></i>' + mensaje +
+            '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+        var container = document.querySelector('.container-fluid');
+        if (container) container.prepend(alert);
+        setTimeout(function() {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(function() { alert.remove(); }, 500);
         }, 5000);
     }
-
-    // Verificar si jQuery y DataTables están disponibles
-    function verificarDependencias() {
-        let intentos = 0;
-        const maxIntentos = 50; // 5 segundos máximo
-        
-        const verificar = () => {
-            if (typeof $ !== 'undefined' && $.fn.DataTable) {
-                inicializarDataTable();
-                cargarEstadisticas();
-                return;
-            }
-            
-            intentos++;
-            if (intentos < maxIntentos) {
-                setTimeout(verificar, 100);
-            } else {
-                console.error('jQuery o DataTables no se cargaron correctamente');
-                mostrarAlerta('Error: No se pudieron cargar las dependencias necesarias', 'error');
-                // Cargar al menos las estadísticas
-                cargarEstadisticas();
-            }
-        };
-        
-        verificar();
-    }
-
-    // Inicializar
-    verificarDependencias();
 });
 </script>
 <?= $this->endSection() ?>

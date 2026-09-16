@@ -31,13 +31,18 @@ class Acceso extends SecureController
     public function index()
     {
         $this->requireAccess('acceso');
-        
+
+        $roles = $this->rolModel->orderBy('nombre', 'ASC')->findAll();
+        $menus = $this->menuModel->getMenusJerarquicos();
+
         $data = [
             'title' => 'Gestión de Accesos',
             'breadcrumb' => [
                 ['name' => 'Inicio', 'url' => base_url('dashboard')],
                 ['name' => 'Accesos', 'url' => '']
-            ]
+            ],
+            'roles' => $roles,
+            'menus' => $menus
         ];
 
         return view('acceso/index', $data);
