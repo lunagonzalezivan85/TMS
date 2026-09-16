@@ -75,11 +75,35 @@
         /* No print */
         .no-print-bar { max-width: 210mm; margin: 0 auto 10px; display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
 
+        /* ===== SEGUNDA HOJA: Hoja de trabajo del técnico ===== */
+        .page-break { page-break-before: always; }
+        .worksheet-title { background: #374151; color: white; text-align: center; padding: 8px; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; border-radius: 4px; }
+        .ref-bar { display: flex; justify-content: space-between; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; padding: 6px 10px; font-size: 11px; margin-bottom: 14px; }
+        .ref-bar strong { color: #1a56db; }
+
+        .check-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .check-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .check-item { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px; }
+        .checkbox { width: 14px; height: 14px; border: 2px solid #374151; border-radius: 3px; flex-shrink: 0; display: inline-block; }
+
+        .write-lines { margin-top: 6px; }
+        .write-line { border-bottom: 1px solid #9ca3af; height: 22px; }
+
+        .field-row { display: flex; gap: 12px; margin-bottom: 10px; }
+        .field-box { flex: 1; }
+        .field-box .f-label { font-size: 9px; text-transform: uppercase; color: #888; font-weight: 600; letter-spacing: 0.5px; }
+        .field-box .f-line { border-bottom: 1px solid #9ca3af; height: 20px; }
+
+        .materials-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .materials-table th { background: #f3f4f6; border: 1px solid #d1d5db; padding: 5px 8px; text-align: left; font-size: 10px; text-transform: uppercase; color: #555; }
+        .materials-table td { border: 1px solid #d1d5db; padding: 5px 8px; height: 22px; }
+
         @media print {
             body { background: white; }
             .page { margin: 0; padding: 10mm 15mm; min-height: auto; }
             .no-print-bar { display: none !important; }
             .report-footer { position: fixed; bottom: 0; }
+            .page-break { page-break-before: always; }
         }
     </style>
 </head>
@@ -261,6 +285,189 @@
         <!-- FOOTER -->
         <div class="report-footer">
             <?= esc($empresa['nombre'] ?? 'Transportes GMV S.A.C.') ?> &mdash; Documento generado el <?= date('d/m/Y H:i') ?> &mdash; <?= esc($solicitud['codigo_consecutivo']) ?>
+        </div>
+    </div>
+
+    <!-- ==================== SEGUNDA HOJA: HOJA DE TRABAJO DEL TÉCNICO ==================== -->
+    <div class="page page-break">
+        <!-- HEADER -->
+        <div class="report-header">
+            <img src="<?= base_url('public/assets/img/logo_tms.png') ?>" alt="Logo" class="logo">
+            <div class="company-info">
+                <h1><?= esc($empresa['nombre'] ?? 'Transportes GMV S.A.C.') ?></h1>
+                <p>Sistema de Gestión de Mantenimiento Vehicular</p>
+            </div>
+            <div class="date-info">
+                <strong><?= date('d/m/Y') ?></strong>
+                <?= date('H:i') ?>
+            </div>
+        </div>
+
+        <div class="worksheet-title">
+            Hoja de Trabajo del Técnico &mdash; <?= esc($solicitud['codigo_consecutivo']) ?>
+        </div>
+
+        <!-- Referencia -->
+        <div class="ref-bar">
+            <span><strong>Placa:</strong> <?= esc($vehiculo['placa'] ?? 'N/A') ?></span>
+            <span><strong>Vehículo:</strong> <?= esc(($vehiculo['marca'] ?? '') . ' ' . ($vehiculo['modelo'] ?? '')) ?></span>
+            <span><strong>Km:</strong> <?= number_format((int)($vehiculo['kilometraje'] ?? 0)) ?></span>
+            <span><strong>Técnico:</strong> <?= !empty($tecnico) ? esc(($tecnico['nombre'] ?? '') . ' ' . ($tecnico['apellido'] ?? '')) : '_______________' ?></span>
+        </div>
+
+        <!-- Recepción del vehículo -->
+        <div class="section">
+            <div class="section-title"><i class="fas fa-clipboard-check"></i> Recepción del Vehículo</div>
+            <div class="field-row">
+                <div class="field-box">
+                    <div class="f-label">Fecha de ingreso</div>
+                    <div class="f-line"></div>
+                </div>
+                <div class="field-box">
+                    <div class="f-label">Hora</div>
+                    <div class="f-line"></div>
+                </div>
+                <div class="field-box">
+                    <div class="f-label">Kilometraje al ingreso</div>
+                    <div class="f-line"></div>
+                </div>
+                <div class="field-box">
+                    <div class="f-label">Nivel de combustible</div>
+                    <div class="f-line"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagnóstico -->
+        <div class="section">
+            <div class="section-title"><i class="fas fa-stethoscope"></i> Diagnóstico Inicial</div>
+            <div class="check-grid">
+                <div class="check-item"><span class="checkbox"></span> Motor</div>
+                <div class="check-item"><span class="checkbox"></span> Transmisión</div>
+                <div class="check-item"><span class="checkbox"></span> Frenos</div>
+                <div class="check-item"><span class="checkbox"></span> Suspensión</div>
+                <div class="check-item"><span class="checkbox"></span> Dirección</div>
+                <div class="check-item"><span class="checkbox"></span> Sistema eléctrico</div>
+                <div class="check-item"><span class="checkbox"></span> Neumáticos</div>
+                <div class="check-item"><span class="checkbox"></span> Carrocería</div>
+                <div class="check-item"><span class="checkbox"></span> Aire acondicionado</div>
+                <div class="check-item"><span class="checkbox"></span> Sistema de escape</div>
+                <div class="check-item"><span class="checkbox"></span> Refrigeración</div>
+                <div class="check-item"><span class="checkbox"></span> Otro: ____________</div>
+            </div>
+            <div class="write-lines">
+                <div class="f-label" style="margin-top:8px;">Observaciones del diagnóstico</div>
+                <div class="write-line"></div>
+                <div class="write-line"></div>
+                <div class="write-line"></div>
+            </div>
+        </div>
+
+        <!-- Trabajos realizados -->
+        <div class="section">
+            <div class="section-title"><i class="fas fa-tools"></i> Trabajos Realizados</div>
+            <div class="check-grid cols-2">
+                <div class="check-item"><span class="checkbox"></span> Cambio de aceite y filtro</div>
+                <div class="check-item"><span class="checkbox"></span> Cambio de filtro de aire</div>
+                <div class="check-item"><span class="checkbox"></span> Cambio de filtro de combustible</div>
+                <div class="check-item"><span class="checkbox"></span> Ajuste de frenos</div>
+                <div class="check-item"><span class="checkbox"></span> Cambio de pastillas/zapatas</div>
+                <div class="check-item"><span class="checkbox"></span> Reparación de motor</div>
+                <div class="check-item"><span class="checkbox"></span> Reparación eléctrica</div>
+                <div class="check-item"><span class="checkbox"></span> Cambio de neumáticos</div>
+                <div class="check-item"><span class="checkbox"></span> Alineación y balanceo</div>
+                <div class="check-item"><span class="checkbox"></span> Otro: ____________</div>
+            </div>
+            <div class="write-lines">
+                <div class="f-label" style="margin-top:8px;">Detalle de trabajos realizados</div>
+                <div class="write-line"></div>
+                <div class="write-line"></div>
+                <div class="write-line"></div>
+                <div class="write-line"></div>
+            </div>
+        </div>
+
+        <!-- Materiales utilizados -->
+        <div class="section">
+            <div class="section-title"><i class="fas fa-boxes"></i> Materiales / Repuestos Utilizados</div>
+            <table class="materials-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">#</th>
+                        <th>Descripción</th>
+                        <th style="width:80px;">Cantidad</th>
+                        <th style="width:100px;">Unidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                    <tr>
+                        <td><?= $i ?></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <?php endfor; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Resultado final -->
+        <div class="section">
+            <div class="section-title"><i class="fas fa-flag-checkered"></i> Resultado Final</div>
+            <div class="check-grid cols-2">
+                <div class="check-item"><span class="checkbox"></span> Reparado — Vehículo operativo</div>
+                <div class="check-item"><span class="checkbox"></span> Reparación parcial — Requiere repuestos</div>
+                <div class="check-item"><span class="checkbox"></span> No reparado — Derivar a taller externo</div>
+                <div class="check-item"><span class="checkbox"></span> Pendiente — Esperando aprobación</div>
+            </div>
+            <div class="field-row" style="margin-top:10px;">
+                <div class="field-box">
+                    <div class="f-label">Fecha de salida</div>
+                    <div class="f-line"></div>
+                </div>
+                <div class="field-box">
+                    <div class="f-label">Hora</div>
+                    <div class="f-line"></div>
+                </div>
+                <div class="field-box">
+                    <div class="f-label">Kilometraje a la salida</div>
+                    <div class="f-line"></div>
+                </div>
+                <div class="field-box">
+                    <div class="f-label">Horas trabajadas</div>
+                    <div class="f-line"></div>
+                </div>
+            </div>
+            <div class="write-lines">
+                <div class="f-label" style="margin-top:4px;">Observaciones finales / recomendaciones</div>
+                <div class="write-line"></div>
+                <div class="write-line"></div>
+            </div>
+        </div>
+
+        <!-- Firmas -->
+        <div class="signatures">
+            <div class="signature">
+                <div class="line"></div>
+                <div class="name"><?= !empty($tecnico) ? esc(($tecnico['nombre'] ?? '') . ' ' . ($tecnico['apellido'] ?? '')) : '&nbsp;' ?></div>
+                <div class="role">Técnico responsable</div>
+            </div>
+            <div class="signature">
+                <div class="line"></div>
+                <div class="name">&nbsp;</div>
+                <div class="role">Supervisor de mantenimiento</div>
+            </div>
+            <div class="signature">
+                <div class="line"></div>
+                <div class="name">&nbsp;</div>
+                <div class="role">Recibido por (conductor)</div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="report-footer">
+            <?= esc($empresa['nombre'] ?? 'Transportes GMV S.A.C.') ?> &mdash; Hoja de trabajo &mdash; <?= esc($solicitud['codigo_consecutivo']) ?>
         </div>
     </div>
 </body>
