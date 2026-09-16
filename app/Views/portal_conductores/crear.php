@@ -329,6 +329,149 @@
 <?php $this->endSection(); ?>
 
 <?php $this->section('scripts') ?>
-<script src="<?= base_url('public/assets/js/modules/Portal.js') ?>"></script>
+<script>
+let pasoActual = 1;
+const totalPasos = 5;
 
+function irPaso(n) {
+    // Validar paso actual antes de avanzar
+    if (n > pasoActual && !validarPaso(pasoActual)) return;
+
+    // Ocultar todos los pasos
+    for (let i = 1; i <= totalPasos; i++) {
+        document.getElementById('step-' + i).classList.add('d-none');
+    }
+    // Mostrar paso destino
+    document.getElementById('step-' + n).classList.remove('d-none');
+    document.getElementById('step-' + n).classList.add('animate__fadeIn');
+
+    // Actualizar indicadores
+    for (let i = 1; i <= totalPasos; i++) {
+        const ind = document.getElementById('step-indicator-' + i);
+        ind.classList.remove('active', 'done');
+        if (i < n) ind.classList.add('done');
+        else if (i === n) ind.classList.add('active');
+    }
+    // Actualizar líneas
+    for (let i = 1; i < totalPasos; i++) {
+        const line = document.getElementById('line-' + i + '-' + (i + 1));
+        if (line) line.classList.toggle('done', i < n);
+    }
+
+    pasoActual = n;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validarPaso(paso) {
+    if (paso === 1) {
+        const val = document.getElementById('carnet-input').value.trim();
+        if (val.length < 3) {
+            document.getElementById('error-carnet').classList.remove('d-none');
+            return false;
+        }
+        document.getElementById('error-carnet').classList.add('d-none');
+    }
+    if (paso === 2) {
+        if (!document.getElementById('id_vehiculo').value) {
+            document.getElementById('error-vehiculo').classList.remove('d-none');
+            return false;
+        }
+        document.getElementById('error-vehiculo').classList.add('d-none');
+    }
+    if (paso === 3) {
+        if (!document.getElementById('id_tipo_problema').value) {
+            document.getElementById('error-tipo').classList.remove('d-none');
+            return false;
+        }
+        document.getElementById('error-tipo').classList.add('d-none');
+    }
+    if (paso === 4) {
+        const desc = document.getElementById('descripcion').value.trim();
+        if (desc.length < 10) {
+            document.getElementById('error-descripcion').classList.remove('d-none');
+            return false;
+        }
+        document.getElementById('error-descripcion').classList.add('d-none');
+    }
+    return true;
+}
+
+// Buscar vehículo
+document.getElementById('btn-buscar').addEventListener('click', buscarVehiculo);
+document.getElementById('buscar-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); buscarVehiculo(); }
+});
+
+function buscarVehiculo() {
+    const q = document.getElementById('buscar-input').value.trim();
+    if (q.length < 2) return;
+
+    const btn = document.getElementById('btn-buscar');
+    const skeleton = document.getElementById('buscar-skeleton');
+    const resultBox = document.getElementById('buscar-resultado');
+    const errorBox = document.getElementById('buscar-error');
+
+    btn.disabled = true;
+    resultBox.classList.add('d-none');
+    errorBox.classList.add('d-none');
+    skeleton.classList.remove('d-none');
+
+    fetch(`<?= base_url('portal/solicitud/buscar-vehiculo') ?>?q=${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then(data => {
+            skeleton.classList.add('d-none');
+            btn.disabled = false;
+
+            if (data.ok) {
+                document.getElementById('res-placa').textContent = data.placa;
+                const detalle = [data.marca, data.modelo, data.anio].filter(Boolean).join(' ');
+                document.getElementById('res-detalle').textContent = detalle + (data.codigo ? ' · Cód: ' + data.codigo : '');
+                resultBox.classList.remove('d-none');
+
+                document.getElementById('id_vehiculo').value = data.id;
+                document.getElementById('resumen-placa').textContent = data.placa;
+                document.getElementById('resumen-detalle').textContent = detalle;
+                document.getElementById('btn-paso3').disabled = false;
+                document.getElementById('error-vehiculo').classList.add('d-none');
+            } else {
+                document.getElementById('buscar-error-msg').textContent = data.mensaje;
+                errorBox.classList.remove('d-none');
+                document.getElementById('id_vehiculo').value = '';
+                document.getElementById('btn-paso3').disabled = true;
+            }
+        })
+        .catch(() => {
+            skeleton.classList.add('d-none');
+            btn.disabled = false;
+            Swal.fire('Error', 'Error en la búsqueda', 'error');
+        });
+}
+
+// Seleccionar tipo de problema
+function seleccionarTipo(el, id) {
+    document.querySelectorAll('.btn-tipo-problema').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('id_tipo_problema').value = id;
+    document.getElementById('error-tipo').classList.add('d-none');
+}
+
+// Archivo
+function mostrarArchivo(input) {
+    if (input.files && input.files[0]) {
+        document.getElementById('archivo-nombre').textContent = input.files[0].name;
+        document.getElementById('archivo-preview').classList.remove('d-none');
+        document.getElementById('drop-zone').classList.add('d-none');
+    }
+}
+
+function quitarArchivo() {
+    document.getElementById('foto').value = '';
+    document.getElementById('archivo-preview').classList.add('d-none');
+    document.getElementById('drop-zone').classList.remove('d-none');
+}
+
+function enviarFormulario() {
+    document.getElementById('wizard-form').submit();
+}
+</script>
 <?php $this->endSection(); ?>
