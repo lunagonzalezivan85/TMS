@@ -223,7 +223,7 @@
                     <div class="label">Condición de Movilidad</div>
                     <div class="value"><?= esc($solicitud['condicion_movilidad'] ?? 'No especificada') ?></div>
                 </div>
-                <div class="info-item" style="grid-column: span 2;">
+                <div class="info-item d-none" style="grid-column: span 2;">
                     <div class="label">Ubicación</div>
                     <div class="value"><?= esc($solicitud['ubicacion'] ?? 'No especificada') ?></div>
                 </div>

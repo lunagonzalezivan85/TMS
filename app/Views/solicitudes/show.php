@@ -99,7 +99,7 @@
                                     <small class="text-muted">Condición de movilidad</small>
                                     <p class="fw-semibold mb-0"><?= esc($solicitud['condicion_movilidad'] ?? 'No especificada') ?></p>
                                 </div>
-                                <div class="col-12">
+                                <div class="col-12 d-none">
                                     <small class="text-muted">Ubicación actual</small>
                                     <p class="fw-semibold mb-0"><?= esc($solicitud['ubicacion'] ?? 'No especificada') ?></p>
                                 </div>

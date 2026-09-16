@@ -72,8 +72,8 @@
                                 </select>
                             </div>
 
-                            <!-- Ubicación -->
-                            <div class="col-12">
+                            <!-- Ubicación (oculto por el momento) -->
+                            <div class="col-12 d-none">
                                 <label class="form-label fw-semibold">Ubicación actual</label>
                                 <input type="text" name="ubicacion" class="form-control" value="<?= esc($solicitud['ubicacion'] ?? '') ?>" placeholder="Ej: Taller central, Ruta 32 km 15">
                             </div>

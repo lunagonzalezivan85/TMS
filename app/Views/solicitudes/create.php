@@ -424,7 +424,7 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md-6 d-none">
                                     <label for="ubicacion" class="form-label fw-semibold">Ubicación actual</label>
                                     <input type="text" name="ubicacion" id="ubicacion" class="form-control rounded-4 py-3" placeholder="Ej: Taller central, Ruta 32 km 15">
                                 </div>
@@ -468,7 +468,7 @@
                                     <span class="summary-label">Condición</span>
                                     <span class="summary-value" id="res-condicion">-</span>
                                 </div>
-                                <div class="summary-row">
+                                <div class="summary-row d-none">
                                     <span class="summary-label">Ubicación</span>
                                     <span class="summary-value" id="res-ubicacion">-</span>
                                 </div>
