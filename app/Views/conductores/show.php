@@ -194,6 +194,20 @@ if (!empty($c['fechaIngreso'])) {
                             <div class="fs-6"><?= !empty($c['fechaRegistro']) ? date('d/m/Y H:i', strtotime($c['fechaRegistro'])) : '-' ?></div>
                         </div>
                     </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">PIN de Acceso</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fs-5 fw-bold font-monospace" id="pin-display">
+                                    <?= !empty($c['pin_acceso']) ? esc($c['pin_acceso']) : '<span class="text-muted">Sin PIN</span>' ?>
+                                </span>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="btn-generar-pin" data-id="<?= $c['id'] ?>">
+                                    <i class="fas fa-key me-1"></i><?= !empty($c['pin_acceso']) ? 'Regenerar' : 'Generar' ?>
+                                </button>
+                            </div>
+                            <small class="text-muted">PIN de 6 dígitos para acceso al portal de conductores</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -478,6 +492,36 @@ document.getElementById('confirmar-eliminacion').addEventListener('click', funct
         else Swal.fire('Error', data.message || 'Error', 'error');
     })
     .catch(() => Swal.fire('Error', 'Error al eliminar', 'error'));
+});
+
+// Generar PIN de acceso
+document.getElementById('btn-generar-pin').addEventListener('click', function() {
+    const id = this.dataset.id;
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Generando...';
+
+    fetch(`<?= base_url('conductores/generar-pin') ?>/${id}`, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('pin-display').innerHTML = data.pin;
+            btn.innerHTML = '<i class="fas fa-key me-1"></i>Regenerar';
+            Swal.fire({ icon: 'success', title: 'PIN generado', text: 'Nuevo PIN: ' + data.pin, timer: 3000, showConfirmButton: false });
+        } else {
+            Swal.fire('Error', data.message || 'Error al generar PIN', 'error');
+            btn.innerHTML = '<i class="fas fa-key me-1"></i>Generar';
+        }
+        btn.disabled = false;
+    })
+    .catch(() => {
+        Swal.fire('Error', 'Error al generar PIN', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-key me-1"></i>Generar';
+    });
 });
 </script>
 <?= $this->endSection() ?>

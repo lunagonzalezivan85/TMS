@@ -296,6 +296,7 @@ $routes->group('conductores', ['filter' => 'auth'], function($routes) {
     $routes->delete('delete/(:num)', 'Conductores::delete/$1');
     $routes->post('cambiarEstado', 'Conductores::cambiarEstado');
     $routes->post('verificarDni', 'Conductores::verificarDni');
+    $routes->post('generar-pin/(:num)', 'Conductores::generarPin/$1');
     
     // Rutas para la gestión de documentos de conductores
     $routes->get('documentos/(:num)', 'Conductores::documentos/$1');

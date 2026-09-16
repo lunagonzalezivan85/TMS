@@ -24,7 +24,8 @@ class ConductorModel extends Model
         'fechaUpdate',
         'usuarioCrea',
         'usuarioEdita',
-        'carnet'
+        'carnet',
+        'pin_acceso'
     ];
 
     // Dates

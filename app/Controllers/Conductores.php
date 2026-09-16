@@ -535,6 +535,52 @@ class Conductores extends SecureController
     }
 
     /**
+     * Generar PIN de acceso de 6 dígitos para el conductor
+     */
+    public function generarPin($id)
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Acceso no autorizado']);
+        }
+
+        $conductor = $this->conductorModel->find($id);
+        if (!$conductor) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Conductor no encontrado']);
+        }
+
+        $session = session();
+        if ($conductor['id_empresa'] != $session->get('empresa_id')) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Sin permisos']);
+        }
+
+        // Generar PIN único de 6 dígitos
+        $pin = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        // Verificar que no exista otro conductor con el mismo PIN en la empresa
+        $existe = $this->conductorModel
+            ->where('pin_acceso', $pin)
+            ->where('id_empresa', $conductor['id_empresa'])
+            ->where('id !=', $id)
+            ->first();
+
+        if ($existe) {
+            // Reintentar con otro PIN
+            $pin = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        }
+
+        $this->conductorModel->update($id, [
+            'pin_acceso' => $pin,
+            'usuarioEdita' => $session->get('user_id')
+        ]);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'pin' => $pin,
+            'message' => 'PIN generado correctamente'
+        ]);
+    }
+
+    /**
      * Obtener estadísticas de conductores
      */
     public function getEstadisticas()
