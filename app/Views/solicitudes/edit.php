@@ -29,9 +29,13 @@
                                 <label class="form-label fw-semibold">Tipo de mantenimiento</label>
                                 <select name="tipo_mantenimiento" class="form-select" required>
                                     <option value="">Seleccionar...</option>
-                                    <option value="PREVENTIVO" <?= ($solicitud['tipo_mantenimiento'] ?? '') === 'PREVENTIVO' ? 'selected' : '' ?>>Preventivo</option>
-                                    <option value="CORRECTIVO" <?= ($solicitud['tipo_mantenimiento'] ?? '') === 'CORRECTIVO' ? 'selected' : '' ?>>Correctivo</option>
-                                    <option value="EMERGENCIA" <?= ($solicitud['tipo_mantenimiento'] ?? '') === 'EMERGENCIA' ? 'selected' : '' ?>>Emergencia</option>
+                                    <?php foreach ($tiposMantenimiento as $tm): ?>
+                                        <option value="<?= $tm['id'] ?>"
+                                            <?= (($solicitud['id_tipo_mantenimiento'] ?? '') == $tm['id']
+                                                || strtoupper($solicitud['tipo_mantenimiento'] ?? '') === strtoupper($tm['nombre'])) ? 'selected' : '' ?>>
+                                            <?= esc(ucwords(strtolower($tm['nombre']))) ?>
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
 

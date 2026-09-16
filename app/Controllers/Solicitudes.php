@@ -280,24 +280,16 @@ class Solicitudes extends BaseController
             return redirect()->to('/auth/login');
         }
 
-        // Obtener tipos de problema de la empresa
-        $tiposProblema = $this->tipoProblemaModel
-            ->where('id_empresa', $empresaId)
-            ->where('estado', 'ACTIVO')
-            ->findAll();
+        // Tipos de problema desde catálogo CAT-0016
+        $tiposProblema = $this->catalogoModel->getHijosActivosPorCodigo('CAT-0016');
 
-        // Fallback: usar catalogo CAT-0010 si no hay tipos_problema
-        if (empty($tiposProblema)) {
-            $tiposProblema = $this->catalogoModel
-                ->where('idempresa', $empresaId)
-                ->where('codigo LIKE', 'CAT-0010%')
-                ->where('estado', 1)
-                ->findAll();
-        }
+        // Tipos de mantenimiento desde catálogo CAT-0010
+        $tiposMantenimiento = $this->catalogoModel->getHijosActivosPorCodigo('CAT-0010');
 
         $data = [
             'title' => 'Nueva Solicitud de Mantenimiento',
             'tiposProblema' => $tiposProblema,
+            'tiposMantenimiento' => $tiposMantenimiento,
         ];
 
         return view('solicitudes/create', $data);
@@ -394,9 +386,17 @@ class Solicitudes extends BaseController
             return redirect()->to('/auth/login');
         }
 
+        // Validar tipo de mantenimiento contra catálogo CAT-0010
+        $tiposMantenimiento = $this->catalogoModel->getHijosActivosPorCodigo('CAT-0010');
+        $tiposMantIds = array_column($tiposMantenimiento, 'id');
+        $tiposMantNombres = array_column($tiposMantenimiento, 'nombre');
+        $reglaTipoMant = !empty($tiposMantIds)
+            ? 'required|in_list[' . implode(',', $tiposMantIds) . ']'
+            : 'required|in_list[PREVENTIVO,CORRECTIVO,EMERGENCIA]';
+
         $rules = [
             'id_vehiculo' => 'required|is_natural_no_zero',
-            'tipo_mantenimiento' => 'required|in_list[PREVENTIVO,CORRECTIVO,EMERGENCIA]',
+            'tipo_mantenimiento' => $reglaTipoMant,
             'id_tipo_problema' => 'required|is_natural_no_zero',
             'prioridad' => 'required|in_list[1,2,3,4]',
             'descripcion' => 'required|min_length[10]',
@@ -432,6 +432,13 @@ class Solicitudes extends BaseController
             $fotoPath = 'uploads/solicitudes/' . $newName;
         }
 
+        // Resolver nombre del tipo de mantenimiento (el form envía el ID de catálogo)
+        $tipoMantPost = $this->request->getPost('tipo_mantenimiento');
+        $tipoMantenimientoNombre = $tipoMantPost;
+        if (is_numeric($tipoMantPost)) {
+            $tipoMantenimientoNombre = $this->catalogoModel->getNombreCatalogoPorId((int)$tipoMantPost) ?? $tipoMantPost;
+        }
+
         // Generar codigo consecutivo
         $ultimo = $this->solicitudModel->selectMax('id')->first();
         $numero = $ultimo ? ((int)$ultimo['id'] + 1) : 1;
@@ -443,7 +450,8 @@ class Solicitudes extends BaseController
             'id_vehiculo' => $this->request->getPost('id_vehiculo'),
             'id_solicitante' => $usuarioId,
             'id_tipo_problema' => $this->request->getPost('id_tipo_problema'),
-            'tipo_mantenimiento' => $this->request->getPost('tipo_mantenimiento'),
+            'id_tipo_mantenimiento' => is_numeric($this->request->getPost('tipo_mantenimiento')) ? (int)$this->request->getPost('tipo_mantenimiento') : null,
+            'tipo_mantenimiento' => $tipoMantenimientoNombre,
             'descripcion' => $this->request->getPost('descripcion'),
             'prioridad' => $this->request->getPost('prioridad'),
             'estado' => 'PENDIENTE',
@@ -464,7 +472,7 @@ class Solicitudes extends BaseController
 
             $idVehiculo = (int)$this->request->getPost('id_vehiculo');
             $prioridad = (int)$this->request->getPost('prioridad');
-            $tipoMantenimiento = $this->request->getPost('tipo_mantenimiento');
+            $tipoMantenimiento = $tipoMantenimientoNombre;
             $condicionMovilidad = $this->request->getPost('condicion_movilidad');
 
             // Si la solicitud indica que el vehiculo no debe usarse, marcarlo como EN MANTENIMIENTO
@@ -528,7 +536,7 @@ class Solicitudes extends BaseController
         }
         $tipoProblema = null;
         if (!empty($solicitud['id_tipo_problema'])) {
-            $tipoProblema = $this->tipoProblemaModel->find($solicitud['id_tipo_problema']);
+            $tipoProblema = $this->catalogoModel->find($solicitud['id_tipo_problema']);
         }
 
         $tecnico = null;
@@ -793,7 +801,7 @@ class Solicitudes extends BaseController
         }
         $tipoProblema = null;
         if (!empty($solicitud['id_tipo_problema'])) {
-            $tipoProblema = $this->tipoProblemaModel->find($solicitud['id_tipo_problema']);
+            $tipoProblema = $this->catalogoModel->find($solicitud['id_tipo_problema']);
         }
         $tecnico = null;
         if (!empty($solicitud['id_asignado'])) {
@@ -877,12 +885,14 @@ class Solicitudes extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
         }
 
-        $tiposProblema = $this->tipoProblemaModel->where('estado', 'ACTIVO')->findAll();
+        $tiposProblema = $this->catalogoModel->getHijosActivosPorCodigo('CAT-0016');
+        $tiposMantenimiento = $this->catalogoModel->getHijosActivosPorCodigo('CAT-0010');
 
         $data = [
             'title' => 'Editar Solicitud ' . $solicitud['codigo_consecutivo'],
             'solicitud' => $solicitud,
             'tiposProblema' => $tiposProblema,
+            'tiposMantenimiento' => $tiposMantenimiento,
         ];
 
         return view('solicitudes/edit', $data);
@@ -907,8 +917,18 @@ class Solicitudes extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
         }
 
+        // Resolver tipo de mantenimiento (el form envía el ID de catálogo)
+        $tipoMantPost = $this->request->getPost('tipo_mantenimiento');
+        $tipoMantenimientoNombre = $tipoMantPost;
+        $tipoMantenimientoId = null;
+        if (is_numeric($tipoMantPost)) {
+            $tipoMantenimientoId = (int)$tipoMantPost;
+            $tipoMantenimientoNombre = $this->catalogoModel->getNombreCatalogoPorId($tipoMantenimientoId) ?? $tipoMantPost;
+        }
+
         $updateData = [
-            'tipo_mantenimiento' => $this->request->getPost('tipo_mantenimiento'),
+            'tipo_mantenimiento' => $tipoMantenimientoNombre,
+            'id_tipo_mantenimiento' => $tipoMantenimientoId,
             'id_tipo_problema' => $this->request->getPost('id_tipo_problema') ?: null,
             'prioridad' => (int)$this->request->getPost('prioridad'),
             'condicion_movilidad' => $this->request->getPost('condicion_movilidad'),

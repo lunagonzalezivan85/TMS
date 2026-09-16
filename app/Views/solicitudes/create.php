@@ -331,30 +331,25 @@
                             <p class="step-subtitle">Selecciona la naturaleza de la solicitud.</p>
 
                             <div class="bento-grid">
-                                <label class="bento-card" onclick="selectTipo('PREVENTIVO')">
-                                    <input type="radio" name="tipo_mantenimiento" value="PREVENTIVO" class="d-none">
-                                    <div class="bento-icon" style="background:#e0f2fe;color:#0284c7;">
-                                        <i class="fas fa-calendar-check"></i>
+                                <?php
+                                $estilosTipo = [
+                                    'PREVENTIVO' => ['icon' => 'fa-calendar-check', 'bg' => '#e0f2fe', 'color' => '#0284c7', 'desc' => 'Mantenimiento programado'],
+                                    'CORRECTIVO' => ['icon' => 'fa-wrench', 'bg' => '#fef3c7', 'color' => '#d97706', 'desc' => 'Reparación de falla'],
+                                    'EMERGENCIA' => ['icon' => 'fa-exclamation-triangle', 'bg' => '#fee2e2', 'color' => '#dc2626', 'desc' => 'Falla crítica, vehículo fuera de servicio'],
+                                ];
+                                $defaultTipo = ['icon' => 'fa-tools', 'bg' => '#e0e7ff', 'color' => '#4f46e5', 'desc' => ''];
+                                foreach ($tiposMantenimiento as $tm):
+                                    $est = $estilosTipo[strtoupper($tm['nombre'])] ?? $defaultTipo;
+                                ?>
+                                <label class="bento-card" onclick="selectTipo(<?= $tm['id'] ?>)">
+                                    <input type="radio" name="tipo_mantenimiento" value="<?= $tm['id'] ?>" class="d-none">
+                                    <div class="bento-icon" style="background:<?= $est['bg'] ?>;color:<?= $est['color'] ?>;">
+                                        <i class="fas <?= $est['icon'] ?>"></i>
                                     </div>
-                                    <div class="bento-title">Preventivo</div>
-                                    <div class="bento-desc">Mantenimiento programado</div>
+                                    <div class="bento-title"><?= esc(ucwords(strtolower($tm['nombre']))) ?></div>
+                                    <div class="bento-desc"><?= esc($tm['descripcion'] ?? $est['desc']) ?></div>
                                 </label>
-                                <label class="bento-card" onclick="selectTipo('CORRECTIVO')">
-                                    <input type="radio" name="tipo_mantenimiento" value="CORRECTIVO" class="d-none">
-                                    <div class="bento-icon" style="background:#fef3c7;color:#d97706;">
-                                        <i class="fas fa-wrench"></i>
-                                    </div>
-                                    <div class="bento-title">Correctivo</div>
-                                    <div class="bento-desc">Reparación de falla</div>
-                                </label>
-                                <label class="bento-card" onclick="selectTipo('EMERGENCIA')">
-                                    <input type="radio" name="tipo_mantenimiento" value="EMERGENCIA" class="d-none">
-                                    <div class="bento-icon" style="background:#fee2e2;color:#dc2626;">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                    </div>
-                                    <div class="bento-title">Emergencia</div>
-                                    <div class="bento-desc">Falla crítica, vehículo fuera de servicio</div>
-                                </label>
+                                <?php endforeach; ?>
                             </div>
                         </div>
 
@@ -715,7 +710,8 @@ function buildSummary() {
     document.getElementById('res-vehiculo').textContent = selectedVehicle ? selectedVehicle.placa + ' ' + selectedVehicle.info : '-';
     document.getElementById('res-conductor').textContent = selectedVehicle ? selectedVehicle.conductor.replace('Carnet: ', '') : '-';
 
-    const tipo = document.querySelector('input[name="tipo_mantenimiento"]:checked')?.value || '-';
+    const tipoCard = document.querySelector('input[name="tipo_mantenimiento"]:checked')?.closest('.bento-card');
+    const tipo = tipoCard?.querySelector('.bento-title')?.textContent || '-';
     document.getElementById('res-tipo').textContent = tipo;
 
     const problema = document.querySelector('input[name="id_tipo_problema"]:checked')?.closest('.bento-card')?.querySelector('.bento-title')?.textContent || '-';
@@ -730,7 +726,7 @@ function buildSummary() {
     document.getElementById('res-descripcion').textContent = document.getElementById('descripcion').value;
 
     const condicion = document.getElementById('condicion_movilidad').value;
-    const inmovilizar = (parseInt(prioridad) === 4) || (tipo === 'EMERGENCIA') || (condicion === 'INMOVILIZADO');
+    const inmovilizar = (parseInt(prioridad) === 4) || (tipo.toUpperCase() === 'EMERGENCIA') || (condicion === 'INMOVILIZADO');
     document.getElementById('avisoInmovilizacion').classList.toggle('d-none', !inmovilizar);
 
     // Generar sugerencia basada en tipo de problema + prioridad + condición

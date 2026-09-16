@@ -563,7 +563,7 @@ class OrdenesTrabajo extends BaseController
 
         // Obtener datos para el formulario
         $vehiculos = $this->vehiculoModel->where('id_empresa', $empresaId)->findAll();
-        $tiposProblema = $this->tipoProblemaModel->findAll();
+        $tiposProblema = $this->catalogoModel->getHijosActivosPorCodigo('CAT-0016');
         $usuarios = $this->usuarioModel->where('id_empresa', $empresaId)->findAll();
 
         $data = [

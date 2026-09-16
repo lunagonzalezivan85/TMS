@@ -518,4 +518,36 @@ class CatalogoModel extends Model
 
         return $registro['nombre'] ?? null;
     }
+
+    /**
+     * Obtener los hijos activos de un catálogo padre identificado por código.
+     * Retorna filas completas (id, codigo, nombre, referencia, nivel).
+     */
+    public function getHijosActivosPorCodigo(string $codigo): array
+    {
+        $session = session();
+        $empresaId = $session->get('empresa_id');
+
+        $padre = $this->select('id')
+                      ->where('codigo', strtoupper(trim($codigo)))
+                      ->where('idempresa', $empresaId)
+                      ->where('estado', 1)
+                      ->groupStart()
+                            ->where('id_superior', 0)
+                            ->orWhere('id_superior IS NULL', null, false)
+                      ->groupEnd()
+                      ->orderBy('id', 'ASC')
+                      ->first();
+
+        if (!$padre) {
+            return [];
+        }
+
+        return $this->select('id, codigo, nombre, descripcion, referencia, nivel')
+                    ->where('idempresa', $empresaId)
+                    ->where('id_superior', $padre['id'])
+                    ->where('estado', 1)
+                    ->orderBy('nombre', 'ASC')
+                    ->findAll();
+    }
 }

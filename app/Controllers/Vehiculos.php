@@ -382,6 +382,7 @@ class Vehiculos extends SecureController
             'stats_combustible_6m'  => $statsCombustible6M,
             'stats_rendimiento'     => $statsRendimiento,
             'documentos'       => $documentos,
+            'tiposMantenimiento' => $this->catalogoModel->getHijosActivosPorCodigo('CAT-0010'),
         ];
 
         return view('vehiculos/show', $data);

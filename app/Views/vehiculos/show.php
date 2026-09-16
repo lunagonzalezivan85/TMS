@@ -883,9 +883,11 @@ $totalGalonesMes = (float)($stats_combustible_mes['total_litros'] ?? 0) / 3.7854
                         <div class="col-md-6">
                             <label class="form-label fw-medium">Tipo de Mantenimiento</label>
                             <select class="form-select" name="tipo_mantenimiento" required>
-                                <option value="PREVENTIVO">Preventivo</option>
-                                <option value="CORRECTIVO" selected>Correctivo</option>
-                                <option value="EMERGENCIA">Emergencia</option>
+                                <?php foreach ($tiposMantenimiento ?? [] as $tm): ?>
+                                    <option value="<?= esc(strtoupper($tm['nombre'])) ?>" <?= strtoupper($tm['nombre']) === 'CORRECTIVO' ? 'selected' : '' ?>>
+                                        <?= esc(ucwords(strtolower($tm['nombre']))) ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="col-md-6">

@@ -58,7 +58,7 @@ class SolicitudModel extends Model
         'kilometraje' => 'permit_empty|is_natural',
         'id_tipo_problema' => 'permit_empty|integer',
         'id_tipo_mantenimiento' => 'permit_empty|integer',
-        'tipo_mantenimiento' => 'permit_empty|in_list[PREVENTIVO,CORRECTIVO,EMERGENCIA]',
+        'tipo_mantenimiento' => 'permit_empty|max_length[50]',
         'observaciones' => 'permit_empty|string',
         'url_foto' => 'permit_empty|string|max_length[255]',
         'solicitante' => 'permit_empty|string|max_length[150]',
@@ -258,7 +258,7 @@ class SolicitudModel extends Model
             ->join('vehiculos v', 'v.id = s.id_vehiculo', 'left')
             ->join('usuarios u1', 'u1.id = s.id_solicitante', 'left')
             ->join('usuarios u2', 'u2.id = s.id_asignado', 'left')
-            ->join('tipos_problema tp', 'tp.id = s.id_tipo_problema', 'left')
+            ->join('catalogo tp', 'tp.id = s.id_tipo_problema', 'left')
             ->where('s.id', $idSolicitud);
         
         if ($idEmpresa) {
@@ -396,11 +396,11 @@ class SolicitudModel extends Model
         $builder = $this->db->table('solicitudes s')
             ->select('s.*, v.placa, v.modelo, v.marca, 
                     CONCAT(u1.nombre, " ", u1.apellido) as nombre_solicitante, 
-                    tp.nombre as tipo_problema, tp.categoria as categoria_problema,
+                    tp.nombre as tipo_problema, tp.referencia as categoria_problema,
                     DATEDIFF(s.fecha_limite, CURDATE()) as dias_restantes')
             ->join('vehiculos v', 'v.id = s.id_vehiculo', 'left')
             ->join('usuarios u1', 'u1.id = s.id_solicitante', 'left')
-            ->join('tipos_problema tp', 'tp.id = s.id_tipo_problema', 'left')
+            ->join('catalogo tp', 'tp.id = s.id_tipo_problema', 'left')
             ->where('s.id_asignado', $idUsuario);
       
         
@@ -463,7 +463,7 @@ class SolicitudModel extends Model
             ->join('vehiculos v', 'v.id = s.id_vehiculo', 'left')
             ->join('usuarios u1', 'u1.id = s.id_solicitante', 'left')
             ->join('usuarios u2', 'u2.id = s.id_asignado', 'left')
-            ->join('tipos_problema tp', 'tp.id = s.id_tipo_problema', 'left')
+            ->join('catalogo tp', 'tp.id = s.id_tipo_problema', 'left')
            ;
         
         // Aplicar filtros
@@ -594,7 +594,7 @@ class SolicitudModel extends Model
         // Obtener conteo por tipo de problema
         $porTipoProblema = $this->db->table('solicitudes s')
             ->select('tp.nombre, COUNT(*) as total')
-            ->join('tipos_problema tp', 'tp.id = s.id_tipo_problema', 'left')
+            ->join('catalogo tp', 'tp.id = s.id_tipo_problema', 'left')
             ->where('s.id_vehiculo', $idVehiculo)
             ->where('s.fecha_solicitud >=', $fechaInicio)
            
@@ -652,7 +652,7 @@ class SolicitudModel extends Model
         // Obtener el tipo de problema más común
         $problemaMasComun = $this->db->table('solicitudes s')
             ->select('tp.nombre, COUNT(*) as total')
-            ->join('tipos_problema tp', 'tp.id = s.id_tipo_problema', 'left')
+            ->join('catalogo tp', 'tp.id = s.id_tipo_problema', 'left')
             ->where('s.id_vehiculo', $idVehiculo)
             ->where('s.fecha_solicitud >=', $fechaInicio)
            
@@ -792,7 +792,7 @@ class SolicitudModel extends Model
         // 3. Por tipo de problema
         $tiposProblema = $this->db->table('solicitudes s')
             ->select('tp.nombre, COUNT(*) as total')
-            ->join('tipos_problema tp', 'tp.id = s.id_tipo_problema', 'left')
+            ->join('catalogo tp', 'tp.id = s.id_tipo_problema', 'left')
             ->where('s.id_empresa', $idEmpresa)
             ->where('s.fecha_solicitud >=', $fechaDesde . ' 00:00:00')
             ->where('s.fecha_solicitud <=', $fechaHasta . ' 23:59:59')
@@ -1057,7 +1057,7 @@ class SolicitudModel extends Model
         return $builder->select('s.id, s.codigo_consecutivo, s.descripcion, s.estado, s.fecha_solicitud, s.fecha_programada, s.prioridad, s.id_vehiculo, s.id_asignado, s.id_tipo_problema, v.placa, u.nombre as mecanico_asignado, tp.nombre as tipo_problema')
                     ->join('vehiculos v', 'v.id = s.id_vehiculo', 'left')
                     ->join('usuarios u', 'u.id = s.id_asignado', 'left')
-                    ->join('tipos_problema tp', 'tp.id = s.id_tipo_problema', 'left')
+                    ->join('catalogo tp', 'tp.id = s.id_tipo_problema', 'left')
                     ->where('s.id_empresa', $idEmpresa)
                     ->whereIn('s.estado', ['PENDIENTE', 'EN_PROCESO', 'FINALIZADO', 'RECHAZADO'])
                     ->orderBy('s.fecha_solicitud', 'DESC')

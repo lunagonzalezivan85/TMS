@@ -153,8 +153,8 @@ class PortalConductores extends BaseController
             ->where('estado', 'ACTIVO')
             ->findAll();
 
-        // Tipos de problema desde catálogo CAT-0010
-        $tiposProblemaCatalogo = $this->catalogoModel->getCatalogosPorCodigo('CAT-0010');
+        // Tipos de problema desde catálogo CAT-0016
+        $tiposProblemaCatalogo = $this->catalogoModel->getHijosActivosPorCodigo('CAT-0016');
         $tiposProblema = [];
         foreach ($tiposProblemaCatalogo as $tipo) {
             $categoria = $tipo['referencia'] ?? 'General';
