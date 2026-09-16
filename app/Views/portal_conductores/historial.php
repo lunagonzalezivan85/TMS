@@ -1,203 +1,108 @@
-<?php $this->extend('layouts/portal'); ?>
-<?php $this->section('content'); ?>
+<?= $this->extend('layouts/portal_oneui') ?>
+<?= $this->section('content') ?>
 
 <?php
 $badges = [
-    'PENDIENTES' => 'warning text-dark',
-    'EN_PROCESO' => 'primary',
-    'APROBADAS'  => 'info text-dark',
-    'FINALIZADA' => 'success',
-    'CANCELADA'  => 'danger',
+    'PENDIENTES' => 'pendientes',
+    'EN_PROCESO' => 'en_proceso',
+    'APROBADAS'  => 'aprobadas',
+    'ASIGNADA'   => 'asignada',
+    'FINALIZADA' => 'finalizada',
+    'CANCELADA'  => 'cancelada',
 ];
 ?>
 
-<div class="container-fluid px-3 px-sm-4 py-3 py-sm-4" style="max-width: 900px; margin: 0 auto;">
-
-    <!-- Encabezado -->
-    <div class="d-flex align-items-center justify-content-between mb-3 gap-2 animate__animated animate__fadeIn">
-        <div>
-            <h5 class="fw-bold mb-0"><i class="fas fa-list-alt me-2 text-primary"></i>Mis Solicitudes</h5>
-            <p class="text-muted mb-0 small"><?= count($solicitudes) ?> solicitud<?= count($solicitudes) !== 1 ? 'es' : '' ?> registrada<?= count($solicitudes) !== 1 ? 's' : '' ?></p>
-        </div>
-        <a href="<?= base_url('portal/solicitud/crear') ?>" class="btn btn-primary btn-sm shadow-sm rounded-pill px-3">
-            <i class="fas fa-plus me-1"></i> <span class="d-none d-sm-inline">Nueva </span>Solicitud
-        </a>
+<!-- Header -->
+<div class="d-flex align-items-center justify-content-between mb-4 animate__animated animate__fadeIn">
+    <div>
+        <h5 class="fw-bold mb-0">Mis Solicitudes</h5>
+        <p class="text-muted mb-0 small"><?= count($solicitudes) ?> registrada<?= count($solicitudes) !== 1 ? 's' : '' ?></p>
     </div>
-
-    <?php if (empty($solicitudes)): ?>
-        <div class="card border-0 shadow-sm text-center py-5">
-            <div class="card-body">
-                <i class="fas fa-inbox fa-3x text-secondary mb-3"></i>
-                <h6 class="text-muted">No tienes solicitudes registradas aún.</h6>
-                <a href="<?= base_url('portal/solicitud/crear') ?>" class="btn btn-primary mt-2">
-                    <i class="fas fa-plus me-1"></i> Crear primera solicitud
-                </a>
-            </div>
-        </div>
-    <?php else: ?>
-
-        <!-- Toggle de vistas -->
-        <div class="d-flex justify-content-end mb-3 animate__animated animate__fadeIn" style="animation-delay: 0.1s">
-            <div class="btn-group btn-group-sm shadow-sm rounded-pill overflow-hidden" role="group" id="view-toggle">
-                <button type="button" class="btn btn-primary active border-0" data-view="list" title="Vista lista">
-                    <i class="fas fa-list"></i>
-                </button>
-                <button type="button" class="btn btn-outline-primary border-0" data-view="card" title="Vista tarjetas">
-                    <i class="fas fa-th-large"></i>
-                </button>
-                <button type="button" class="btn btn-outline-primary border-0" data-view="table" title="Vista tabla">
-                    <i class="fas fa-table"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- ══════════════ VISTA LIST (default) ══════════════ -->
-        <div id="view-list" class="animate__animated">
-            <div class="d-flex flex-column gap-2">
-                <?php $idx = 0; foreach ($solicitudes as $s):
-                    $estado = $s['estado'] ?? 'PENDIENTES';
-                    $badge  = $badges[$estado] ?? 'secondary';
-                    $desc   = $s['descripcion'] ?? '';
-                    $fecha  = $s['fecha_solicitud'] ? date('d/m/Y', strtotime($s['fecha_solicitud'])) : '—';
-                ?>
-                <div class="card border-0 shadow-sm animate__animated animate__fadeInUp" style="animation-delay: <?= ($idx * 0.05) ?>s">
-                    <div class="card-body p-3">
-<?php $idx++; ?>
-                        <div class="d-flex align-items-start gap-3">
-                            <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0"
-                                 style="width:42px;height:42px;">
-                                <i class="fas fa-truck text-primary"></i>
-                            </div>
-                            <div class="flex-grow-1 overflow-hidden">
-                                <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
-                                    <span class="fw-semibold"><?= esc($s['placa'] ?? 'N/A') ?></span>
-                                    <span class="badge bg-<?= $badge ?> flex-shrink-0"><?= esc($estado) ?></span>
-                                </div>
-                                <div class="text-muted small text-truncate mb-1"><?= esc(($s['marca'] ?? '') . ' ' . ($s['modelo'] ?? '')) ?></div>
-                                <div class="small text-truncate text-secondary"><?= esc($desc) ?></div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
-                            <span class="text-muted" style="font-size:.75rem"><i class="fas fa-calendar-alt me-1"></i><?= $fecha ?></span>
-                            <span class="text-muted" style="font-size:.75rem">#<?= esc($s['id']) ?></span>
-                        </div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-
-        <!-- ══════════════ VISTA CARD ══════════════ -->
-        <div id="view-card" class="d-none">
-            <div class="row g-3">
-                <?php foreach ($solicitudes as $s):
-                    $estado = $s['estado'] ?? 'PENDIENTES';
-                    $badge  = $badges[$estado] ?? 'secondary';
-                    $fecha  = $s['fecha_solicitud'] ? date('d/m/Y', strtotime($s['fecha_solicitud'])) : '—';
-                ?>
-                <div class="col-12 col-sm-6 col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center"
-                                     style="width:38px;height:38px;">
-                                    <i class="fas fa-truck text-primary small"></i>
-                                </div>
-                                <span class="badge bg-<?= $badge ?>"><?= esc($estado) ?></span>
-                            </div>
-                            <div class="fw-semibold mb-0"><?= esc($s['placa'] ?? 'N/A') ?></div>
-                            <div class="text-muted small mb-2"><?= esc(($s['marca'] ?? '') . ' ' . ($s['modelo'] ?? '')) ?></div>
-                            <p class="small text-secondary mb-0" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
-                                <?= esc($s['descripcion'] ?? '') ?>
-                            </p>
-                        </div>
-                        <div class="card-footer bg-transparent border-top py-2 px-3 d-flex justify-content-between">
-                            <span class="text-muted" style="font-size:.72rem"><i class="fas fa-calendar-alt me-1"></i><?= $fecha ?></span>
-                            <span class="text-muted" style="font-size:.72rem">#<?= esc($s['id']) ?></span>
-                        </div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-
-        <!-- ══════════════ VISTA TABLE ══════════════ -->
-        <div id="view-table" class="d-none">
-            <div class="card border-0 shadow-sm">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-3">#</th>
-                                <th>Vehículo</th>
-                                <th class="d-none d-md-table-cell">Descripción</th>
-                                <th>Estado</th>
-                                <th class="d-none d-sm-table-cell">Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($solicitudes as $s):
-                                $estado = $s['estado'] ?? 'PENDIENTES';
-                                $badge  = $badges[$estado] ?? 'secondary';
-                                $fecha  = $s['fecha_solicitud'] ? date('d/m/Y', strtotime($s['fecha_solicitud'])) : '—';
-                            ?>
-                            <tr>
-                                <td class="ps-3 fw-bold text-muted small"><?= esc($s['id']) ?></td>
-                                <td>
-                                    <div class="fw-semibold small"><?= esc($s['placa'] ?? 'N/A') ?></div>
-                                    <div class="text-muted" style="font-size:.72rem"><?= esc(($s['marca'] ?? '') . ' ' . ($s['modelo'] ?? '')) ?></div>
-                                </td>
-                                <td class="d-none d-md-table-cell">
-                                    <div class="text-truncate small" style="max-width:260px;"><?= esc($s['descripcion'] ?? '') ?></div>
-                                </td>
-                                <td><span class="badge bg-<?= $badge ?>"><?= esc($estado) ?></span></td>
-                                <td class="small text-muted d-none d-sm-table-cell"><?= $fecha ?></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-    <?php endif; ?>
-
+    <a href="<?= base_url('portal/solicitud/crear') ?>" class="btn btn-oneui btn-oneui-primary btn-sm">
+        <i class="fas fa-plus me-1"></i> Nueva
+    </a>
 </div>
 
+<?php if (empty($solicitudes)): ?>
+    <div class="oneui-card text-center py-5 animate__animated animate__fadeIn">
+        <i class="fas fa-inbox fa-3x text-muted opacity-25 mb-3"></i>
+        <p class="text-muted mb-3">No tienes solicitudes registradas</p>
+        <a href="<?= base_url('portal/solicitud/crear') ?>" class="btn btn-oneui btn-oneui-primary">
+            <i class="fas fa-plus me-1"></i> Crear primera solicitud
+        </a>
+    </div>
+<?php else: ?>
+
+    <!-- Filtros por estado -->
+    <div class="d-flex gap-2 mb-3 overflow-auto pb-1 animate__animated animate__fadeIn" style="animation-delay:.05s">
+        <button class="btn btn-sm rounded-pill px-3 filtro-estado active" data-estado="" style="background:var(--primary);color:#fff;border:none;font-size:.75rem;font-weight:600;">Todas</button>
+        <button class="btn btn-sm rounded-pill px-3 filtro-estado" data-estado="PENDIENTES" style="background:#fef3c7;color:#92400e;border:none;font-size:.75rem;font-weight:600;">Pendientes</button>
+        <button class="btn btn-sm rounded-pill px-3 filtro-estado" data-estado="EN_PROCESO" style="background:#dbeafe;color:#1e40af;border:none;font-size:.75rem;font-weight:600;">En Proceso</button>
+        <button class="btn btn-sm rounded-pill px-3 filtro-estado" data-estado="FINALIZADA" style="background:#dcfce7;color:#166534;border:none;font-size:.75rem;font-weight:600;">Finalizadas</button>
+    </div>
+
+    <!-- Lista de solicitudes -->
+    <div class="d-flex flex-column gap-2" id="lista-solicitudes">
+        <?php foreach ($solicitudes as $i => $s):
+            $estado = $s['estado'] ?? 'PENDIENTES';
+            $estadoClass = $badges[$estado] ?? 'pendientes';
+            $fecha = $s['fecha_solicitud'] ? date('d/m/Y', strtotime($s['fecha_solicitud'])) : '—';
+            $hora = $s['fecha_solicitud'] ? date('H:i', strtotime($s['fecha_solicitud'])) : '';
+        ?>
+        <a href="<?= base_url('portal/solicitud/seguimiento/' . $s['id']) ?>"
+           class="oneui-card d-flex align-items-center gap-3 text-decoration-none solicitud-item animate__animated animate__fadeInUp"
+           style="animation-delay:<?= (0.1 + $i * 0.04) ?>s;color:var(--text);"
+           data-estado="<?= esc($estado) ?>">
+
+            <div class="bento-icon flex-shrink-0" style="width:42px;height:42px;font-size:1rem;background:#f0f4f8;color:var(--muted);border-radius:14px;">
+                <i class="fas fa-truck"></i>
+            </div>
+
+            <div class="flex-grow-1 overflow-hidden">
+                <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+                    <span class="fw-semibold small"><?= esc($s['placa'] ?? 'N/A') ?></span>
+                    <span class="status-pill <?= $estadoClass ?>"><?= esc($estado) ?></span>
+                </div>
+                <div class="text-muted small text-truncate mb-1"><?= esc(($s['marca'] ?? '') . ' ' . ($s['modelo'] ?? '')) ?></div>
+                <div class="small text-truncate" style="color:var(--muted);"><?= esc($s['descripcion'] ?? '') ?></div>
+            </div>
+
+            <div class="text-end flex-shrink-0">
+                <div class="text-muted" style="font-size:.7rem;"><?= $fecha ?></div>
+                <div class="text-muted" style="font-size:.65rem;"><?= $hora ?></div>
+                <i class="fas fa-chevron-right text-muted mt-1" style="font-size:.65rem;"></i>
+            </div>
+        </a>
+        <?php endforeach; ?>
+    </div>
+
+<?php endif; ?>
+
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const views   = ['list', 'card', 'table'];
-    const stored  = localStorage.getItem('historial_view') || 'list';
+document.querySelectorAll('.filtro-estado').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const estado = this.dataset.estado;
 
-    function activarVista(v) {
-        views.forEach(function (name) {
-            const el = document.getElementById('view-' + name);
-            if (el) {
-                if (name === v) {
-                    el.classList.remove('d-none');
-                    el.classList.add('animate__fadeIn');
-                } else {
-                    el.classList.add('d-none');
-                }
+        // Actualizar botones activos
+        document.querySelectorAll('.filtro-estado').forEach(b => {
+            b.classList.remove('active');
+            b.style.background = '';
+            b.style.color = '';
+        });
+        this.classList.add('active');
+        this.style.background = 'var(--primary)';
+        this.style.color = '#fff';
+
+        // Filtrar items
+        document.querySelectorAll('.solicitud-item').forEach(item => {
+            if (!estado || item.dataset.estado === estado) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
             }
-        });
-        document.querySelectorAll('#view-toggle button').forEach(function (btn) {
-            const isActive = btn.dataset.view === v;
-            btn.classList.toggle('btn-primary', isActive);
-            btn.classList.toggle('btn-outline-primary', !isActive);
-            btn.classList.toggle('active', isActive);
-        });
-        localStorage.setItem('historial_view', v);
-    }
-
-    activarVista(stored);
-
-    document.querySelectorAll('#view-toggle button').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            activarVista(btn.dataset.view);
         });
     });
 });
 </script>
 
-<?php $this->endSection(); ?>
+<?= $this->endSection() ?>

@@ -236,13 +236,17 @@ $routes->group('ordenes-trabajo', ['filter' => 'auth'], function($routes) {
 // Alias: solicitudes/crear → Solicitudes::create (usado en Menu.php)
 $routes->get('solicitudes/crear', 'Solicitudes::create', ['filter' => 'auth']);
 
-// Portal de Conductores (sin login, acceso público — futuro: auth por PIN)
+// Portal de Conductores (auth por PIN)
 $routes->group('portal', function($routes) {
+    $routes->get('login',                    'PortalConductores::login');
+    $routes->post('login',                   'PortalConductores::doLogin');
+    $routes->get('logout',                   'PortalConductores::logout');
     $routes->get('',                         'PortalConductores::index');
     $routes->get('solicitud/crear',          'PortalConductores::crear');
     $routes->post('solicitud/store',         'PortalConductores::store');
     $routes->get('solicitud/confirmacion/(:num)', 'PortalConductores::confirmacion/$1');
     $routes->get('solicitud/historial',      'PortalConductores::historial');
+    $routes->get('solicitud/seguimiento/(:num)', 'PortalConductores::seguimiento/$1');
     $routes->get('solicitud/buscar-vehiculo','PortalConductores::buscarVehiculo');
 });
 
