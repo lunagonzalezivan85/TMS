@@ -752,10 +752,20 @@ class OrdenesTrabajo extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Orden no encontrada');
         }
 
-        // Verificar que la orden esté en estado EN_PROCESO
-        if ($orden['estado'] !== 'EN_PROCESO') {
+        // Verificar que la orden esté en un estado que permita realizar el trabajo
+        $estadoOrden = strtoupper($orden['estado'] ?? '');
+        if (!in_array($estadoOrden, ['EN_PROCESO', 'ASIGNADA', 'APROBADA'])) {
             return redirect()->to('ordenes-trabajo/show/' . $id)
-                           ->with('error', 'La orden debe estar en estado EN_PROCESO para poder realizarla');
+                           ->with('error', 'La orden debe estar ASIGNADA, APROBADA o EN_PROCESO para poder realizarla');
+        }
+
+        // Auto-transicionar a EN_PROCESO si está ASIGNADA o APROBADA
+        if (in_array($estadoOrden, ['ASIGNADA', 'APROBADA'])) {
+            $this->solicitudModel->update($id, [
+                'estado' => 'EN_PROCESO',
+                'usuario_actualiza' => $usuarioId
+            ]);
+            $orden['estado'] = 'EN_PROCESO';
         }
 
         // Últimos 3 registros de combustible del vehículo
@@ -798,9 +808,10 @@ class OrdenesTrabajo extends BaseController
             return redirect()->to('ordenes-trabajo')->with('error', 'Orden no encontrada');
         }
 
-        if ($orden['estado_orden'] !== 'EN_PROCESO') {
+        $estadoOrden = strtoupper($orden['estado_orden'] ?? $orden['estado'] ?? '');
+        if (!in_array($estadoOrden, ['EN_PROCESO', 'ASIGNADA', 'APROBADA'])) {
             return redirect()->to('ordenes-trabajo/show/' . $id)
-                           ->with('error', 'Solo se pueden guardar trabajos en órdenes EN PROCESO');
+                           ->with('error', 'Solo se pueden guardar trabajos en órdenes ASIGNADAS, APROBADAS o EN PROCESO');
         }
 
        

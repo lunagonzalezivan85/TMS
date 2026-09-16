@@ -24,6 +24,11 @@
                             <i class="fas fa-user-cog me-2"></i>Asignar técnico
                         </a>
                     <?php endif; ?>
+                    <?php if (in_array(strtoupper($solicitud['estado']), ['ASIGNADA', 'APROBADA', 'EN_PROCESO'])): ?>
+                        <a href="<?= base_url('ordenes-trabajo/realizar/' . $solicitud['id']) ?>" class="btn btn-sm btn-info rounded-pill text-white">
+                            <i class="fas fa-clipboard-list me-2"></i>Llenar hoja de trabajo
+                        </a>
+                    <?php endif; ?>
                     <a href="<?= base_url('solicitudes/edit/' . $solicitud['id']) ?>" class="btn btn-sm btn-outline-warning rounded-pill">
                         <i class="fas fa-edit me-2"></i>Editar
                     </a>
