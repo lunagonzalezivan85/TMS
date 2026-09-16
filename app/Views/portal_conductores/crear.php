@@ -127,15 +127,18 @@
 
         <!-- Resultado de búsqueda -->
         <div id="buscar-resultado" class="d-none mb-2 animate__animated animate__fadeIn">
-            <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="border:2px solid var(--primary);background:#eff6ff;">
-                <div class="rounded-circle p-2 flex-shrink-0" style="background:rgba(37,99,235,.15);">
-                    <i class="fas fa-truck text-primary"></i>
+            <div class="p-3 rounded-3" style="border:2px solid var(--primary);background:#eff6ff;">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="rounded-circle p-2 flex-shrink-0" style="background:rgba(37,99,235,.15);">
+                        <i class="fas fa-truck text-primary"></i>
+                    </div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="fw-bold" id="res-placa"></div>
+                        <div class="text-muted small" id="res-detalle"></div>
+                    </div>
+                    <i class="fas fa-check-circle text-primary fa-lg flex-shrink-0 animate__animated animate__bounceIn"></i>
                 </div>
-                <div class="flex-grow-1 overflow-hidden">
-                    <div class="fw-bold" id="res-placa"></div>
-                    <div class="text-muted small text-truncate" id="res-detalle"></div>
-                </div>
-                <i class="fas fa-check-circle text-primary fa-lg flex-shrink-0 animate__animated animate__bounceIn"></i>
+                <div class="d-flex flex-wrap gap-1" id="res-chips"></div>
             </div>
         </div>
 
@@ -425,7 +428,18 @@ function buscarVehiculo() {
             if (data.ok) {
                 document.getElementById('res-placa').textContent = data.placa;
                 const detalle = [data.marca, data.modelo, data.anio].filter(Boolean).join(' ');
-                document.getElementById('res-detalle').textContent = detalle + (data.codigo ? ' · Cód: ' + data.codigo : '');
+                document.getElementById('res-detalle').textContent = detalle;
+
+                // Chips con todos los códigos
+                const chips = [];
+                if (data.codigo)        chips.push({ label: 'Cód', value: data.codigo });
+                if (data.codigo_unidad) chips.push({ label: 'Unidad', value: data.codigo_unidad });
+                if (data.motor)         chips.push({ label: 'Motor', value: data.motor });
+                if (data.chasis)        chips.push({ label: 'Chasis', value: data.chasis });
+                document.getElementById('res-chips').innerHTML = chips.map(c =>
+                    `<span class="badge rounded-pill" style="background:#dbeafe;color:#1e40af;font-size:.68rem;font-weight:600;">${c.label}: ${c.value}</span>`
+                ).join('');
+
                 resultBox.classList.remove('d-none');
 
                 document.getElementById('id_vehiculo').value = data.id;

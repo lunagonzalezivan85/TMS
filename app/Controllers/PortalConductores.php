@@ -307,13 +307,16 @@ class PortalConductores extends BaseController
         }
 
         return $this->response->setJSON([
-            'ok'      => true,
-            'id'      => $vehiculo['id'],
-            'placa'   => $vehiculo['placa'],
-            'marca'   => $vehiculo['marca'] ?? '',
-            'modelo'  => $vehiculo['modelo'] ?? '',
-            'anio'    => $vehiculo['anio'] ?? '',
-            'codigo'  => $vehiculo['codigo_consecutivo'] ?? '',
+            'ok'           => true,
+            'id'           => $vehiculo['id'],
+            'placa'        => $vehiculo['placa'],
+            'marca'        => $vehiculo['marca'] ?? '',
+            'modelo'       => $vehiculo['modelo'] ?? '',
+            'anio'         => $vehiculo['anio'] ?? '',
+            'codigo'       => $vehiculo['codigo_consecutivo'] ?? '',
+            'codigo_unidad'=> $vehiculo['codigo_unidad'] ?? '',
+            'motor'        => $vehiculo['numero_motor'] ?? '',
+            'chasis'       => $vehiculo['numero_chasis'] ?? '',
         ]);
     }
 
