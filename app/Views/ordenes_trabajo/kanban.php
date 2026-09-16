@@ -373,10 +373,10 @@
             $kb_labels = [
                 'PENDIENTE' => 'Por hacer',
                 'EN_PROCESO' => 'En progreso',
-                'FINALIZADO' => 'Finalizadas',
-                'RECHAZADO' => 'Rechazadas'
+                'FINALIZADA' => 'Finalizadas',
+                'RECHAZADA' => 'Rechazadas'
             ];
-            $kb_order = ['PENDIENTE','EN_PROCESO','FINALIZADO','RECHAZADO'];
+            $kb_order = ['PENDIENTE','EN_PROCESO','FINALIZADA','RECHAZADA'];
             ?>
             <div class="row g-3">
                 <?php foreach ($kb_order as $estado): ?>

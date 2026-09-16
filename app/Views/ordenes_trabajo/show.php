@@ -8,12 +8,12 @@
 <?php
 $estadoActual = $orden['estado_orden'] ?? $orden['estado'] ?? 'N/A';
 $estadoTexto = [
-    'PENDIENTES' => 'Pendiente', 'APROBADAS' => 'Aprobada',
+    'PENDIENTE' => 'Pendiente', 'APROBADA' => 'Aprobada',
     'EN_PROCESO' => 'En Proceso', 'FINALIZADA' => 'Finalizada',
     'PLANIFICADA' => 'Planificada'
 ];
 $badgeClass = [
-    'PENDIENTES' => 'bg-warning text-dark', 'APROBADAS' => 'bg-success',
+    'PENDIENTE' => 'bg-warning text-dark', 'APROBADA' => 'bg-success',
     'EN_PROCESO' => 'bg-primary', 'FINALIZADA' => 'bg-secondary',
     'PLANIFICADA' => 'bg-info'
 ];
@@ -80,15 +80,15 @@ $diasDesdeCreacion = !empty($orden['fecha_solicitud'])
                         <li><a class="dropdown-item" href="<?= site_url('historial-orden-trabajo/create/' . $orden['id']) ?>">
                             <i class="fas fa-exchange-alt me-2"></i>Cambiar Estado
                         </a></li>
-                        <?php if ($estadoActual === 'PENDIENTES'): ?>
+                        <?php if ($estadoActual === 'PENDIENTE'): ?>
                         <li><button type="button" class="dropdown-item" onclick="cambiarEstado('EN_PROCESO')">
                             <i class="fas fa-play me-2 text-primary"></i>Iniciar Trabajo
                         </button></li>
-                        <li><button type="button" class="dropdown-item" onclick="cambiarEstado('APROBADAS')">
+                        <li><button type="button" class="dropdown-item" onclick="cambiarEstado('APROBADA')">
                             <i class="fas fa-check me-2 text-success"></i>Aprobar
                         </button></li>
                         <?php endif; ?>
-                        <?php if ($estadoActual === 'APROBADAS'): ?>
+                        <?php if ($estadoActual === 'APROBADA'): ?>
                         <li><button type="button" class="dropdown-item" onclick="cambiarEstado('EN_PROCESO')">
                             <i class="fas fa-play me-2 text-primary"></i>Iniciar Trabajo
                         </button></li>

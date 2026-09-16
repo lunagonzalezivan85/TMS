@@ -75,19 +75,19 @@
                                 <span class="ml-2">Pendientes</span>
                             </div>
                             <span class="badge bg-warning text-dark badge-pill">
-                                <?= $conteoEstados['PENDIENTES'] ?? 0 ?>
+                                <?= $conteoEstados['PENDIENTE'] ?? 0 ?>
                             </span>
                         </a>
                         
                         <!-- Aprobadas -->
-                        <a href="<?= base_url('ordenes-trabajo') ?>?estado=APROBADAS" 
+                        <a href="<?= base_url('ordenes-trabajo') ?>?estado=APROBADA" 
                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                             <div>
                                 <i class="fas fa-check-circle text-success"></i>
                                 <span class="ml-2">Aprobadas</span>
                             </div>
                             <span class="badge bg-success text-white badge-pill">
-                                <?= $conteoEstados['APROBADAS'] ?? 0 ?>
+                                <?= $conteoEstados['APROBADA'] ?? 0 ?>
                             </span>
                         </a>
                         
@@ -266,7 +266,7 @@ function aprobarSolicitud(id) {
             method: 'POST',
             data: {
                 id: id,
-                estado: 'APROBADAS',
+                estado: 'APROBADA',
                 <?= csrf_token() ?>: '<?= csrf_hash() ?>'
             },
             success: function(response) {

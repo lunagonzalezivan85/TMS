@@ -180,7 +180,7 @@ class OrdenesTrabajo extends BaseController
         }
 
         // Filtros para la consulta
-        $filtros = ['estado' => 'PENDIENTES'];
+        $filtros = ['estado' => 'PENDIENTE'];
         
         // Si no es administrador, solo ver las asignadas al usuario
         if ($rolId != 1) { // Asumiendo que rol_id 1 es ADMINISTRADOR
@@ -476,7 +476,7 @@ class OrdenesTrabajo extends BaseController
             'id_tipo_problema' => $tipoProblemaId,
             'descripcion' => $descripcionDetallada,
             'prioridad' => '1',
-            'estado' => 'PENDIENTES',
+            'estado' => 'PENDIENTE',
             'fecha_solicitud' => date('Y-m-d H:i:s'),
             'usuario_crea' => $usuarioId,
             'url_foto' => $fotoPath,
@@ -604,7 +604,7 @@ class OrdenesTrabajo extends BaseController
             'id_tipo_problema' => 'required|is_natural_no_zero',
             'descripcion' => 'required|min_length[10]',
             'prioridad' => 'required|in_list[BAJA,MEDIA,ALTA,CRITICA]',
-            'estado' => 'required|in_list[PLANIFICADA,PENDIENTES,APROBADAS,EN_PROCESO,FINALIZADA]',
+            'estado' => 'required|in_list[PLANIFICADA,PENDIENTE,APROBADA,EN_PROCESO,FINALIZADA]',
             'fecha_planificacion' => 'permit_empty|valid_date'
         ];
 
@@ -1020,10 +1020,10 @@ class OrdenesTrabajo extends BaseController
 
         // Obtener solicitudes agrupadas por estado
         $solicitudesPorEstado = [
-            'PENDIENTE' => $this->solicitudModel->getSolicitudesPorEstado($empresaId, 'PENDIENTES'),
+            'PENDIENTE' => $this->solicitudModel->getSolicitudesPorEstado($empresaId, 'PENDIENTE'),
             'EN_PROCESO' => $this->solicitudModel->getSolicitudesPorEstado($empresaId, 'EN_PROCESO'),
-            'FINALIZADO' => $this->solicitudModel->getSolicitudesPorEstado($empresaId, 'FINALIZADO'),
-            'RECHAZADO' => $this->solicitudModel->getSolicitudesPorEstado($empresaId, 'EN_PROCESO_COMPRA')
+            'FINALIZADA' => $this->solicitudModel->getSolicitudesPorEstado($empresaId, 'FINALIZADA'),
+            'RECHAZADA' => $this->solicitudModel->getSolicitudesPorEstado($empresaId, 'RECHAZADA')
         ];
 
         // Obtener conteos
@@ -1117,8 +1117,8 @@ class OrdenesTrabajo extends BaseController
         $colores = [
             'PENDIENTE' => '#ffc107',    // Amarillo
             'EN_PROCESO' => '#fd7e14',   // Naranja
-            'FINALIZADO' => '#28a745',   // Verde
-            'RECHAZADO' => '#dc3545'     // Rojo
+            'FINALIZADA' => '#28a745',   // Verde
+            'RECHAZADA' => '#dc3545'     // Rojo
         ];
 
         return $colores[$estado] ?? '#6c757d'; // Gris por defecto

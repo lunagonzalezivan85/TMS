@@ -32,8 +32,8 @@
                             <select name="estado" id="estado" class="form-control">
                                 <option value="">Todos los estados</option>
                                 <option value="PLANIFICADA" <?= (isset($filtros['estado']) && $filtros['estado'] == 'PLANIFICADA') ? 'selected' : '' ?>>Planificada</option>
-                                <option value="PENDIENTES" <?= (isset($filtros['estado']) && $filtros['estado'] == 'PENDIENTES') ? 'selected' : '' ?>>Pendientes</option>
-                                <option value="APROBADAS" <?= (isset($filtros['estado']) && $filtros['estado'] == 'APROBADAS') ? 'selected' : '' ?>>Aprobadas</option>
+                                <option value="PENDIENTE" <?= (isset($filtros['estado']) && $filtros['estado'] == 'PENDIENTE') ? 'selected' : '' ?>>Pendientes</option>
+                                <option value="APROBADA" <?= (isset($filtros['estado']) && $filtros['estado'] == 'APROBADA') ? 'selected' : '' ?>>Aprobadas</option>
                                 <option value="EN_PROCESO" <?= (isset($filtros['estado']) && $filtros['estado'] == 'EN_PROCESO') ? 'selected' : '' ?>>En Proceso</option>
                                 <option value="FINALIZADA" <?= (isset($filtros['estado']) && $filtros['estado'] == 'FINALIZADA') ? 'selected' : '' ?>>Finalizada</option>
                             </select>
@@ -113,8 +113,8 @@
                                     <td>
                                         <?php
                                         $badgeClass = [
-                                            'PENDIENTES' => 'warning',
-                                            'APROBADAS' => 'info',
+                                            'PENDIENTE' => 'warning',
+                                            'APROBADA' => 'info',
                                             'EN_PROCESO' => 'primary',
                                             'FINALIZADA' => 'success',
                                             'PLANIFICADA' => 'secondary'
@@ -195,8 +195,8 @@
                         <label for="nuevoEstado">Nuevo Estado</label>
                         <select name="estado" id="nuevoEstado" class="form-control" required>
                             <option value="">Seleccionar estado</option>
-                            <option value="PENDIENTES">Pendientes</option>
-                            <option value="APROBADAS">Aprobadas</option>
+                            <option value="PENDIENTE">Pendientes</option>
+                            <option value="APROBADA">Aprobadas</option>
                             <option value="EN_PROCESO">En Proceso</option>
                             <option value="FINALIZADA">Finalizada</option>
                         </select>

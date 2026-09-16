@@ -3,9 +3,9 @@
 
 <?php
 $badges = [
-    'PENDIENTES' => 'pendientes',
+    'PENDIENTE'  => 'pendientes',
     'EN_PROCESO' => 'en_proceso',
-    'APROBADAS'  => 'aprobadas',
+    'APROBADA'   => 'aprobadas',
     'ASIGNADA'   => 'asignada',
     'FINALIZADA' => 'finalizada',
     'CANCELADA'  => 'cancelada',
@@ -36,7 +36,7 @@ $badges = [
     <!-- Filtros por estado -->
     <div class="d-flex gap-2 mb-3 overflow-auto pb-1 animate__animated animate__fadeIn" style="animation-delay:.05s">
         <button class="btn btn-sm rounded-pill px-3 filtro-estado active" data-estado="" style="background:var(--primary);color:#fff;border:none;font-size:.75rem;font-weight:600;">Todas</button>
-        <button class="btn btn-sm rounded-pill px-3 filtro-estado" data-estado="PENDIENTES" style="background:#fef3c7;color:#92400e;border:none;font-size:.75rem;font-weight:600;">Pendientes</button>
+        <button class="btn btn-sm rounded-pill px-3 filtro-estado" data-estado="PENDIENTE" style="background:#fef3c7;color:#92400e;border:none;font-size:.75rem;font-weight:600;">Pendientes</button>
         <button class="btn btn-sm rounded-pill px-3 filtro-estado" data-estado="EN_PROCESO" style="background:#dbeafe;color:#1e40af;border:none;font-size:.75rem;font-weight:600;">En Proceso</button>
         <button class="btn btn-sm rounded-pill px-3 filtro-estado" data-estado="FINALIZADA" style="background:#dcfce7;color:#166534;border:none;font-size:.75rem;font-weight:600;">Finalizadas</button>
     </div>
@@ -44,7 +44,7 @@ $badges = [
     <!-- Lista de solicitudes -->
     <div class="d-flex flex-column gap-2" id="lista-solicitudes">
         <?php foreach ($solicitudes as $i => $s):
-            $estado = $s['estado'] ?? 'PENDIENTES';
+            $estado = $s['estado'] ?? 'PENDIENTE';
             $estadoClass = $badges[$estado] ?? 'pendientes';
             $fecha = $s['fecha_solicitud'] ? date('d/m/Y', strtotime($s['fecha_solicitud'])) : '—';
             $hora = $s['fecha_solicitud'] ? date('H:i', strtotime($s['fecha_solicitud'])) : '';

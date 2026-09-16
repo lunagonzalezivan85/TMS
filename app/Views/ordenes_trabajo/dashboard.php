@@ -47,8 +47,8 @@
         }
         $kpis = [
             ['label' => 'Total', 'count' => $totalTodas, 'icon' => 'fa-list', 'color' => 'primary', 'bg' => '#eff6ff', 'estado' => 'todas'],
-            ['label' => 'Pendientes', 'count' => $conteoEstados['PENDIENTES'] ?? 0, 'icon' => 'fa-clock', 'color' => 'warning', 'bg' => '#fffbeb', 'estado' => 'PENDIENTES'],
-            ['label' => 'Aprobadas', 'count' => $conteoEstados['APROBADAS'] ?? 0, 'icon' => 'fa-check-circle', 'color' => 'success', 'bg' => '#f0fdf4', 'estado' => 'APROBADAS'],
+            ['label' => 'Pendientes', 'count' => $conteoEstados['PENDIENTE'] ?? 0, 'icon' => 'fa-clock', 'color' => 'warning', 'bg' => '#fffbeb', 'estado' => 'PENDIENTE'],
+            ['label' => 'Aprobadas', 'count' => $conteoEstados['APROBADA'] ?? 0, 'icon' => 'fa-check-circle', 'color' => 'success', 'bg' => '#f0fdf4', 'estado' => 'APROBADA'],
             ['label' => 'En Proceso', 'count' => $conteoEstados['EN_PROCESO'] ?? 0, 'icon' => 'fa-cogs', 'color' => 'info', 'bg' => '#ecfeff', 'estado' => 'EN_PROCESO'],
             ['label' => 'Finalizadas', 'count' => $conteoEstados['FINALIZADA'] ?? 0, 'icon' => 'fa-flag-checkered', 'color' => 'secondary', 'bg' => '#f8fafc', 'estado' => 'FINALIZADA'],
         ];
@@ -86,8 +86,8 @@
                         $estados = [
                             'todas' => ['label' => 'Todas', 'icon' => 'fa-list', 'color' => 'secondary'],
                             'PLANIFICADA' => ['label' => 'Planificadas', 'icon' => 'fa-calendar-alt', 'color' => 'info'],
-                            'PENDIENTES' => ['label' => 'Pendientes', 'icon' => 'fa-clock', 'color' => 'warning'],
-                            'APROBADAS' => ['label' => 'Aprobadas', 'icon' => 'fa-check-circle', 'color' => 'success'],
+                            'PENDIENTE' => ['label' => 'Pendientes', 'icon' => 'fa-clock', 'color' => 'warning'],
+                            'APROBADA' => ['label' => 'Aprobadas', 'icon' => 'fa-check-circle', 'color' => 'success'],
                             'EN_PROCESO' => ['label' => 'En Proceso', 'icon' => 'fa-cogs', 'color' => 'primary'],
                             'FINALIZADA' => ['label' => 'Finalizadas', 'icon' => 'fa-flag-checkered', 'color' => 'secondary'],
                         ];
@@ -179,12 +179,12 @@
                                     <?php foreach ($ordenes as $orden): ?>
                                     <?php
                                     $estadoTexto = [
-                                        'PENDIENTES' => 'Pendiente', 'APROBADAS' => 'Aprobada',
+                                        'PENDIENTE' => 'Pendiente', 'APROBADA' => 'Aprobada',
                                         'EN_PROCESO' => 'En Proceso', 'FINALIZADA' => 'Finalizada',
                                         'PLANIFICADA' => 'Planificada'
                                     ];
                                     $badgeClass = [
-                                        'PENDIENTES' => 'bg-warning text-dark', 'APROBADAS' => 'bg-success',
+                                        'PENDIENTE' => 'bg-warning text-dark', 'APROBADA' => 'bg-success',
                                         'EN_PROCESO' => 'bg-primary', 'FINALIZADA' => 'bg-secondary',
                                         'PLANIFICADA' => 'bg-info'
                                     ];
@@ -286,8 +286,8 @@ function updateTitulo(estado) {
     const titulos = {
         'todas': 'Todas las Órdenes',
         'PLANIFICADA': 'Órdenes Planificadas',
-        'PENDIENTES': 'Órdenes Pendientes',
-        'APROBADAS': 'Órdenes Aprobadas',
+        'PENDIENTE': 'Órdenes Pendientes',
+        'APROBADA': 'Órdenes Aprobadas',
         'EN_PROCESO': 'Órdenes en Proceso',
         'FINALIZADA': 'Órdenes Finalizadas'
     };

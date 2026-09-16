@@ -124,8 +124,8 @@ class PortalConductores extends BaseController
         ];
         foreach ($solicitudes as $s) {
             $estado = $s['estado'] ?? '';
-            if ($estado === 'PENDIENTES') $conteo['pendientes']++;
-            elseif ($estado === 'EN_PROCESO' || $estado === 'APROBADAS') $conteo['en_proceso']++;
+            if ($estado === 'PENDIENTE') $conteo['pendientes']++;
+            elseif ($estado === 'EN_PROCESO' || $estado === 'APROBADA' || $estado === 'ASIGNADA') $conteo['en_proceso']++;
             elseif ($estado === 'FINALIZADA') $conteo['finalizadas']++;
         }
 
@@ -224,7 +224,7 @@ class PortalConductores extends BaseController
             'id_tipo_problema' => $tipoProblemaId,
             'descripcion'      => $descripcion,
             'prioridad'        => '1',
-            'estado'           => 'PENDIENTES',
+            'estado'           => 'PENDIENTE',
             'fecha_solicitud'  => date('Y-m-d H:i:s'),
             'usuario_crea'     => $this->conductorId,
             'url_foto'         => $fotoPath,

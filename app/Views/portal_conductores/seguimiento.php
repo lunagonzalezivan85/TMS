@@ -3,19 +3,19 @@
 
 <?php
 $s = $solicitud;
-$estado = strtoupper($s['estado'] ?? 'PENDIENTES');
+$estado = strtoupper($s['estado'] ?? 'PENDIENTE');
 $estadoClass = strtolower(str_replace(' ', '_', $estado));
 
 // Timeline steps
 $pasos = [
-    'PENDIENTES'  => ['label' => 'Solicitud enviada', 'icon' => 'fa-paper-plane'],
-    'APROBADAS'   => ['label' => 'Aprobada', 'icon' => 'fa-check'],
+    'PENDIENTE'   => ['label' => 'Solicitud enviada', 'icon' => 'fa-paper-plane'],
+    'APROBADA'    => ['label' => 'Aprobada', 'icon' => 'fa-check'],
     'ASIGNADA'    => ['label' => 'Técnico asignado', 'icon' => 'fa-user-cog'],
     'EN_PROCESO'  => ['label' => 'En reparación', 'icon' => 'fa-cogs'],
     'FINALIZADA'  => ['label' => 'Finalizada', 'icon' => 'fa-flag-checkered'],
 ];
 
-$ordenEstados = ['PENDIENTES', 'APROBADAS', 'ASIGNADA', 'EN_PROCESO', 'FINALIZADA'];
+$ordenEstados = ['PENDIENTE', 'APROBADA', 'ASIGNADA', 'EN_PROCESO', 'FINALIZADA'];
 $estadoActualIdx = array_search($estado, $ordenEstados);
 if ($estadoActualIdx === false) $estadoActualIdx = 0;
 if ($estado === 'CANCELADA') $estadoActualIdx = -1;

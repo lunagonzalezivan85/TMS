@@ -80,7 +80,7 @@ $conductorId = session()->get('conductor_id');
 
 <div class="d-flex flex-column gap-2 mb-4">
     <?php foreach ($recientes as $i => $s):
-        $estado = $s['estado'] ?? 'PENDIENTES';
+        $estado = $s['estado'] ?? 'PENDIENTE';
         $estadoClass = strtolower(str_replace(' ', '_', $estado));
         $fecha = $s['fecha_solicitud'] ? date('d/m/Y', strtotime($s['fecha_solicitud'])) : '—';
     ?>

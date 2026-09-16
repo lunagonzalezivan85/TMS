@@ -943,7 +943,7 @@ class SolicitudModel extends Model
      */
     public function getSolicitudesPendientes($idEmpresa, $filtros = [])
     {
-        $builder = $this->getSolicitudesPorEmpresa($idEmpresa, array_merge($filtros, ['estado' => 'PENDIENTES']));
+        $builder = $this->getSolicitudesPorEmpresa($idEmpresa, array_merge($filtros, ['estado' => 'PENDIENTE']));
         return $builder->get()->getResultArray();
     }
 
@@ -956,7 +956,7 @@ class SolicitudModel extends Model
      */
     public function getSolicitudesAprobadas($idEmpresa, $filtros = [])
     {
-        $builder = $this->getSolicitudesPorEmpresa($idEmpresa, array_merge($filtros, ['estado' => 'APROBADAS']));
+        $builder = $this->getSolicitudesPorEmpresa($idEmpresa, array_merge($filtros, ['estado' => 'APROBADA']));
         return $builder->get()->getResultArray();
     }
 
@@ -1020,8 +1020,8 @@ class SolicitudModel extends Model
         // Inicializar todos los estados con 0
         $conteo = [
             'PLANIFICADA' => 0,
-            'PENDIENTES' => 0,
-            'APROBADAS' => 0,
+            'PENDIENTE' => 0,
+            'APROBADA' => 0,
             'EN_PROCESO' => 0,
             'FINALIZADA' => 0
         ];
@@ -1043,7 +1043,7 @@ class SolicitudModel extends Model
      */
     public function getSolicitudesActivas($idEmpresa, $filtros = [])
     {
-        $estadosActivos = ['PLANIFICADA', 'PENDIENTES', 'APROBADAS', 'EN_PROCESO'];
+        $estadosActivos = ['PLANIFICADA', 'PENDIENTE', 'APROBADA', 'EN_PROCESO'];
         $builder = $this->getSolicitudesPorEmpresa($idEmpresa, array_merge($filtros, ['estado' => $estadosActivos]));
         return $builder->get()->getResultArray();
     }
@@ -1059,7 +1059,7 @@ class SolicitudModel extends Model
                     ->join('usuarios u', 'u.id = s.id_asignado', 'left')
                     ->join('catalogo tp', 'tp.id = s.id_tipo_problema', 'left')
                     ->where('s.id_empresa', $idEmpresa)
-                    ->whereIn('s.estado', ['PENDIENTE', 'EN_PROCESO', 'FINALIZADO', 'RECHAZADO'])
+                    ->whereIn('s.estado', ['PENDIENTE', 'EN_PROCESO', 'FINALIZADA', 'RECHAZADA'])
                     ->orderBy('s.fecha_solicitud', 'DESC')
                     ->get()
                     ->getResultArray();
@@ -1094,7 +1094,7 @@ class SolicitudModel extends Model
                     ->where('s.id_empresa', $idEmpresa)
                     ->where('s.fecha_solicitud >=', $fechaInicio)
                     ->where('s.fecha_solicitud <=', $fechaFin)
-                    ->whereIn('s.estado', ['PENDIENTE', 'EN_PROCESO', 'FINALIZADO', 'RECHAZADO'])
+                    ->whereIn('s.estado', ['PENDIENTE', 'EN_PROCESO', 'FINALIZADA', 'RECHAZADA'])
                     ->findAll();
     }
 
@@ -1103,7 +1103,7 @@ class SolicitudModel extends Model
      */
     public function cambiarEstado($solicitudId, $nuevoEstado)
     {
-        $estadosValidos = ['PENDIENTE', 'EN_PROCESO', 'FINALIZADO', 'RECHAZADO'];
+        $estadosValidos = ['PENDIENTE', 'EN_PROCESO', 'FINALIZADA', 'RECHAZADA'];
         
         if (!in_array($nuevoEstado, $estadosValidos)) {
             return false;
@@ -1112,7 +1112,7 @@ class SolicitudModel extends Model
         $data = ['estado' => $nuevoEstado];
         
         // Si se finaliza, agregar fecha de cierre
-        if ($nuevoEstado === 'FINALIZADO') {
+        if ($nuevoEstado === 'FINALIZADA') {
             $data['fecha_cierre'] = date('Y-m-d H:i:s');
         }
 

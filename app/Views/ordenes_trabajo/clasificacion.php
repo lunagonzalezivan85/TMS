@@ -22,8 +22,8 @@ $prioridadInfo = $prioridad && isset($prioridadMap[$prioridad])
     ? $prioridadMap[$prioridad]
     : ['label' => $prioridad ?? 'N/A', 'class' => 'secondary', 'icon' => 'fa-minus'];
 $estadoClass = [
-    'PENDIENTES' => 'warning',
-    'APROBADAS' => 'info',
+    'PENDIENTE' => 'warning',
+    'APROBADA' => 'info',
     'EN_PROCESO' => 'primary',
     'FINALIZADA' => 'success',
     'PLANIFICADA' => 'secondary'
