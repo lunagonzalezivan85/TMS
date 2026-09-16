@@ -857,4 +857,70 @@ class Solicitudes extends BaseController
 
         return $texto;
     }
+
+    /**
+     * Mostrar formulario de edición para completar datos de la solicitud
+     */
+    public function edit($id = null)
+    {
+        $empresaId = $this->session->get('empresa_id');
+        if (!$empresaId || !$id) {
+            return redirect()->to('/auth/login');
+        }
+
+        $solicitud = $this->solicitudModel
+            ->where('id', $id)
+            ->where('id_empresa', $empresaId)
+            ->first();
+
+        if (!$solicitud) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
+        }
+
+        $tiposProblema = $this->tipoProblemaModel->where('estado', 'ACTIVO')->findAll();
+
+        $data = [
+            'title' => 'Editar Solicitud ' . $solicitud['codigo_consecutivo'],
+            'solicitud' => $solicitud,
+            'tiposProblema' => $tiposProblema,
+        ];
+
+        return view('solicitudes/edit', $data);
+    }
+
+    /**
+     * Guardar cambios de edición
+     */
+    public function update($id = null)
+    {
+        $empresaId = $this->session->get('empresa_id');
+        if (!$empresaId || !$id) {
+            return redirect()->to('/auth/login');
+        }
+
+        $solicitud = $this->solicitudModel
+            ->where('id', $id)
+            ->where('id_empresa', $empresaId)
+            ->first();
+
+        if (!$solicitud) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
+        }
+
+        $updateData = [
+            'tipo_mantenimiento' => $this->request->getPost('tipo_mantenimiento'),
+            'id_tipo_problema' => $this->request->getPost('id_tipo_problema') ?: null,
+            'prioridad' => (int)$this->request->getPost('prioridad'),
+            'condicion_movilidad' => $this->request->getPost('condicion_movilidad'),
+            'ubicacion' => trim($this->request->getPost('ubicacion') ?? ''),
+            'descripcion' => trim($this->request->getPost('descripcion') ?? ''),
+            'usuario_actualiza' => $this->session->get('user_id'),
+        ];
+
+        if ($this->solicitudModel->update($id, $updateData)) {
+            return redirect()->to('/solicitudes/show/' . $id)->with('success', 'Solicitud actualizada correctamente.');
+        }
+
+        return redirect()->back()->withInput()->with('error', 'Error al actualizar la solicitud.');
+    }
 }

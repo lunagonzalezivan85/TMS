@@ -257,6 +257,8 @@ $routes->group('solicitudes', ['filter' => 'auth'], function($routes) {
     $routes->get('asignar/(:num)', 'Solicitudes::asignar/$1');
     $routes->post('guardar-asignacion/(:num)', 'Solicitudes::guardarAsignacion/$1');
     $routes->get('reporte/(:num)', 'Solicitudes::reporte/$1');
+    $routes->get('edit/(:num)', 'Solicitudes::edit/$1');
+    $routes->post('update/(:num)', 'Solicitudes::update/$1');
     $routes->get('buscar-vehiculo', 'Solicitudes::buscarVehiculo');
     
     // API/Data

@@ -24,6 +24,9 @@
                             <i class="fas fa-user-cog me-2"></i>Asignar técnico
                         </a>
                     <?php endif; ?>
+                    <a href="<?= base_url('solicitudes/edit/' . $solicitud['id']) ?>" class="btn btn-sm btn-outline-warning rounded-pill">
+                        <i class="fas fa-edit me-2"></i>Editar
+                    </a>
                     <a href="<?= base_url('solicitudes/reporte/' . $solicitud['id']) ?>" onclick="window.open(this.href, 'reporte', 'width=900,height=700,scrollbars=yes'); return false;" class="btn btn-sm btn-outline-primary rounded-pill">
                         <i class="fas fa-print me-2"></i>Reporte
                     </a>

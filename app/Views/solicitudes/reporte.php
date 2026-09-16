@@ -96,7 +96,7 @@
     <div class="page">
         <!-- HEADER -->
         <div class="report-header">
-            <img src="<?= base_url('assets/img/logo_tms.png') ?>" alt="Logo" class="logo">
+            <img src="<?= base_url('public/assets/img/logo_tms.png') ?>" alt="Logo" class="logo">
             <div class="company-info">
                 <h1><?= esc($empresa['nombre'] ?? 'Transportes GMV S.A.C.') ?></h1>
                 <p>Sistema de Gestión de Mantenimiento Vehicular</p>
