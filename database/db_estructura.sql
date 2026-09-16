@@ -410,6 +410,7 @@ CREATE TABLE `menu` (
   `fecha_actualiza` datetime DEFAULT current_timestamp(),
   `ruta` varchar(100) DEFAULT NULL,
   `estado` int(11) DEFAULT 1,
+  `orden` int(11) DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;

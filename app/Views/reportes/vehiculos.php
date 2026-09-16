@@ -57,10 +57,6 @@
     ═════════════════════════════════════════════════════════════ -->
     <div class="card shadow-sm mb-3 border-0 rounded-4 overflow-hidden" style="background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);">
         <div class="card-body p-4 text-white position-relative">
-            <div class="position-absolute top-0 end-0 opacity-10" style="font-size: 8rem; line-height: 1; transform: translate(20px, -10px);">
-                <i class="fas fa-truck-moving"></i>
-            </div>
-
             <div class="row align-items-center position-relative">
                 <div class="col-lg-8">
                     <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">

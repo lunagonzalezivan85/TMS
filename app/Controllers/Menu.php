@@ -370,30 +370,37 @@ class Menu extends SecureController
     }
 
     /**
-     * Reordenar menús (para futuro drag & drop)
+     * Reordenar menús vía drag & drop
      */
     public function reorder()
     {
-        $orden = $this->request->getJSON(true);
-        
-        if (!$orden) {
+        $data = $this->request->getJSON(true);
+
+        if (!$data || !isset($data['items'])) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Datos de ordenamiento no válidos'
             ]);
         }
-        
+
         try {
-            foreach ($orden as $item) {
-                $this->menuModel->update($item['id'], [
-                    'id_superior' => $item['parent'] ?: null,
+            foreach ($data['items'] as $item) {
+                $updateData = [
+                    'orden' => (int)$item['orden'],
                     'usuario_edita' => session('user_id')
-                ]);
-                
-                // Actualizar niveles
-                $this->menuModel->actualizarNiveles($item['id']);
+                ];
+
+                if (isset($item['parent'])) {
+                    $updateData['id_superior'] = $item['parent'] ?: null;
+                }
+
+                $this->menuModel->update($item['id'], $updateData);
+
+                if (isset($item['parent'])) {
+                    $this->menuModel->actualizarNiveles($item['id']);
+                }
             }
-            
+
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Menús reordenados exitosamente'

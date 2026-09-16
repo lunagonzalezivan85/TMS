@@ -107,12 +107,12 @@
         <div class="card-header py-3">
             <ul class="nav nav-tabs card-header-tabs" id="menuTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="tabla-tab" data-bs-toggle="tab" data-bs-target="#tabla" type="button" role="tab">
+                    <button class="nav-link" id="tabla-tab" data-bs-toggle="tab" data-bs-target="#tabla" type="button" role="tab">
                         <i class="fas fa-table"></i> Vista de Tabla
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="arbol-tab" data-bs-toggle="tab" data-bs-target="#arbol" type="button" role="tab">
+                    <button class="nav-link active" id="arbol-tab" data-bs-toggle="tab" data-bs-target="#arbol" type="button" role="tab">
                         <i class="fas fa-sitemap"></i> Vista de Árbol
                     </button>
                 </li>
@@ -122,7 +122,7 @@
         <div class="card-body">
             <div class="tab-content" id="menuTabsContent">
                 <!-- Vista de Tabla -->
-                <div class="tab-pane fade show active" id="tabla" role="tabpanel">
+                <div class="tab-pane fade" id="tabla" role="tabpanel">
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover" id="tablaMenus" width="100%" cellspacing="0">
                             <thead class="table-dark">
@@ -146,13 +146,9 @@
                 </div>
 
                 <!-- Vista de Árbol -->
-                <div class="tab-pane fade" id="arbol" role="tabpanel">
+                <div class="tab-pane fade show active" id="arbol" role="tabpanel">
                     <div class="row">
                         <div class="col-12">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i>
-                                <strong>Vista Jerárquica:</strong> Aquí puedes ver la estructura completa de menús en formato de árbol.
-                            </div>
                             <div id="menuTree">
                                 <?= $this->include('menu/tree_view', ['menus' => $menus]) ?>
                             </div>

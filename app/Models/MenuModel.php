@@ -18,6 +18,7 @@ class MenuModel extends Model
         'id_superior',
         'nivel',
         'ruta',
+        'orden',
         'usuario_crea',
         'usuario_edita',
         'fecha_registra',
@@ -53,8 +54,7 @@ class MenuModel extends Model
      */
     public function getMenusJerarquicos()
     {
-        $menus = $this->orderBy('id', 'ASC')
-                     ->orderBy('nivel', 'ASC')
+        $menus = $this->orderBy('orden', 'ASC')
                      ->findAll();
         
         return $this->buildMenuTree($menus);
@@ -67,7 +67,7 @@ class MenuModel extends Model
     {
         return $this->where('nivel', 1)
                    ->where('id_superior IS NULL OR id_superior = 0')
-                   ->orderBy('menu', 'ASC')
+                   ->orderBy('orden', 'ASC')
                    ->findAll();
     }
 
@@ -77,7 +77,7 @@ class MenuModel extends Model
     public function getSubmenus($idPadre)
     {
         return $this->where('id_superior', $idPadre)
-                   ->orderBy('menu', 'ASC')
+                   ->orderBy('orden', 'ASC')
                    ->findAll();
     }
 
