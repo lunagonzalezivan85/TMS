@@ -765,11 +765,16 @@ class OrdenesTrabajo extends BaseController
         ]);
         $ultimosCombustible = array_slice($ultimosCombustible, 0, 3);
 
+        // Catálogo de materiales para el selector
+        $materialesModel = new \App\Models\MaterialesModel();
+        $materiales = $materialesModel->where('id_empresa', $empresaId)->findAll();
+
         $data = [
             'title' => 'Realizar Orden de Trabajo #' . $id,
             'orden' => $orden,
             'movimientos' => $movimientos,
             'ultimos_combustible' => $ultimosCombustible,
+            'materiales' => $materiales,
         ];
 
         return view('ordenes_trabajo/realizar', $data);
@@ -809,7 +814,11 @@ class OrdenesTrabajo extends BaseController
             'observaciones' => 'permit_empty|string',
             'estado_vehiculo_post' => 'permit_empty|in_list[OPERATIVO,REQUIERE_REVISION,FUERA_DE_SERVICIO,PENDIENTE_REPUESTOS]',
             'kilometraje_actual' => 'permit_empty|numeric',
-            'horas_trabajo' => 'permit_empty|numeric'
+            'horas_trabajo' => 'permit_empty|numeric',
+            'kilometraje_ingreso' => 'permit_empty|numeric',
+            'nivel_combustible' => 'permit_empty|max_length[20]',
+            'resultado_final' => 'permit_empty|max_length[50]',
+            'observaciones_finales' => 'permit_empty|string'
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
@@ -826,6 +835,23 @@ class OrdenesTrabajo extends BaseController
             // Iniciar transacción
             $this->db->transStart();
 
+            // Checkboxes de diagnóstico y trabajos (guardar como JSON)
+            $diagnostico = $this->request->getPost('diagnostico');
+            $trabajosCheck = $this->request->getPost('trabajos_check');
+            $diagnosticoOtro = trim((string)$this->request->getPost('diagnostico_otro'));
+            $trabajosOtro = trim((string)$this->request->getPost('trabajos_otro'));
+
+            if (is_array($diagnostico) && $diagnosticoOtro !== '') {
+                $diagnostico[] = 'Otro: ' . $diagnosticoOtro;
+            } elseif ($diagnosticoOtro !== '') {
+                $diagnostico = ['Otro: ' . $diagnosticoOtro];
+            }
+            if (is_array($trabajosCheck) && $trabajosOtro !== '') {
+                $trabajosCheck[] = 'Otro: ' . $trabajosOtro;
+            } elseif ($trabajosOtro !== '') {
+                $trabajosCheck = ['Otro: ' . $trabajosOtro];
+            }
+
             // Preparar datos para el registro de trabajo
             $registroData = [
                 'id_solicitud' => $id,
@@ -838,6 +864,12 @@ class OrdenesTrabajo extends BaseController
                 'observaciones' => $this->request->getPost('observaciones'),
                 'estado_vehiculo_post' => $this->request->getPost('estado_vehiculo_post'),
                 'trabajo_completado' => $this->request->getPost('trabajo_completado') ? 1 : 0,
+                'diagnostico_sistemas' => !empty($diagnostico) ? json_encode($diagnostico, JSON_UNESCAPED_UNICODE) : null,
+                'trabajos_checklist' => !empty($trabajosCheck) ? json_encode($trabajosCheck, JSON_UNESCAPED_UNICODE) : null,
+                'nivel_combustible' => $this->request->getPost('nivel_combustible') ?: null,
+                'kilometraje_ingreso' => $this->request->getPost('kilometraje_ingreso') ?: null,
+                'resultado_final' => $this->request->getPost('resultado_final') ?: null,
+                'observaciones_finales' => $this->request->getPost('observaciones_finales') ?: null,
                 'usuario_crea' => $usuarioId
             ];
 

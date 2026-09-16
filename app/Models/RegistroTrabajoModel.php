@@ -25,6 +25,12 @@ class RegistroTrabajoModel extends Model
         'estado_vehiculo_post',
         'trabajo_completado',
         'costo_total_materiales',
+        'diagnostico_sistemas',
+        'trabajos_checklist',
+        'nivel_combustible',
+        'kilometraje_ingreso',
+        'resultado_final',
+        'observaciones_finales',
         'usuario_crea',
         'usuario_actualiza'
     ];
