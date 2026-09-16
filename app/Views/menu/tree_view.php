@@ -208,10 +208,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     // Inicializar Sortable en cada lista
-    $('.sortable-list').each(function() {
-        Sortable.create(this, {
+    document.querySelectorAll('.sortable-list').forEach(function(list) {
+        Sortable.create(list, {
             group: 'menu-tree',
             handle: '.drag-handle',
             animation: 150,
@@ -224,92 +224,117 @@ $(document).ready(function() {
         });
     });
 
-    // Colapsar/expandir nivel 1
-    $(document).on('click', '.toggle-children', function(e) {
-        e.stopPropagation();
-        $(this).closest('.menu-item').toggleClass('collapsed');
+    // Colapsar/expandir
+    document.querySelectorAll('.toggle-children').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.closest('.menu-item').classList.toggle('collapsed');
+        });
     });
 
     // Colapsar todo por defecto (solo nivel 1 que tiene hijos)
-    $('.menu-item.level-1.has-children').addClass('collapsed');
+    document.querySelectorAll('.menu-item.level-1.has-children').forEach(function(el) {
+        el.classList.add('collapsed');
+    });
 
     // Guardar orden
-    $('#btnGuardarOrden').on('click', function() {
-        var items = [];
-        var orden = 0;
+    var btnGuardar = document.getElementById('btnGuardarOrden');
+    if (btnGuardar) {
+        btnGuardar.addEventListener('click', function() {
+            var items = [];
+            var orden = 0;
 
-        $('.sortable-list').each(function() {
-            var parentId = $(this).data('parent-id') || '';
-            $(this).children('.menu-item').each(function() {
-                orden++;
-                items.push({
-                    id: $(this).data('id'),
-                    orden: orden,
-                    parent: parentId
+            document.querySelectorAll('.sortable-list').forEach(function(list) {
+                var parentId = list.getAttribute('data-parent-id') || '';
+                list.querySelectorAll(':scope > .menu-item').forEach(function(item) {
+                    orden++;
+                    items.push({
+                        id: item.getAttribute('data-id'),
+                        orden: orden,
+                        parent: parentId
+                    });
                 });
             });
-        });
 
-        if (items.length === 0) return;
+            if (items.length === 0) return;
 
-        var btn = $(this);
-        btn.addClass('saving').html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
+            var btn = this;
+            btn.classList.add('saving');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
-        $.ajax({
-            url: '<?= base_url('menu/reorder') ?>',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ items: items }),
-            success: function(response) {
-                btn.removeClass('saving').html('<i class="fas fa-save"></i> Guardar Orden');
+            fetch('<?= base_url('menu/reorder') ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                },
+                body: JSON.stringify({ items: items })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(response) {
+                btn.classList.remove('saving');
+                btn.innerHTML = '<i class="fas fa-save"></i> Guardar Orden';
                 if (response.success) {
                     showAlert('success', response.message);
                 } else {
                     showAlert('error', response.message);
                 }
-            },
-            error: function() {
-                btn.removeClass('saving').html('<i class="fas fa-save"></i> Guardar Orden');
+            })
+            .catch(function() {
+                btn.classList.remove('saving');
+                btn.innerHTML = '<i class="fas fa-save"></i> Guardar Orden';
                 showAlert('error', 'Error al guardar el orden');
-            }
+            });
+        });
+    }
+
+    // Manejar eliminación
+    document.querySelectorAll('.eliminar-menu-tree').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var menuId = this.getAttribute('data-id');
+            if (!confirm('¿Estás seguro de que deseas eliminar este menú?')) return;
+
+            fetch('<?= base_url('menu/delete') ?>/' + menuId, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    setTimeout(function() { location.reload(); }, 1500);
+                } else {
+                    showAlert('error', response.message);
+                }
+            })
+            .catch(function() {
+                showAlert('error', 'Error al eliminar el menú');
+            });
         });
     });
 
-    // Manejar eliminación desde vista de árbol
-    $(document).on('click', '.eliminar-menu-tree', function() {
-        const menuId = $(this).data('id');
-
-        if (confirm('¿Estás seguro de que deseas eliminar este menú?')) {
-            $.ajax({
-                url: '<?= base_url('menu/delete') ?>/' + menuId,
-                type: 'DELETE',
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        showAlert('success', response.message);
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        showAlert('error', response.message);
-                    }
-                },
-                error: function() {
-                    showAlert('error', 'Error al eliminar el menú');
-                }
-            });
-        }
-    });
-
     function showAlert(type, message) {
-        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-        const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        var iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
 
-        const alert = '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
-            '<i class="fas ' + iconClass + '"></i> ' + message +
-            '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
-            '</div>';
+        var alert = document.createElement('div');
+        alert.className = 'alert ' + alertClass + ' alert-dismissible fade show';
+        alert.setAttribute('role', 'alert');
+        alert.innerHTML = '<i class="fas ' + iconClass + '"></i> ' + message +
+            '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
 
-        $('.container-fluid').prepend(alert);
-        setTimeout(function() { $('.alert').fadeOut(); }, 5000);
+        var container = document.querySelector('.container-fluid');
+        if (container) container.prepend(alert);
+
+        setTimeout(function() {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(function() { alert.remove(); }, 500);
+        }, 5000);
     }
 });
 </script>
