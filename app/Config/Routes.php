@@ -252,6 +252,8 @@ $routes->group('solicitudes', ['filter' => 'auth'], function($routes) {
     $routes->get('/', 'Solicitudes::index');
     $routes->get('create', 'Solicitudes::create');
     $routes->get('show/(:num)', 'Solicitudes::show/$1');
+    $routes->get('aprobar/(:num)', 'Solicitudes::aprobar/$1');
+    $routes->post('guardar-aprobacion/(:num)', 'Solicitudes::guardarAprobacion/$1');
     $routes->get('asignar/(:num)', 'Solicitudes::asignar/$1');
     $routes->post('guardar-asignacion/(:num)', 'Solicitudes::guardarAsignacion/$1');
     $routes->get('reporte/(:num)', 'Solicitudes::reporte/$1');

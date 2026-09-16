@@ -14,7 +14,12 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="fw-bold mb-0"><i class="fas fa-file-alt me-2 text-success"></i><?= $title ?></h4>
                 <div class="d-flex gap-2">
-                    <?php if (in_array(strtolower((string)session('rol_name')), ['administrador', 'supervisor']) && in_array($solicitud['estado'], ['PENDIENTE', 'APROBADA'])): ?>
+                    <?php if (in_array(strtolower((string)session('rol_name')), ['administrador', 'supervisor']) && strtoupper($solicitud['estado']) === 'PENDIENTE'): ?>
+                        <a href="<?= base_url('solicitudes/aprobar/' . $solicitud['id']) ?>" class="btn btn-sm btn-primary rounded-pill">
+                            <i class="fas fa-clipboard-check me-2"></i>Aprobar
+                        </a>
+                    <?php endif; ?>
+                    <?php if (in_array(strtolower((string)session('rol_name')), ['administrador', 'supervisor']) && strtoupper($solicitud['estado']) === 'APROBADA'): ?>
                         <a href="<?= base_url('solicitudes/asignar/' . $solicitud['id']) ?>" class="btn btn-sm btn-success rounded-pill">
                             <i class="fas fa-user-cog me-2"></i>Asignar técnico
                         </a>
@@ -192,35 +197,39 @@
 
                     <div class="card border-0 shadow-sm rounded-4">
                         <div class="card-body p-2">
+<?php
+                            $estadoUpper = strtoupper($solicitud['estado']);
+                            $pasos = [
+                                ['Aprobación', 'Un supervisor aprueba o rechaza.', ['PENDIENTE']],
+                                ['Asignación', 'Se asigna un técnico responsable.', ['APROBADA']],
+                                ['Diagnóstico', 'El técnico evalúa el vehículo.', ['ASIGNADA', 'EN_PROCESO']],
+                                ['Finalización', 'Reparado, descartado o pendiente.', ['COMPLETADA', 'FINALIZADA', 'CANCELADA', 'RECHAZADA']],
+                            ];
+                            $pasoActual = 0;
+                            foreach ($pasos as $i => $p) {
+                                if (in_array($estadoUpper, $p[2])) { $pasoActual = $i; break; }
+                            }
+                            if ($estadoUpper === 'ASIGNADA' || $estadoUpper === 'EN_PROCESO') $pasoActual = 2;
+                            ?>
                             <h6 class="fw-bold mb-2" style="font-size:0.85rem;">Siguientes pasos</h6>
-                            <div class="d-flex mb-2">
-                                <div class="flex-shrink-0"><span class="badge rounded-circle bg-success p-1">1</span></div>
-                                <div class="ms-2">
-                                    <p class="fw-semibold mb-0 small">Aprobación</p>
-                                    <small class="text-muted" style="font-size:0.75rem;">Un supervisor aprueba o rechaza.</small>
+                            <?php foreach ($pasos as $i => $p): ?>
+                                <?php
+                                $clase = $i < $pasoActual ? 'bg-success' : ($i === $pasoActual ? 'bg-primary' : 'bg-secondary');
+                                $done = $i < $pasoActual;
+                                ?>
+                                <div class="d-flex <?= $i < count($pasos) - 1 ? 'mb-2' : '' ?>">
+                                    <div class="flex-shrink-0"><span class="badge rounded-circle <?= $clase ?> p-1"><?= $done ? '<i class="fas fa-check" style="font-size:0.6rem;"></i>' : ($i + 1) ?></span></div>
+                                    <div class="ms-2">
+                                        <p class="fw-semibold mb-0 small <?= $i === $pasoActual ? 'text-primary' : '' ?>"><?= $p[0] ?></p>
+                                        <small class="text-muted" style="font-size:0.75rem;">
+                                            <?php if ($i === $pasoActual): ?>
+                                                <span class="text-primary fw-semibold">En curso:</span>
+                                            <?php endif; ?>
+                                            <?= $p[1] ?>
+                                        </small>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="d-flex mb-2">
-                                <div class="flex-shrink-0"><span class="badge rounded-circle bg-secondary p-1">2</span></div>
-                                <div class="ms-2">
-                                    <p class="fw-semibold mb-0 small">Diagnóstico</p>
-                                    <small class="text-muted" style="font-size:0.75rem;">Se evalúa el vehículo.</small>
-                                </div>
-                            </div>
-                            <div class="d-flex mb-2">
-                                <div class="flex-shrink-0"><span class="badge rounded-circle bg-secondary p-1">3</span></div>
-                                <div class="ms-2">
-                                    <p class="fw-semibold mb-0 small">Asignación</p>
-                                    <small class="text-muted" style="font-size:0.75rem;">Se asigna un mecánico.</small>
-                                </div>
-                            </div>
-                            <div class="d-flex">
-                                <div class="flex-shrink-0"><span class="badge rounded-circle bg-secondary p-1">4</span></div>
-                                <div class="ms-2">
-                                    <p class="fw-semibold mb-0 small">Finalización</p>
-                                    <small class="text-muted" style="font-size:0.75rem;">Reparado, descartado o pendiente.</small>
-                                </div>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>

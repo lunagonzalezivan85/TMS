@@ -152,7 +152,12 @@
                         </div>
                         <div class="card-footer bg-white border-top-0 pt-0 pb-3 px-4">
                             <div class="d-flex justify-content-end gap-2">
-                                <?php if (in_array(strtolower((string)session('rol_name')), ['administrador', 'supervisor']) && in_array($estado, ['PENDIENTE', 'APROBADA'])): ?>
+                                <?php if (in_array(strtolower((string)session('rol_name')), ['administrador', 'supervisor']) && $estado === 'PENDIENTE'): ?>
+                                    <a href="<?= base_url('solicitudes/aprobar/' . $s['id']) ?>" class="btn btn-sm btn-primary rounded-pill" title="Aprobar">
+                                        <i class="fas fa-clipboard-check"></i>
+                                    </a>
+                                <?php endif; ?>
+                                <?php if (in_array(strtolower((string)session('rol_name')), ['administrador', 'supervisor']) && $estado === 'APROBADA'): ?>
                                     <a href="<?= base_url('solicitudes/asignar/' . $s['id']) ?>" class="btn btn-sm btn-success rounded-pill" title="Asignar técnico">
                                         <i class="fas fa-user-cog"></i>
                                     </a>

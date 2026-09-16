@@ -31,6 +31,7 @@ class SolicitudModel extends Model
         'fecha_planificacion',
         'id_asignado',
         'fecha_asignacion',
+        'fecha_aprobacion',
         'observaciones',
         'url_foto',
         'solicitante',

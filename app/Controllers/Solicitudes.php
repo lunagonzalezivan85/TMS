@@ -553,6 +553,106 @@ class Solicitudes extends BaseController
     }
 
     /**
+     * Formulario para supervisor aprobar o rechazar una solicitud
+     */
+    public function aprobar($id = null)
+    {
+        $empresaId = $this->session->get('empresa_id');
+        $rol = strtolower((string)$this->session->get('rol_name'));
+
+        if (!$empresaId || !$id) {
+            return redirect()->to('/auth/login');
+        }
+
+        if (!in_array($rol, ['administrador', 'supervisor'])) {
+            return redirect()->to('/solicitudes')->with('error', 'No tiene permisos para aprobar solicitudes.');
+        }
+
+        $solicitud = $this->solicitudModel
+            ->where('id', $id)
+            ->where('id_empresa', $empresaId)
+            ->first();
+
+        if (!$solicitud) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
+        }
+
+        if (!in_array(strtoupper($solicitud['estado']), ['PENDIENTE'])) {
+            return redirect()->to('/solicitudes/show/' . $id)->with('error', 'Solo se pueden aprobar solicitudes en estado PENDIENTE.');
+        }
+
+        $vehiculo = $this->vehiculoModel->find($solicitud['id_vehiculo']);
+
+        $data = [
+            'title' => 'Aprobar solicitud - ' . $solicitud['codigo_consecutivo'],
+            'solicitud' => $solicitud,
+            'vehiculo' => $vehiculo,
+        ];
+
+        return view('solicitudes/aprobar', $data);
+    }
+
+    /**
+     * Guardar aprobación o rechazo de una solicitud
+     */
+    public function guardarAprobacion($id = null)
+    {
+        $empresaId = $this->session->get('empresa_id');
+        $rol = strtolower((string)$this->session->get('rol_name'));
+        $usuarioId = $this->session->get('user_id');
+
+        if (!$empresaId || !$id) {
+            return redirect()->to('/auth/login');
+        }
+
+        if (!in_array($rol, ['administrador', 'supervisor'])) {
+            return redirect()->to('/solicitudes')->with('error', 'No tiene permisos para aprobar solicitudes.');
+        }
+
+        $solicitud = $this->solicitudModel
+            ->where('id', $id)
+            ->where('id_empresa', $empresaId)
+            ->first();
+
+        if (!$solicitud) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
+        }
+
+        $accion = $this->request->getPost('accion');
+        $observacionesAprobacion = trim($this->request->getPost('observaciones_aprobacion') ?? '');
+
+        if (!in_array($accion, ['aprobar', 'rechazar'])) {
+            return redirect()->back()->withInput()->with('error', 'Acción no válida.');
+        }
+
+        $observacionesActuales = trim($solicitud['observaciones'] ?? '');
+        $fechaAhora = date('d/m/Y H:i');
+        $prefijo = $accion === 'aprobar' ? '[Aprobación' : '[Rechazo';
+        $nuevaObservacion = empty($observacionesActuales)
+            ? "$prefijo: $fechaAhora] " . $observacionesAprobacion
+            : $observacionesActuales . "\n$prefijo: $fechaAhora] " . $observacionesAprobacion;
+
+        $updateData = [
+            'estado' => $accion === 'aprobar' ? 'APROBADA' : 'RECHAZADA',
+            'fecha_aprobacion' => date('Y-m-d H:i:s'),
+            'usuario_actualiza' => $usuarioId,
+            'observaciones' => $nuevaObservacion,
+        ];
+
+        if ($accion === 'rechazar') {
+            $updateData['fecha_cierre'] = date('Y-m-d H:i:s');
+        }
+
+        $this->solicitudModel->update($id, $updateData);
+
+        $mensaje = $accion === 'aprobar'
+            ? 'Solicitud aprobada correctamente. Ya puede asignar un técnico.'
+            : 'Solicitud rechazada.';
+
+        return redirect()->to('/solicitudes/show/' . $id)->with('success', $mensaje);
+    }
+
+    /**
      * Formulario para supervisor asignar técnico a una solicitud
      */
     public function asignar($id = null)
@@ -575,6 +675,10 @@ class Solicitudes extends BaseController
 
         if (!$solicitud) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
+        }
+
+        if (!in_array(strtoupper($solicitud['estado']), ['APROBADA'])) {
+            return redirect()->to('/solicitudes/show/' . $id)->with('error', 'Solo se pueden asignar técnicos a solicitudes aprobadas.');
         }
 
         // Obtener técnicos disponibles
@@ -617,6 +721,10 @@ class Solicitudes extends BaseController
 
         if (!$solicitud) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
+        }
+
+        if (!in_array(strtoupper($solicitud['estado']), ['APROBADA'])) {
+            return redirect()->to('/solicitudes/show/' . $id)->with('error', 'Solo se pueden asignar técnicos a solicitudes aprobadas.');
         }
 
         $idTecnico = $this->request->getPost('id_tecnico');
