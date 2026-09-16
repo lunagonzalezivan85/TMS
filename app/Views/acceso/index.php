@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (hasChildren) {
                 html += '<i class="fas fa-chevron-down toggle-access-children text-muted me-2" style="cursor:pointer;font-size:11px;"></i>';
             } else {
-                html += '<i class="fas fa-circle text-muted me-2" style="font-size:6px;"></i>';
+                html += '<span class="me-2" style="width:11px;display:inline-block;"></span>';
             }
             html += '<div class="form-check">';
             html += '<input class="form-check-input menu-checkbox" type="checkbox" value="' + menu.id + '" id="menu-' + menu.id + '" ' + checked + '>';
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
-        fetch('<?= base_url('acceso/storeMultiple') ?>', {
+        fetch('<?= base_url('acceso/store-multiple') ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

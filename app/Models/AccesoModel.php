@@ -63,12 +63,11 @@ class AccesoModel extends BaseModel
      */
     public function getAccesosPorRol($idRol)
     {
-        return $this->select('accesos.*, menu.menu as menu_nombre, menu.icono as menu_icono, menu.ruta as menu_url')
+        return $this->select('accesos.*, menu.menu as menu_nombre, menu.icono as menu_icono, menu.ruta as menu_url, menu.orden as menu_orden, menu.id_superior, menu.nivel')
                     ->join('menu', 'menu.id = accesos.id_menu')
                     ->where('accesos.id_rol', $idRol)
                     ->where('accesos.estado', 1)
-                    ->orderBy('menu.id', 'ASC')
-                    ->orderBy('menu.nivel', 'ASC')
+                    ->orderBy('menu.orden', 'ASC')
                     ->findAll();
     }
 

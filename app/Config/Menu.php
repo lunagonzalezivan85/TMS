@@ -402,6 +402,7 @@ class Menu
                         'icon'    => $menu['icono'] ?: 'fas fa-circle',
                         'url'     => $menu['ruta'] ?: '#',
                         'active'  => [$menu['ruta'], $menu['ruta'] . '/*'],
+                        'orden'   => (int)($menu['orden'] ?? 0),
                         'submenu' => []
                     ];
                 }
@@ -418,6 +419,7 @@ class Menu
                             'icon'    => $padre['icono'] ?: 'fas fa-circle',
                             'url'     => '#',
                             'active'  => [$padre['ruta'] ?? '', ($padre['ruta'] ?? '') . '/*'],
+                            'orden'   => (int)($padre['orden'] ?? 0),
                             'submenu' => []
                         ];
                     }
@@ -425,20 +427,26 @@ class Menu
 
                 $submenus[$idPadre][] = [
                     'title' => $menu['menu'],
-                    'url'   => $menu['ruta'] ?: '#'
+                    'url'   => $menu['ruta'] ?: '#',
+                    'orden' => (int)($menu['orden'] ?? 0)
                 ];
             }
         }
 
-        // Asignar submenús a sus padres
+        // Asignar submenús a sus padres (ordenados por 'orden')
         foreach ($submenus as $idPadre => $items) {
+            usort($items, function($a, $b) {
+                return ($a['orden'] ?? 0) <=> ($b['orden'] ?? 0);
+            });
             if (isset($menusPadre[$idPadre])) {
                 $menusPadre[$idPadre]['submenu'] = $items;
             }
         }
 
-        // Ordenar padres por id (las keys del array son los IDs del menú)
-        ksort($menusPadre);
+        // Ordenar padres por 'orden'
+        usort($menusPadre, function($a, $b) {
+            return ($a['orden'] ?? 0) <=> ($b['orden'] ?? 0);
+        });
 
         return array_values($menusPadre);
     }

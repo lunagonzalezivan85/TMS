@@ -115,7 +115,7 @@
                         </div>
                     </div>
 
-                    <div class="card border-0 shadow-sm rounded-4 mb-2">
+                    <div class="card border-0 shadow-sm rounded-4 mb-2 mt-3">
                         <div class="card-body p-2">
                             <h6 class="text-muted mb-1" style="font-size:0.85rem;">Estado actual</h6>
                             <span class="badge text-bg-warning rounded-pill"><?= esc($solicitud['estado']) ?></span>
@@ -133,9 +133,9 @@
                                     <small class="text-muted d-block mb-0">Solicitante</small>
                                     <p class="fw-semibold mb-0 small"><?= esc($solicitud['solicitante']) ?></p>
                                 </div>
-                                <?php if (!empty($tecnico)): ?>
-                                    <div class="col-md-3">
-                                        <small class="text-muted d-block mb-0">Técnico asignado</small>
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block mb-0">Técnico asignado</small>
+                                    <?php if (!empty($tecnico)): ?>
                                         <p class="fw-semibold mb-0 small">
                                             <i class="fas fa-user-cog text-success me-1"></i>
                                             <?= esc(($tecnico['nombre'] ?? '') . ' ' . ($tecnico['apellido'] ?? '')) ?>
@@ -143,8 +143,22 @@
                                         <?php if (!empty($solicitud['fecha_asignacion'])): ?>
                                             <small class="text-muted d-block" style="font-size:0.7rem;"><?= date('d/m/Y H:i', strtotime($solicitud['fecha_asignacion'])) ?></small>
                                         <?php endif; ?>
-                                    </div>
-                                <?php endif; ?>
+                                    <?php else: ?>
+                                        <?php
+                                        $rolName = strtolower(trim((string)session('rol_name')));
+                                        $rolId = (int)session('rol_id');
+                                        $esAdminOSupervisor = in_array($rolName, ['administrador', 'supervisor', 'admin']) || in_array($rolId, [1, 4]);
+                                        $estadosPermitidos = in_array(strtoupper($solicitud['estado']), ['APROBADA', 'PENDIENTE']);
+                                        ?>
+                                        <?php if ($esAdminOSupervisor && $estadosPermitidos): ?>
+                                            <a href="<?= base_url('solicitudes/asignar/' . $solicitud['id']) ?>" class="btn btn-sm btn-outline-success rounded-circle" title="Asignar técnico" data-bs-toggle="tooltip" data-bs-placement="top">
+                                                <i class="fas fa-user-plus"></i>
+                                            </a>
+                                        <?php else: ?>
+                                            <p class="mb-0 small text-muted"><i class="fas fa-user-slash me-1"></i>Sin asignar</p>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </div>
                             </div>
 
                             <?php

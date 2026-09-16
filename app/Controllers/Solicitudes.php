@@ -677,8 +677,8 @@ class Solicitudes extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
         }
 
-        if (!in_array(strtoupper($solicitud['estado']), ['APROBADA'])) {
-            return redirect()->to('/solicitudes/show/' . $id)->with('error', 'Solo se pueden asignar técnicos a solicitudes aprobadas.');
+        if (!in_array(strtoupper($solicitud['estado']), ['APROBADA', 'PENDIENTE'])) {
+            return redirect()->to('/solicitudes/show/' . $id)->with('error', 'Solo se pueden asignar técnicos a solicitudes pendientes o aprobadas.');
         }
 
         // Obtener técnicos disponibles
@@ -723,8 +723,8 @@ class Solicitudes extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Solicitud no encontrada');
         }
 
-        if (!in_array(strtoupper($solicitud['estado']), ['APROBADA'])) {
-            return redirect()->to('/solicitudes/show/' . $id)->with('error', 'Solo se pueden asignar técnicos a solicitudes aprobadas.');
+        if (!in_array(strtoupper($solicitud['estado']), ['APROBADA', 'PENDIENTE'])) {
+            return redirect()->to('/solicitudes/show/' . $id)->with('error', 'Solo se pueden asignar técnicos a solicitudes pendientes o aprobadas.');
         }
 
         $idTecnico = $this->request->getPost('id_tecnico');
